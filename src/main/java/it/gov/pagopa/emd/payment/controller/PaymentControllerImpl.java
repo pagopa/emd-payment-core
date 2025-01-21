@@ -1,6 +1,7 @@
 package it.gov.pagopa.emd.payment.controller;
 
 
+import it.gov.pagopa.emd.payment.dto.RetrivalDTO;
 import it.gov.pagopa.emd.payment.service.PaymentServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,16 +18,16 @@ public class PaymentControllerImpl implements PaymentController {
   }
 
   @Override
-  public Mono<ResponseEntity<Void>> saveData() {
+  public Mono<ResponseEntity<Void>> createRetrival() {
     return paymentServiceImpl.saveRetrival()
             .map(savedData -> ResponseEntity.status(HttpStatus.CREATED).build());
   }
 
 
   @Override
-  public Mono<ResponseEntity<Void>> getData(@PathVariable String retrivalId) {
+  public Mono<ResponseEntity<RetrivalDTO>> getRetrival(@PathVariable String retrivalId) {
     return paymentServiceImpl.getRetrival()
-              .map(data -> ResponseEntity.status(HttpStatus.ACCEPTED).build());
+              .map(retrivalDTO -> ResponseEntity.status(HttpStatus.ACCEPTED).body(retrivalDTO));
   }
 
 

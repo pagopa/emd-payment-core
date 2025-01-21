@@ -1,5 +1,6 @@
 package it.gov.pagopa.emd.payment.controller;
 
+import it.gov.pagopa.emd.payment.dto.RetrivalDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -10,10 +11,10 @@ import reactor.core.publisher.Mono;
 public interface PaymentController {
 
   @PostMapping("/retrivalTokens")
-  Mono<ResponseEntity<Void>> saveData();
+  Mono<ResponseEntity<Void>> createRetrival();
 
   @GetMapping("/retrivalTokens/{retrivalId}")
-  Mono<ResponseEntity<Void>> getData(@PathVariable String retrivalId) ;
+  Mono<ResponseEntity<RetrivalDTO>> getRetrival(@PathVariable String retrivalId) ;
 
   @GetMapping("/token/{fiscalCode}/{noticeNumber}")
   Mono<ResponseEntity<Void>> generateDeepLink(@PathVariable String fiscalCode, @PathVariable String noticeNumber);
