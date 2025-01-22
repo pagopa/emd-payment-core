@@ -10,12 +10,25 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/payment")
 public interface PaymentController {
 
+  /*
+    1 - Identifica TPP da access token
+    2 - Ricerca deeplink e payment button
+    3 - Genera retrival id (UUID)
+    4 - Memorizza il retrival impostando un time-to-live
+   */
   @PostMapping("/retrivalTokens")
   Mono<ResponseEntity<Void>> createRetrival();
 
+  /*
+      1 - Ricerca e restituisce retrival tramite retrivalId
+   */
   @GetMapping("/retrivalTokens/{retrivalId}")
   Mono<ResponseEntity<RetrivalDTO>> getRetrival(@PathVariable String retrivalId) ;
 
+  /*
+      1 - Ricerca retrival tramite retrivalId
+      2 - Genera redirect tramite deeplink fiscalCode e noticeNumber
+   */
   @GetMapping("/token/{fiscalCode}/{noticeNumber}")
   Mono<ResponseEntity<Void>> generateDeepLink(@PathVariable String fiscalCode, @PathVariable String noticeNumber);
 }
