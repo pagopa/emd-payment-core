@@ -8,12 +8,17 @@ import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
 import it.gov.pagopa.emd.payment.dto.TppDTO;
 import it.gov.pagopa.emd.payment.model.Retrieval;
 import it.gov.pagopa.emd.payment.repository.RetrievalRepository;
+import it.gov.pagopa.emd.payment.utils.Utils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.UUID;
 
+import static it.gov.pagopa.emd.payment.utils.Utils.inputSanify;
+
+@Slf4j
 @Service
 public class PaymentServiceImpl implements PaymentService {
 
@@ -32,15 +37,21 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Mono<RetrievalResponseDTO> saveRetrieval(String tppId, RetrievalRequestDTO retrievalRequestDTO) {
+        log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Save retrieval for tppId:{} and agent: {}",inputSanify(tppId),retrievalRequestDTO.getAgent());
         return tppControllerImpl.getTpp(tppId)
                 .flatMap(tppDTO ->
                         repository.save(createRetrievalByTppAndRequest(tppDTO, retrievalRequestDTO))
                                 .map(this::createResponseByRetrieval))
-                .onErrorMap(error -> exceptionMap.throwException(PaymentConstants.ExceptionName.TPP_NOT_FOUND, PaymentConstants.ExceptionMessage.TPP_NOT_FOUND));
+                .doOnSuccess(retrievalResponseDTO -> log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for tppId:{} and agent: {}",inputSanify(retrievalResponseDTO.getRetrievalId()),inputSanify(tppId),retrievalRequestDTO.getAgent()))
+                .onErrorMap(error -> {
+                    log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Failed to save retrieval for tppId:{} and agent: {}, with error: {}",inputSanify(tppId),retrievalRequestDTO.getAgent(),error.getMessage());
+                    return exceptionMap.throwException(PaymentConstants.ExceptionName.TPP_NOT_FOUND, PaymentConstants.ExceptionMessage.TPP_NOT_FOUND);
+                });
     }
 
     @Override
     public Mono<RetrievalResponseDTO> getRetrievalByRetrievalId(String retrievalId) {
+        log.info("[EMD][PAYMENT][GET-RETRIEVAL] Get retrieval by retrievalId: {}",inputSanify(retrievalId));
         return repository.findByRetrievalId(retrievalId)
                 .switchIfEmpty(Mono.error(exceptionMap.throwException(PaymentConstants.ExceptionName.RETRIEVAL_NOT_FOUND,
                         PaymentConstants.ExceptionMessage.RETRIEVAL_NOT_FOUND)))
@@ -49,6 +60,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public Mono<String> getRedirect(String retrievalId, String fiscalCode, String noticeNumber) {
+        log.info("[EMD][PAYMENT][GET-REDIRECT] Get redirect for retrievalId: {}, fiscalCode: {} and noticeNumber: {}",inputSanify(retrievalId), Utils.createSHA256(fiscalCode),noticeNumber);
         return getRetrievalByRetrievalId(retrievalId)
                 .map(retrievalResponseDTO -> buildDeepLink(retrievalResponseDTO.getDeeplink(), fiscalCode, noticeNumber));
     }

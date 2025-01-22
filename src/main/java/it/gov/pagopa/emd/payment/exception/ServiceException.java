@@ -1,0 +1,19 @@
+package it.gov.pagopa.emd.payment.exception;
+
+import lombok.Getter;
+
+@Getter
+public class ServiceException extends RuntimeException {
+  private final String code;
+  private final boolean printStackTrace;
+  private final ServiceExceptionPayload payload;
+
+
+  public ServiceException(String code, String message, ServiceExceptionPayload payload, boolean printStackTrace, Throwable ex) {
+    super(message, ex);
+    this.code = code;
+    this.printStackTrace = printStackTrace;
+    this.payload = payload;
+  }
+
+}

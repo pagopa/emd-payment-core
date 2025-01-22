@@ -2,8 +2,8 @@ package it.gov.pagopa.emd.payment.configuration;
 
 
 import it.gov.pagopa.emd.payment.constant.PaymentConstants;
-import it.gov.pagopa.emd.payment.error.ClientException;
-import it.gov.pagopa.emd.payment.error.ClientExceptionWithBody;
+import it.gov.pagopa.emd.payment.exception.ClientException;
+import it.gov.pagopa.emd.payment.exception.ClientExceptionWithBody;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
