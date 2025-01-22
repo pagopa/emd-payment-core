@@ -13,7 +13,6 @@ import reactor.core.publisher.Mono;
 public class TppConnectorImpl implements  TppConnector {
     private final WebClient webClient;
 
-
     public TppConnectorImpl(@Value("${rest-client.tpp.baseUrl}") String baseUrl) {
         this.webClient = WebClient.builder().baseUrl(baseUrl).build();
     }

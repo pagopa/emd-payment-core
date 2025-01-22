@@ -28,15 +28,15 @@ public class PaymentControllerImpl implements PaymentController {
 
 
   @Override
-  public Mono<ResponseEntity<RetrievalResponseDTO>> getRetrieval(String retridvalId) {
-    return paymentServiceImpl.getRetrievalByRetrievalId(retridvalId)
+  public Mono<ResponseEntity<RetrievalResponseDTO>> getRetrieval(String retrievalId) {
+    return paymentServiceImpl.getRetrievalByRetrievalId(retrievalId)
             .map(ResponseEntity::ok);
   }
 
 
   @Override
-  public Mono<ResponseEntity<Void>> generateDeepLink(@PathVariable String retridvalId, @PathVariable String fiscalCode, @PathVariable String noticeNumber){
-    return paymentServiceImpl.getRedirect(retridvalId,fiscalCode,noticeNumber)
+  public Mono<ResponseEntity<Void>> generateDeepLink(@PathVariable String retrievalId, @PathVariable String fiscalCode, @PathVariable String noticeNumber){
+    return paymentServiceImpl.getRedirect(retrievalId,fiscalCode,noticeNumber)
             .map(deepLink ->ResponseEntity.status(HttpStatus.FOUND)
                     .header("Location", deepLink)
                     .build()

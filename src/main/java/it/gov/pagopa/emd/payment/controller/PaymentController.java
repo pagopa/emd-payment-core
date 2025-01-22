@@ -9,7 +9,7 @@ import reactor.core.publisher.Mono;
 
 
 @RestController
-@RequestMapping("/payment")
+@RequestMapping("/emd/payment")
 public interface PaymentController {
 
   @PostMapping("/retrievalTokens/{tppId}")
