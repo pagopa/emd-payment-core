@@ -7,7 +7,6 @@ import it.gov.pagopa.emd.payment.service.PaymentServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
 import reactor.core.publisher.Mono;
 
 
@@ -35,7 +34,7 @@ public class PaymentControllerImpl implements PaymentController {
 
 
   @Override
-  public Mono<ResponseEntity<Void>> generateDeepLink(@PathVariable String retrievalId, @PathVariable String fiscalCode, @PathVariable String noticeNumber){
+  public Mono<ResponseEntity<Void>> generateDeepLink(String retrievalId, String fiscalCode, String noticeNumber){
     return paymentServiceImpl.getRedirect(retrievalId,fiscalCode,noticeNumber)
             .map(deepLink ->ResponseEntity.status(HttpStatus.FOUND)
                     .header("Location", deepLink)

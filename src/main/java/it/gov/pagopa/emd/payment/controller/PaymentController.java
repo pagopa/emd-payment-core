@@ -18,7 +18,7 @@ public interface PaymentController {
   @GetMapping("/retrievalTokens/{retrievalId}")
   Mono<ResponseEntity<RetrievalResponseDTO>> getRetrieval(@Valid @PathVariable String retrievalId) ;
 
-  @GetMapping("/token/{retrievalId}/{fiscalCode}/{noticeNumber}")
-  Mono<ResponseEntity<Void>> generateDeepLink(@PathVariable String retrievalId, @PathVariable String fiscalCode, @PathVariable String noticeNumber);
+  @GetMapping("/token")
+  Mono<ResponseEntity<Void>> generateDeepLink(@Valid @RequestParam String retrievalId, @Valid @RequestParam String fiscalCode, @Valid @RequestParam String noticeNumber);
 
 }

@@ -64,7 +64,7 @@ class PaymentControllerImplTest {
         Mockito.when(paymentServiceImpl.getRedirect("retrievalId","fiscalCode","noticeNumber")).thenReturn(Mono.just("string"));
 
         webTestClient.get()
-                .uri("/emd/payment/token/{retrievalId}/{fiscalCode}/{noticeNumber}","retrievalId","fiscalCode","noticeNumber")
+                .uri("/emd/payment/token?retrievalId={retrievalId}&fiscalCode={fiscalCode}&noticeNumber={noticeNumber}","retrievalId","fiscalCode","noticeNumber")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isFound()
