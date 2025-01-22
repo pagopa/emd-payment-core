@@ -1,36 +1,22 @@
 package it.gov.pagopa.emd.payment.utils;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectReader;
 import it.gov.pagopa.emd.payment.exception.EmdEncryptionException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageHeaders;
 
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Map;
-import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CommonUtilitiesTest {
 
-    @Mock
-    private Message<String> messageMock;
-    @Mock
-    private ObjectReader objectReaderMock;
 
     @Test
     void createSHA256_Ko_NoSuchAlgorithm() {
@@ -52,5 +38,4 @@ class CommonUtilitiesTest {
         assertEquals(hashedExpected, actualHash);
     }
 
-        record MyObject(String name) { }
 }
