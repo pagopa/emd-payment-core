@@ -18,7 +18,7 @@ public class TppConnectorImpl implements  TppConnector {
     }
 
     public Mono<TppDTO> getTpp(String tppId) {
-        return webClient.post()
+        return webClient.get()
                 .uri("/emd/tpp/{tppId}",tppId)
                 .retrieve()
                 .bodyToMono(TppDTO.class);
