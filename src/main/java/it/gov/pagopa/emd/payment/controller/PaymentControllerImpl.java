@@ -32,7 +32,7 @@ public class PaymentControllerImpl implements PaymentController {
 
 
   @Override
-  public Mono<ResponseEntity<Void>> generateDeepLink(@PathVariable String fiscalCode, @PathVariable String noticeNumber) {
+  public Mono<ResponseEntity<Void>> generateDeepLink(@PathVariable String retrivalId, @PathVariable String fiscalCode, @PathVariable String noticeNumber){
     return paymentServiceImpl.getRedirect(fiscalCode,noticeNumber)
       .map(deepLink ->ResponseEntity.status(HttpStatus.FOUND)
         .header("Location", deepLink)

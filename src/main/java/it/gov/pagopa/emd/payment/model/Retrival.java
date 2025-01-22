@@ -13,6 +13,6 @@ import java.util.Date;
 @Data
 public class Retrival extends RetrivalBase {
 
-  @Indexed(expireAfterSeconds = 3600)
+  @Indexed(expireAfterSeconds = 36000)
   private Date createdAt;
 }

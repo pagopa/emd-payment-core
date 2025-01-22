@@ -15,8 +15,10 @@ public interface PaymentController {
     2 - Ricerca deeplink e payment button
     3 - Genera retrival id (UUID)
     4 - Memorizza il retrival impostando un time-to-live
+
+
    */
-  @PostMapping("/retrivalTokens")
+  @PostMapping("/retrivalTokens/{tppId}")
   Mono<ResponseEntity<Void>> createRetrival();
 
   /*
@@ -29,6 +31,6 @@ public interface PaymentController {
       1 - Ricerca retrival tramite retrivalId
       2 - Genera redirect tramite deeplink fiscalCode e noticeNumber
    */
-  @GetMapping("/token/{fiscalCode}/{noticeNumber}")
-  Mono<ResponseEntity<Void>> generateDeepLink(@PathVariable String fiscalCode, @PathVariable String noticeNumber);
+  @GetMapping("/token/{retrivalId}/{fiscalCode}/{noticeNumber}")
+  Mono<ResponseEntity<Void>> generateDeepLink(@PathVariable String retrivalId, @PathVariable String fiscalCode, @PathVariable String noticeNumber);
 }
