@@ -17,6 +17,6 @@ import java.util.Date;
 @NoArgsConstructor
 public class Retrieval extends RetrievalBase {
 
-  @Indexed(expireAfterSeconds = 36000)
+  @Indexed(expireAfterSeconds = 10)
   private Date createdAt;
 }
