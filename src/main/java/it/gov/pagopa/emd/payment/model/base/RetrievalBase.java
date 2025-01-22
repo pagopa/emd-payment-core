@@ -4,9 +4,9 @@ package it.gov.pagopa.emd.payment.model.base;
 import lombok.Data;
 
 @Data
-public class RetrivalBase {
+public class RetrievalBase {
 
-  private String retrivalId;
+  private String retrievalId;
   private String deeplink;
   private String paymentButton;
   private String originId;

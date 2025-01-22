@@ -1,14 +1,17 @@
 package it.gov.pagopa.emd.payment.controller;
 
 
-import it.gov.pagopa.emd.payment.dto.RetrivalDTO;
+import it.gov.pagopa.emd.payment.dto.RetrievalRequestDTO;
+import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
 import it.gov.pagopa.emd.payment.service.PaymentServiceImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import reactor.core.publisher.Mono;
 
 
+@Controller
 public class PaymentControllerImpl implements PaymentController {
 
   private final PaymentServiceImpl paymentServiceImpl;
@@ -18,25 +21,25 @@ public class PaymentControllerImpl implements PaymentController {
   }
 
   @Override
-  public Mono<ResponseEntity<Void>> createRetrival() {
-    return paymentServiceImpl.saveRetrival()
-            .map(savedData -> ResponseEntity.status(HttpStatus.CREATED).build());
+  public Mono<ResponseEntity<RetrievalResponseDTO>> retrievalTokens(String tppId, RetrievalRequestDTO retrievalRequestDTO) {
+    return paymentServiceImpl.saveRetrieval(tppId, retrievalRequestDTO)
+            .map(ResponseEntity::ok);
   }
 
 
   @Override
-  public Mono<ResponseEntity<RetrivalDTO>> getRetrival(@PathVariable String retrivalId) {
-    return paymentServiceImpl.getRetrival()
-              .map(retrivalDTO -> ResponseEntity.status(HttpStatus.ACCEPTED).body(retrivalDTO));
+  public Mono<ResponseEntity<RetrievalResponseDTO>> getRetrieval(String retridvalId) {
+    return paymentServiceImpl.getRetrievalByRetrievalId(retridvalId)
+            .map(ResponseEntity::ok);
   }
 
 
   @Override
-  public Mono<ResponseEntity<Void>> generateDeepLink(@PathVariable String retrivalId, @PathVariable String fiscalCode, @PathVariable String noticeNumber){
-    return paymentServiceImpl.getRedirect(fiscalCode,noticeNumber)
-      .map(deepLink ->ResponseEntity.status(HttpStatus.FOUND)
-        .header("Location", deepLink)
-        .build()
-      );
+  public Mono<ResponseEntity<Void>> generateDeepLink(@PathVariable String retridvalId, @PathVariable String fiscalCode, @PathVariable String noticeNumber){
+    return paymentServiceImpl.getRedirect(retridvalId,fiscalCode,noticeNumber)
+            .map(deepLink ->ResponseEntity.status(HttpStatus.FOUND)
+                    .header("Location", deepLink)
+                    .build()
+            );
   }
 }

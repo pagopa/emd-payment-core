@@ -1,6 +1,8 @@
 package it.gov.pagopa.emd.payment.controller;
 
-import it.gov.pagopa.emd.payment.dto.RetrivalDTO;
+import it.gov.pagopa.emd.payment.dto.RetrievalRequestDTO;
+import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -10,27 +12,13 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/payment")
 public interface PaymentController {
 
-  /*
-    1 - Identifica TPP da access token
-    2 - Ricerca deeplink e payment button
-    3 - Genera retrival id (UUID)
-    4 - Memorizza il retrival impostando un time-to-live
+  @PostMapping("/retrievalTokens/{tppId}")
+  Mono<ResponseEntity<RetrievalResponseDTO>> retrievalTokens(@Valid @PathVariable String tppId, @Valid @RequestBody RetrievalRequestDTO retrievalRequestDTO);
 
+  @GetMapping("/retrievalTokens/{retrievalId}")
+  Mono<ResponseEntity<RetrievalResponseDTO>> getRetrieval(@Valid @PathVariable String retrievalId) ;
 
-   */
-  @PostMapping("/retrivalTokens/{tppId}")
-  Mono<ResponseEntity<Void>> createRetrival();
+  @GetMapping("/token/{retrievalId}/{fiscalCode}/{noticeNumber}")
+  Mono<ResponseEntity<Void>> generateDeepLink(@PathVariable String retrievalId, @PathVariable String fiscalCode, @PathVariable String noticeNumber);
 
-  /*
-      1 - Ricerca e restituisce retrival tramite retrivalId
-   */
-  @GetMapping("/retrivalTokens/{retrivalId}")
-  Mono<ResponseEntity<RetrivalDTO>> getRetrival(@PathVariable String retrivalId) ;
-
-  /*
-      1 - Ricerca retrival tramite retrivalId
-      2 - Genera redirect tramite deeplink fiscalCode e noticeNumber
-   */
-  @GetMapping("/token/{retrivalId}/{fiscalCode}/{noticeNumber}")
-  Mono<ResponseEntity<Void>> generateDeepLink(@PathVariable String retrivalId, @PathVariable String fiscalCode, @PathVariable String noticeNumber);
 }
