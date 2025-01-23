@@ -37,15 +37,15 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     @Override
-    public Mono<RetrievalResponseDTO> saveRetrieval(String tppId, RetrievalRequestDTO retrievalRequestDTO) {
-        log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Save retrieval for tppId:{} and agent: {}",inputSanify(tppId),retrievalRequestDTO.getAgent());
-        return tppControllerImpl.getTpp(tppId)
+    public Mono<RetrievalResponseDTO> saveRetrieval(String entityId, RetrievalRequestDTO retrievalRequestDTO) {
+        log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Save retrieval for entityId:{} and agent: {}",inputSanify(entityId),retrievalRequestDTO.getAgent());
+        return tppControllerImpl.getTppByEntityId(entityId)
                 .flatMap(tppDTO ->
                         repository.save(createRetrievalByTppAndRequest(tppDTO, retrievalRequestDTO))
                                 .map(this::createResponseByRetrieval))
-                .doOnSuccess(retrievalResponseDTO -> log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for tppId:{} and agent: {}",inputSanify(retrievalResponseDTO.getRetrievalId()),inputSanify(tppId),retrievalRequestDTO.getAgent()))
+                .doOnSuccess(retrievalResponseDTO -> log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for entityId:{} and agent: {}",inputSanify(retrievalResponseDTO.getRetrievalId()),inputSanify(entityId),retrievalRequestDTO.getAgent()))
                 .onErrorMap(error -> {
-                    log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Failed to save retrieval for tppId:{} and agent: {}, with error: {}",inputSanify(tppId),retrievalRequestDTO.getAgent(),error.getMessage());
+                    log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Failed to save retrieval for entityId:{} and agent: {}, with error: {}",inputSanify(entityId),retrievalRequestDTO.getAgent(),error.getMessage());
                     return exceptionMap.throwException(PaymentConstants.ExceptionName.TPP_NOT_FOUND, PaymentConstants.ExceptionMessage.TPP_NOT_FOUND);
                 });
     }

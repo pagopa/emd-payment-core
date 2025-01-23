@@ -35,7 +35,7 @@ class PaymentServiceImplTest {
      */
     @Test
     void testSaveRetrieval() {
-        when(tppConnectorImpl.getTpp("tppId")).thenReturn(Mono.just(TPP_DTO));
+        when(tppConnectorImpl.getTppByEntityId("tppId")).thenReturn(Mono.just(TPP_DTO));
         when(retrievalRepository.save(any())).thenReturn(Mono.just(RETRIEVAL));
         RetrievalResponseDTO retrievalResponseDTO = new RetrievalResponseDTO();
         retrievalResponseDTO.setRetrievalId("retrievalId");

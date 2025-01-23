@@ -37,7 +37,7 @@ class TppConnectorImplTest {
                 .setBody("{\"tppId\":\"TPP_OK_1\",\"entityId\":\"ENTITY_OK_1\",\"businessName\":\"Test Business\",\"messageUrl\":\"https://example.com/message\",\"authenticationUrl\":\"https://example.com/auth\",\"authenticationType\":\"OAUTH2\",\"contact\":{\"name\":\"John Doe\",\"number\":\"+1234567890\",\"email\":\"contact@example.com\"},\"state\":true}")
                 .addHeader("Content-Type", "application/json"));
 
-        Mono<TppDTO> resultMono = tppConnector.getTpp("TPP_OK_1");
+        Mono<TppDTO> resultMono = tppConnector.getTppByEntityId("TPP_OK_1");
         TppDTO tppDTO = resultMono.block();
 
         assertThat(tppDTO).isNotNull();

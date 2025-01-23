@@ -12,8 +12,8 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/emd/payment")
 public interface PaymentController {
 
-  @PostMapping("/retrievalTokens/{tppId}")
-  Mono<ResponseEntity<RetrievalResponseDTO>> retrievalTokens(@Valid @PathVariable String tppId, @Valid @RequestBody RetrievalRequestDTO retrievalRequestDTO);
+  @PostMapping("/retrievalTokens/{entityId}")
+  Mono<ResponseEntity<RetrievalResponseDTO>> retrievalTokens(@Valid @PathVariable String entityId, @Valid @RequestBody RetrievalRequestDTO retrievalRequestDTO);
 
   @GetMapping("/retrievalTokens/{retrievalId}")
   Mono<ResponseEntity<RetrievalResponseDTO>> getRetrieval(@Valid @PathVariable String retrievalId) ;
