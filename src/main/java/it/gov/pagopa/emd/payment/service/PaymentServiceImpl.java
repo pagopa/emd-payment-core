@@ -40,6 +40,8 @@ public class PaymentServiceImpl implements PaymentService {
     public Mono<RetrievalResponseDTO> saveRetrieval(String entityId, RetrievalRequestDTO retrievalRequestDTO) {
         log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Save retrieval for entityId:{} and agent: {}",inputSanify(entityId),retrievalRequestDTO.getAgent());
         return tppControllerImpl.getTppByEntityId(entityId)
+                .switchIfEmpty(Mono.error(exceptionMap.throwException(PaymentConstants.ExceptionName.TPP_NOT_FOUND,
+                        PaymentConstants.ExceptionMessage.TPP_NOT_FOUND)))
                 .flatMap(tppDTO ->
                         repository.save(createRetrievalByTppAndRequest(tppDTO, retrievalRequestDTO))
                                 .map(this::createResponseByRetrieval))
