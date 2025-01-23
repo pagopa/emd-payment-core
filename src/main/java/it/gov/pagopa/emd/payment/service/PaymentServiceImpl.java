@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -72,9 +71,7 @@ public class PaymentServiceImpl implements PaymentService {
         retrieval.setDeeplink(agentDeepLinks.get(retrievalRequestDTO.getAgent()));
         retrieval.setPaymentButton(tppDTO.getPaymentButton());
         retrieval.setOriginId(retrievalRequestDTO.getOriginId());
-        Date currentDate = new Date();
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(currentDate);
         calendar.add(Calendar.MINUTE, TTL);
         retrieval.setCreatedAt(calendar.getTime());
         return retrieval;
