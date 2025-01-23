@@ -40,15 +40,11 @@ public class PaymentServiceImpl implements PaymentService {
     public Mono<RetrievalResponseDTO> saveRetrieval(String entityId, RetrievalRequestDTO retrievalRequestDTO) {
         log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Save retrieval for entityId:{} and agent: {}",inputSanify(entityId),retrievalRequestDTO.getAgent());
         return tppControllerImpl.getTppByEntityId(entityId)
-                .onErrorMap(error -> exceptionMap.throwException(PaymentConstants.ExceptionName.TPP_NOT_FOUND, PaymentConstants.ExceptionMessage.TPP_NOT_FOUND))
                 .flatMap(tppDTO ->
                         repository.save(createRetrievalByTppAndRequest(tppDTO, retrievalRequestDTO))
+                                .onErrorMap(error -> exceptionMap.throwException(PaymentConstants.ExceptionName.GENERIC_ERROR, PaymentConstants.ExceptionMessage.GENERIC_ERROR))
                                 .map(this::createResponseByRetrieval))
-                .doOnSuccess(retrievalResponseDTO -> log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for entityId:{} and agent: {}",inputSanify(retrievalResponseDTO.getRetrievalId()),inputSanify(entityId),retrievalRequestDTO.getAgent()))
-                .onErrorMap(error -> {
-                    log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Failed to save retrieval for entityId:{} and agent: {}, with error: {}",inputSanify(entityId),retrievalRequestDTO.getAgent(),error.getMessage());
-                    return exceptionMap.throwException(PaymentConstants.ExceptionName.GENERIC_ERROR, PaymentConstants.ExceptionMessage.GENERIC_ERROR);
-                });
+                .doOnSuccess(retrievalResponseDTO -> log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for entityId:{} and agent: {}",inputSanify(retrievalResponseDTO.getRetrievalId()),inputSanify(entityId),retrievalRequestDTO.getAgent()));
     }
 
     @Override
