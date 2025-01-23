@@ -27,7 +27,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final TppConnectorImpl tppControllerImpl;
     private final ExceptionMap exceptionMap;
     private static final String DEEP_LINK = "<deepLink>?fiscalCode=<payee fiscal code>&noticeNumber=<notice number>";
-
+    private static final long TTL = 1;
     public PaymentServiceImpl(RetrievalRepository repository,
                               TppConnectorImpl tppControllerImpl,
                               ExceptionMap exceptionMap){
@@ -74,7 +74,7 @@ public class PaymentServiceImpl implements PaymentService {
         retrieval.setDeeplink(agentDeepLinks.get(retrievalRequestDTO.getAgent()));
         retrieval.setPaymentButton(tppDTO.getPaymentButton());
         retrieval.setOriginId(retrievalRequestDTO.getOriginId());
-        retrieval.setCreatedAt(new Date());
+        retrieval.setCreatedAt(new Date(TTL * 60 * 1000));
         return retrieval;
     }
 

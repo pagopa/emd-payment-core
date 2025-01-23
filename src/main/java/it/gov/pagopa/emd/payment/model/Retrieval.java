@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.annotation.CreatedDate;
 
 import java.util.Date;
 
@@ -15,8 +15,8 @@ import java.util.Date;
 @Data
 @SuperBuilder
 @NoArgsConstructor
-@Document(collection = "retrieval")
 public class Retrieval extends RetrievalBase {
 
+  @CreatedDate
   private Date createdAt;
 }
