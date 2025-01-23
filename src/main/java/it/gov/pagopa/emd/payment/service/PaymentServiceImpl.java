@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
@@ -27,7 +28,7 @@ public class PaymentServiceImpl implements PaymentService {
     private final TppConnectorImpl tppControllerImpl;
     private final ExceptionMap exceptionMap;
     private static final String DEEP_LINK = "<deepLink>?fiscalCode=<payee fiscal code>&noticeNumber=<notice number>";
-    private static final long TTL = 1;
+    private static final int TTL = 1;
     public PaymentServiceImpl(RetrievalRepository repository,
                               TppConnectorImpl tppControllerImpl,
                               ExceptionMap exceptionMap){
@@ -71,7 +72,11 @@ public class PaymentServiceImpl implements PaymentService {
         retrieval.setDeeplink(agentDeepLinks.get(retrievalRequestDTO.getAgent()));
         retrieval.setPaymentButton(tppDTO.getPaymentButton());
         retrieval.setOriginId(retrievalRequestDTO.getOriginId());
-        retrieval.setCreatedAt(new Date(TTL * 60 * 1000));
+        Date currentDate = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentDate);
+        calendar.add(Calendar.MINUTE, TTL);
+        retrieval.setCreatedAt(calendar.getTime());
         return retrieval;
     }
 
