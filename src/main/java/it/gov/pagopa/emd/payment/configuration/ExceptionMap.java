@@ -2,6 +2,7 @@ package it.gov.pagopa.emd.payment.configuration;
 
 
 import it.gov.pagopa.emd.payment.constant.PaymentConstants;
+import it.gov.pagopa.emd.payment.exception.ClientException;
 import it.gov.pagopa.emd.payment.exception.ClientExceptionWithBody;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +17,7 @@ import java.util.function.Function;
 @Slf4j
 public class ExceptionMap {
 
-    private final Map<String, Function<String, ResponseStatusException >> exceptions = new HashMap<>();
+    private final Map<String, Function<String, ClientException>> exceptions = new HashMap<>();
 
     public ExceptionMap() {
         exceptions.put(PaymentConstants.ExceptionName.TPP_NOT_FOUND, message ->
@@ -41,7 +42,7 @@ public class ExceptionMap {
             return exceptions.get(exceptionKey).apply(message);
         } else {
             log.error("Exception Name Not Found: {}", exceptionKey);
-            return  new RuntimeException();
+            return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unhandled exception key: " + exceptionKey);
         }
     }
 

@@ -2,15 +2,22 @@ package it.gov.pagopa.emd.payment.exception;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 @Getter
-public class ClientExceptionWithBody extends ResponseStatusException {
+public class ClientExceptionWithBody extends ClientException {
   private final String code;
 
   public ClientExceptionWithBody(HttpStatus httpStatus, String code, String message){
-    super(httpStatus, message);
-    this.code = code;
+    this(httpStatus, code, message, null);
   }
 
+  public ClientExceptionWithBody(HttpStatus httpStatus, String code, String message,
+      Throwable ex){
+    this(httpStatus, code, message, false, ex);
+  }
+
+  public ClientExceptionWithBody(HttpStatus httpStatus, String code, String message, boolean printStackTrace, Throwable ex){
+    super(httpStatus, message, printStackTrace, ex);
+    this.code = code;
+  }
 }

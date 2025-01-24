@@ -8,6 +8,12 @@ public class ServiceException extends RuntimeException {
   private final boolean printStackTrace;
   private final ServiceExceptionPayload payload;
 
+  public ServiceException(String code, String message) {
+    this(code, message, null);
+  }
+  public ServiceException(String code, String message, ServiceExceptionPayload payload) {
+    this(code, message, payload, false, null);
+  }
 
   public ServiceException(String code, String message, ServiceExceptionPayload payload, boolean printStackTrace, Throwable ex) {
     super(message, ex);
