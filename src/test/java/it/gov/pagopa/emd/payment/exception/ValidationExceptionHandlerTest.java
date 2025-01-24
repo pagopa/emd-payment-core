@@ -100,4 +100,19 @@ class ValidationExceptionHandlerTest {
                     assertThat(errorDTO.getMessage()).isEqualTo("Something went wrong due to a missing static resource");  // Check the message from ErrorDTO
                 });
     }
+
+    @Test
+    void testHandleMethodNotAllowedException() {
+        webTestClient.get()
+                .uri("/test")
+                .exchange()
+                .expectStatus().is4xxClientError()  // Expect 404 Not Found
+                .expectBody(ErrorDTO.class)
+                .consumeWith(response -> {
+                    ErrorDTO errorDTO = response.getResponseBody();
+                    assertThat(errorDTO).isNotNull();
+                    assertThat(errorDTO.getCode()).isEqualTo("INVALID_REQUEST");  // Check the code from ErrorDTO
+                    assertThat(errorDTO.getMessage()).isEqualTo("Request is not supported");  // Check the message from ErrorDTO
+                });
+    }
 }

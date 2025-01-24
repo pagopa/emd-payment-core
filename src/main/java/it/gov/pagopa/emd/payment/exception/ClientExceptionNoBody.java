@@ -8,13 +8,5 @@ public class ClientExceptionNoBody extends ClientException {
     super(httpStatus, message);
   }
 
-  public ClientExceptionNoBody(HttpStatus httpStatus, String message, Throwable ex) {
-    super(httpStatus, message, ex);
-  }
-
-  public ClientExceptionNoBody(HttpStatus httpStatus, String message, boolean printStackTrace,
-      Throwable ex) {
-    super(httpStatus, message, printStackTrace, ex);
-  }
 }
 
