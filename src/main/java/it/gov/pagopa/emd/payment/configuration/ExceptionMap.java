@@ -2,11 +2,11 @@ package it.gov.pagopa.emd.payment.configuration;
 
 
 import it.gov.pagopa.emd.payment.constant.PaymentConstants;
-import it.gov.pagopa.emd.payment.exception.ClientException;
 import it.gov.pagopa.emd.payment.exception.ClientExceptionWithBody;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +16,7 @@ import java.util.function.Function;
 @Slf4j
 public class ExceptionMap {
 
-    private final Map<String, Function<String, ClientException>> exceptions = new HashMap<>();
+    private final Map<String, Function<String, ResponseStatusException >> exceptions = new HashMap<>();
 
     public ExceptionMap() {
         exceptions.put(PaymentConstants.ExceptionName.TPP_NOT_FOUND, message ->
@@ -28,7 +28,7 @@ public class ExceptionMap {
         );
 
         exceptions.put(PaymentConstants.ExceptionName.RETRIEVAL_NOT_FOUND, message ->
-                new ClientExceptionWithBody(
+                new ClientExceptionWithBody (
                         HttpStatus.NOT_FOUND,
                         PaymentConstants.ExceptionCode.RETRIEVAL_NOT_FOUND,
                         message
