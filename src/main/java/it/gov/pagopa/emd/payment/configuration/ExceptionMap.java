@@ -7,7 +7,6 @@ import it.gov.pagopa.emd.payment.exception.ClientExceptionWithBody;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +28,7 @@ public class ExceptionMap {
         );
 
         exceptions.put(PaymentConstants.ExceptionName.RETRIEVAL_NOT_FOUND, message ->
-                new ClientExceptionWithBody (
+                new ClientExceptionWithBody(
                         HttpStatus.NOT_FOUND,
                         PaymentConstants.ExceptionCode.RETRIEVAL_NOT_FOUND,
                         message
@@ -41,10 +40,9 @@ public class ExceptionMap {
         if (exceptions.containsKey(exceptionKey)) {
             return exceptions.get(exceptionKey).apply(message);
         } else {
-            log.error("Exception Name Not Found: {}", exceptionKey);
-            return new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unhandled exception key: " + exceptionKey);
+            log.error("[EMP-PAYMENT][EXCEPTION-MAP] Exception Name Not Found: {}", exceptionKey);
+            return  new RuntimeException();
         }
     }
 
 }
-

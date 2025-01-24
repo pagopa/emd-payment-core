@@ -26,6 +26,9 @@ public class ErrorManager {
 
     logClientException(error);
 
+    log.error("Caught exception: {}", error.getClass().getName());
+    log.error("Exception details: {}", error.getMessage());
+
     if(error instanceof ClientExceptionNoBody clientExceptionNoBody){
       return ResponseEntity.status(clientExceptionNoBody.getHttpStatus()).build();
     }
