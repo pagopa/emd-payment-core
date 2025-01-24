@@ -19,4 +19,9 @@ public class ErrorDTO implements ServiceExceptionPayload {
   private String code;
   @NotBlank
   private String message;
+
+  public ErrorDTO(ErrorDTO errorDTO){
+    this.code = errorDTO.getCode();
+    this.message = errorDTO.getMessage();
+  }
 }

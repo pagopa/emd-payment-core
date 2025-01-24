@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @RestControllerAdvice
@@ -42,7 +43,14 @@ public class ErrorManager {
       }
       else if(error instanceof WebClientResponseException webClientResponseException){
         httpStatus=HttpStatus.valueOf(webClientResponseException.getStatusCode().value());
-        errorDTO = new ErrorDTO(webClientResponseException.getStatusCode().toString(),  webClientResponseException.getResponseBodyAsString());
+        String responseBody = webClientResponseException.getResponseBodyAsString();
+
+        if (isValidErrorDTO(responseBody)) {
+          errorDTO = new ErrorDTO(Objects.requireNonNull(webClientResponseException.getResponseBodyAs(ErrorDTO.class)));
+        } else {
+          errorDTO = new ErrorDTO(webClientResponseException.getStatusCode().toString(),
+                  webClientResponseException.getMessage());
+        }
       }
       else {
         httpStatus=HttpStatus.INTERNAL_SERVER_ERROR;
@@ -73,5 +81,10 @@ public class ErrorManager {
       log.info("{}",clientExceptionMessage);
     }
   }
+
+  private boolean isValidErrorDTO(String responseBody) {
+    return responseBody != null && responseBody.contains("\"code\"") && responseBody.contains("\"message\"");
+  }
+
 
 }

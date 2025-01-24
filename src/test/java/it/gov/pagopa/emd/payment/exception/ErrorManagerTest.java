@@ -16,13 +16,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 @WebFluxTest(value = {
@@ -105,6 +108,40 @@ class ErrorManagerTest {
             .expectBody()
             .json("{\"code\":\"Error\",\"message\":\"Error ClientExceptionWithBody\"}");
   }
+
+  @Test
+  void handleExceptionWebClientResponseException() {
+    Mockito.doThrow(
+                    new ClientExceptionWithBody(HttpStatus.BAD_REQUEST, "Error", "Error WebClientResponseException"))
+            .when(testControllerSpy).testEndpoint();
+
+    webTestClient.get()
+            .uri("/test")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isBadRequest()
+            .expectBody()
+            .json("{\"code\":\"Error\",\"message\":\"Error WebClientResponseException\"}");
+
+    Mockito.doThrow(
+            new WebClientResponseException(
+                    HttpStatus.NOT_FOUND.value(),
+                    "Resource not found",
+                    new HttpHeaders(),
+                    null,
+                    StandardCharsets.UTF_8
+            ))
+            .when(testControllerSpy).testEndpoint();
+
+    webTestClient.get()
+            .uri("/test")
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isNotFound()
+            .expectBody()
+            .json("{\"code\":\"404 NOT_FOUND\",\"message\":\"404 Resource not found\"}");
+  }
+
 
   @Test
   void handleExceptionClientExceptionTest() {
