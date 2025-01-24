@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import java.util.Optional;
 
@@ -38,6 +39,10 @@ public class ErrorManager {
       if (error instanceof ClientExceptionWithBody clientExceptionWithBody){
         httpStatus=clientExceptionWithBody.getHttpStatus();
         errorDTO = new ErrorDTO(clientExceptionWithBody.getCode(),  error.getMessage());
+      }
+      else if(error instanceof WebClientResponseException webClientResponseException){
+        httpStatus=HttpStatus.valueOf(webClientResponseException.getStatusCode().value());
+        errorDTO = new ErrorDTO(webClientResponseException.getStatusCode().toString(),  webClientResponseException.getResponseBodyAsString());
       }
       else {
         httpStatus=HttpStatus.INTERNAL_SERVER_ERROR;
