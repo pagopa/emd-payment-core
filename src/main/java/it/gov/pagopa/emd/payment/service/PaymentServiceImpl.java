@@ -11,6 +11,7 @@ import it.gov.pagopa.emd.payment.repository.RetrievalRepository;
 import it.gov.pagopa.emd.payment.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ObjectUtils;
 import reactor.core.publisher.Mono;
 
 import java.util.Calendar;
@@ -70,6 +71,10 @@ public class PaymentServiceImpl implements PaymentService {
         Retrieval retrieval = new Retrieval();
         HashMap<String, String> agentDeepLinks = tppDTO.getAgentDeepLinks();
         retrieval.setRetrievalId(String.format("%s-%d", UUID.randomUUID(), System.currentTimeMillis()));
+        retrieval.setTppId(tppDTO.getTppId());
+        if(ObjectUtils.isEmpty(agentDeepLinks)){
+            throw exceptionMap.throwException(PaymentConstants.ExceptionName.AGENT_DEEP_LINKS_EMPTY, PaymentConstants.ExceptionMessage.AGENT_DEEP_LINKS_EMPTY);
+        }
         retrieval.setDeeplink(agentDeepLinks.get(retrievalRequestDTO.getAgent()));
         retrieval.setPaymentButton(tppDTO.getPaymentButton());
         retrieval.setOriginId(retrievalRequestDTO.getOriginId());
@@ -91,6 +96,7 @@ public class PaymentServiceImpl implements PaymentService {
         retrievalResponseDTO.setDeeplink(retrieval.getDeeplink());
         retrievalResponseDTO.setPaymentButton(retrieval.getPaymentButton());
         retrievalResponseDTO.setOriginId(retrieval.getOriginId());
+        retrievalResponseDTO.setTppId(retrieval.getTppId());
         return retrievalResponseDTO;
     }
 

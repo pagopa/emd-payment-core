@@ -14,4 +14,5 @@ public class RetrievalBase {
   private String deeplink;
   private String paymentButton;
   private String originId;
+  private String tppId;
 }

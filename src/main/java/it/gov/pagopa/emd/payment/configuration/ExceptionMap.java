@@ -34,6 +34,14 @@ public class ExceptionMap {
                         message
                 )
         );
+
+        exceptions.put(PaymentConstants.ExceptionName.AGENT_DEEP_LINKS_EMPTY, message ->
+                new ClientExceptionWithBody(
+                        HttpStatus.NOT_FOUND,
+                        PaymentConstants.ExceptionCode.AGENT_DEEP_LINKS_EMPTY,
+                        message
+                )
+        );
     }
 
     public RuntimeException throwException(String exceptionKey, String message) {
@@ -41,7 +49,7 @@ public class ExceptionMap {
             return exceptions.get(exceptionKey).apply(message);
         } else {
             log.error("[EMP-PAYMENT][EXCEPTION-MAP] Exception Name Not Found: {}", exceptionKey);
-            return  new RuntimeException();
+            return new RuntimeException();
         }
     }
 
