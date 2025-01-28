@@ -1,5 +1,6 @@
 package it.gov.pagopa.emd.payment.controller;
 
+import it.gov.pagopa.emd.payment.dto.NetworkResponseDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
 import it.gov.pagopa.emd.payment.service.PaymentServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -69,6 +70,25 @@ class PaymentControllerImplTest {
                 .exchange()
                 .expectStatus().isFound()
                 .expectHeader().exists("Location");
+    }
+
+
+    @Test
+    void testConnection() {
+        NetworkResponseDTO networkResponseDTO = new NetworkResponseDTO();
+        networkResponseDTO.setMessage("tppName ha raggiunto i nostri sistemi");
+        networkResponseDTO.setCode("PAGOPA_NETWORK_TEST");
+        Mockito.when(paymentServiceImpl.testConnection("tppName")).thenReturn(Mono.just(networkResponseDTO));
+
+        webTestClient.get()
+                .uri("/emd/payment/network/connection/{tppName}","tppName")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(NetworkResponseDTO.class)
+                .consumeWith(response -> {
+                    NetworkResponseDTO resultResponse = response.getResponseBody();
+                    Assertions.assertNotNull(resultResponse);
+                });
     }
 }
 

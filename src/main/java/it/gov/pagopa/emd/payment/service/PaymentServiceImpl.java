@@ -3,6 +3,7 @@ package it.gov.pagopa.emd.payment.service;
 import it.gov.pagopa.emd.payment.configuration.ExceptionMap;
 import it.gov.pagopa.emd.payment.connector.TppConnectorImpl;
 import it.gov.pagopa.emd.payment.constant.PaymentConstants;
+import it.gov.pagopa.emd.payment.dto.NetworkResponseDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalRequestDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
 import it.gov.pagopa.emd.payment.dto.TppDTO;
@@ -64,6 +65,18 @@ public class PaymentServiceImpl implements PaymentService {
         log.info("[EMD][PAYMENT][GET-REDIRECT] Get redirect for retrievalId: {}, fiscalCode: {} and noticeNumber: {}",inputSanify(retrievalId), Utils.createSHA256(fiscalCode),noticeNumber);
         return getRetrievalByRetrievalId(retrievalId)
                 .map(retrievalResponseDTO -> buildDeepLink(retrievalResponseDTO.getDeeplink(), fiscalCode, noticeNumber));
+    }
+
+    @Override
+    public Mono<NetworkResponseDTO> testConnection(String tppName) {
+        return Mono.just(createNetworkResponse(tppName));
+    }
+
+    private NetworkResponseDTO createNetworkResponse(String tppName){
+        NetworkResponseDTO networkResponseDTO = new NetworkResponseDTO();
+        networkResponseDTO.setCode("PAGOPA_NETWORK_TEST");
+        networkResponseDTO.setMessage(tppName+" ha raggiunto i nostri sistemi");
+        return networkResponseDTO;
     }
 
 
