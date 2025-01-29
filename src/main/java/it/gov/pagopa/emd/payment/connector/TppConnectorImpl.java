@@ -13,14 +13,13 @@ import reactor.core.publisher.Mono;
 public class TppConnectorImpl implements  TppConnector {
     private final WebClient webClient;
 
-
     public TppConnectorImpl(@Value("${rest-client.tpp.baseUrl}") String baseUrl) {
         this.webClient = WebClient.builder().baseUrl(baseUrl).build();
     }
 
-    public Mono<TppDTO> getTpp(String tppId) {
-        return webClient.post()
-                .uri("/emd/tpp/{tppId}",tppId)
+    public Mono<TppDTO> getTppByEntityId(String entityId) {
+        return webClient.get()
+                .uri("/emd/tpp/entityId/{entityId}",entityId)
                 .retrieve()
                 .bodyToMono(TppDTO.class);
     }

@@ -5,5 +5,5 @@ import it.gov.pagopa.emd.payment.dto.TppDTO;
 import reactor.core.publisher.Mono;
 
 public interface TppConnector {
-    Mono<TppDTO> getTpp(String tppId);
+    Mono<TppDTO> getTppByEntityId(String entityId);
 }
