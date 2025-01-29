@@ -1,6 +1,5 @@
 package it.gov.pagopa.emd.payment.controller;
 
-import it.gov.pagopa.emd.payment.dto.NetworkResponseDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalRequestDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
 import jakarta.validation.Valid;
@@ -21,8 +20,5 @@ public interface PaymentController {
 
   @GetMapping("/token")
   Mono<ResponseEntity<Void>> generateDeepLink(@Valid @RequestParam String retrievalId, @Valid @RequestParam String fiscalCode, @Valid @RequestParam String noticeNumber);
-
-  @GetMapping("/network/connection/{tppName}")
-  Mono<ResponseEntity<NetworkResponseDTO>> testConnection(@Valid @PathVariable String tppName);
 
 }

@@ -1,7 +1,6 @@
 package it.gov.pagopa.emd.payment.controller;
 
 
-import it.gov.pagopa.emd.payment.dto.NetworkResponseDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalRequestDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
 import it.gov.pagopa.emd.payment.service.PaymentServiceImpl;
@@ -43,10 +42,5 @@ public class PaymentControllerImpl implements PaymentController {
             );
   }
 
-  @Override
-  public Mono<ResponseEntity<NetworkResponseDTO>> testConnection(String tppName) {
-    return paymentServiceImpl.testConnection(tppName)
-            .map(ResponseEntity::ok);
-  }
 
 }

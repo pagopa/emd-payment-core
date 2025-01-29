@@ -2,7 +2,6 @@ package it.gov.pagopa.emd.payment.service;
 
 import it.gov.pagopa.emd.payment.configuration.ExceptionMap;
 import it.gov.pagopa.emd.payment.connector.TppConnectorImpl;
-import it.gov.pagopa.emd.payment.dto.NetworkResponseDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalRequestDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
 import it.gov.pagopa.emd.payment.repository.RetrievalRepository;
@@ -62,15 +61,6 @@ class PaymentServiceImplTest {
                 .verifyComplete();
     }
 
-    @Test
-    void testConnection(){
-        NetworkResponseDTO networkResponseDTO = new NetworkResponseDTO();
-        networkResponseDTO.setMessage("tppName ha raggiunto i nostri sistemi");
-        networkResponseDTO.setCode("PAGOPA_NETWORK_TEST");
-        StepVerifier.create(paymentServiceImpl.testConnection("tppName"))
-                .expectNext(networkResponseDTO)
-                .verifyComplete();
-    }
 
 }
 
