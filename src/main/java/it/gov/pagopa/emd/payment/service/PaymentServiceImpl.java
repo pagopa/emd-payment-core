@@ -3,9 +3,7 @@ package it.gov.pagopa.emd.payment.service;
 import it.gov.pagopa.emd.payment.configuration.ExceptionMap;
 import it.gov.pagopa.emd.payment.connector.TppConnectorImpl;
 import it.gov.pagopa.emd.payment.constant.PaymentConstants;
-import it.gov.pagopa.emd.payment.dto.RetrievalRequestDTO;
-import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
-import it.gov.pagopa.emd.payment.dto.TppDTO;
+import it.gov.pagopa.emd.payment.dto.*;
 import it.gov.pagopa.emd.payment.model.AttemptDetails;
 import it.gov.pagopa.emd.payment.model.PaymentAttempt;
 import it.gov.pagopa.emd.payment.model.Retrieval;
@@ -17,10 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 
 import static it.gov.pagopa.emd.payment.utils.Utils.inputSanify;
 
@@ -83,6 +78,51 @@ public class PaymentServiceImpl implements PaymentService {
                                 )
                 );
     }
+
+    @Override
+    public Mono<List<PaymentAttemptResponseDTO>> getAllPaymentAttemptsByTppId(String tppId){
+        log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID] Get payments by tppId: {}",inputSanify(tppId));
+        return paymentAttemptRepository.findAllByTppId(tppId)
+                .map(this::convertPaymentAttemptModelToDTO)
+                .doOnSuccess(paymentAttemptResponseDTOS -> log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID] Got {} payments by tppId: {}",paymentAttemptResponseDTOS.size(),inputSanify(tppId)))
+                .doOnError(error -> log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID] Error {} to get Payment Attempts by tppId: {}",error.getMessage(),inputSanify(tppId)));
+    }
+
+    @Override
+    public Mono<List<PaymentAttemptResponseDTO>> getAllPaymentAttemptsByTppIdAndFiscalCode(String tppId, String fiscalCode){
+        log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID-AND-FISCAL-CODE] Get payments by tppId: {} and fiscalCode: {}",inputSanify(tppId),Utils.createSHA256(fiscalCode));
+        return paymentAttemptRepository.findAllByTppIdAndFiscalCode(tppId,fiscalCode)
+                .map(this::convertPaymentAttemptModelToDTO)
+                .doOnSuccess(paymentAttemptResponseDTOS -> log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID-AND-FISCAL-CODE] Got {} payments by tppId: {} and fiscalCode: {}",paymentAttemptResponseDTOS.size(),inputSanify(tppId),Utils.createSHA256(fiscalCode)))
+                .doOnError(error -> log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID-AND-FISCAL-CODE] Error {} to get Payment Attempts by tppId: {} and fiscalCode: {}",error.getMessage(),inputSanify(tppId),Utils.createSHA256(fiscalCode)));
+    }
+
+    private List<PaymentAttemptResponseDTO> convertPaymentAttemptModelToDTO(List<PaymentAttempt> paymentAttemptList){
+        List<PaymentAttemptResponseDTO> paymentAttemptResponseDTOList = new ArrayList<>();
+        for(PaymentAttempt paymentAttempt : paymentAttemptList){
+            PaymentAttemptResponseDTO paymentAttemptResponseDTO = new PaymentAttemptResponseDTO();
+            paymentAttemptResponseDTO.setTppId(paymentAttempt.getTppId());
+            paymentAttemptResponseDTO.setOriginId(paymentAttempt.getOriginId());
+            paymentAttemptResponseDTO.setFiscalCode(paymentAttempt.getFiscalCode());
+            paymentAttemptResponseDTO.setAttemptDetails(convertAttemptDetailsModelToDTO(paymentAttempt.getAttemptDetails()));
+            paymentAttemptResponseDTOList.add(paymentAttemptResponseDTO);
+        }
+        return paymentAttemptResponseDTOList;
+    }
+
+    private List<AttemptDetailsResponseDTO> convertAttemptDetailsModelToDTO(List<AttemptDetails> attemptDetails){
+        List<AttemptDetailsResponseDTO> attemptDetailsResponseDTOList = new ArrayList<>();
+        for(AttemptDetails attemptDetail : attemptDetails){
+            AttemptDetailsResponseDTO attemptDetailsResponseDTO = new AttemptDetailsResponseDTO();
+            attemptDetailsResponseDTO.setPaymentAttemptDate(attemptDetail.getPaymentAttemptDate());
+            attemptDetailsResponseDTO.setNoticeNumber(attemptDetail.getNoticeNumber());
+            attemptDetailsResponseDTOList.add(attemptDetailsResponseDTO);
+        }
+        return attemptDetailsResponseDTOList;
+    }
+
+
+
 
 
     private PaymentAttempt addNewAttemptDetails(PaymentAttempt paymentAttempt, String noticeNumber){

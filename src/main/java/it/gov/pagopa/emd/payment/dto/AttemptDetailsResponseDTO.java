@@ -1,4 +1,4 @@
-package it.gov.pagopa.emd.payment.model;
+package it.gov.pagopa.emd.payment.dto;
 
 
 import lombok.AllArgsConstructor;
@@ -13,7 +13,7 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class AttemptDetails {
+public class AttemptDetailsResponseDTO {
 
   private String noticeNumber;
   private Date paymentAttemptDate;

@@ -16,8 +16,11 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.List;
+
 import static it.gov.pagopa.emd.payment.faker.TestUtils.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {PaymentServiceImpl.class, ExceptionMap.class})
@@ -61,7 +64,7 @@ class PaymentServiceImplTest {
     void testGetRedirect(){
         when(retrievalRepository.findByRetrievalId(any())).thenReturn(Mono.just(RETRIEVAL));
         when(paymentAttemptRepository.findByTppIdAndOriginIdAndFiscalCode(RETRIEVAL.getTppId(),RETRIEVAL.getOriginId(),"fiscalCode")).thenReturn(Mono.just(PAYMENT_ATTEMPT));
-        when(paymentAttemptRepository.save(any())).thenReturn(Mono.just(new PaymentAttempt()));
+        when(paymentAttemptRepository.save(any())).thenReturn(Mono.just(PAYMENT_ATTEMPT));
 
         StepVerifier.create(paymentServiceImpl.getRedirect("retrievalId","fiscalCode","noticeNumber"))
                 .expectNext("deepLink?fiscalCode=fiscalCode&noticeNumber=noticeNumber")
@@ -79,6 +82,21 @@ class PaymentServiceImplTest {
                 .verifyComplete();
     }
 
+    @Test
+    void testGetAllPaymentAttemptsByTppId(){
+        when(paymentAttemptRepository.findAllByTppId(anyString())).thenReturn(Mono.just(List.of(PAYMENT_ATTEMPT)));
+
+        StepVerifier.create(paymentServiceImpl.getAllPaymentAttemptsByTppId("tppId")).expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void testGetAllPaymentAttemptsByTppIdAndFiscalCode(){
+        when(paymentAttemptRepository.findAllByTppIdAndFiscalCode(anyString(),anyString())).thenReturn(Mono.just(List.of(PAYMENT_ATTEMPT)));
+
+        StepVerifier.create(paymentServiceImpl.getAllPaymentAttemptsByTppIdAndFiscalCode("tppId","fiscalCode")).expectNextCount(1)
+                .verifyComplete();
+    }
 
 }
 

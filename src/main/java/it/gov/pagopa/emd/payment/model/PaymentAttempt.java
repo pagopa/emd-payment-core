@@ -11,8 +11,8 @@ import java.util.List;
 
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 @Document(collection = "payment_attempt")
 public class PaymentAttempt {

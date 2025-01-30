@@ -3,16 +3,13 @@ package it.gov.pagopa.emd.payment.dto;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import it.gov.pagopa.emd.payment.exception.ServiceExceptionPayload;
 import jakarta.validation.constraints.NotBlank;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
-@EqualsAndHashCode
+@Builder
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ErrorDTO implements ServiceExceptionPayload {
 
   @NotBlank
