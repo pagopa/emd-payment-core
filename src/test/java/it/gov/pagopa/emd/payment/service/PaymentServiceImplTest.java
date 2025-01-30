@@ -4,6 +4,8 @@ import it.gov.pagopa.emd.payment.configuration.ExceptionMap;
 import it.gov.pagopa.emd.payment.connector.TppConnectorImpl;
 import it.gov.pagopa.emd.payment.dto.RetrievalRequestDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
+import it.gov.pagopa.emd.payment.model.PaymentAttempt;
+import it.gov.pagopa.emd.payment.repository.PaymentAttemptRepository;
 import it.gov.pagopa.emd.payment.repository.RetrievalRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,6 +28,9 @@ class PaymentServiceImplTest {
 
     @MockBean
     private RetrievalRepository retrievalRepository;
+
+    @MockBean
+    private PaymentAttemptRepository paymentAttemptRepository;
 
     @MockBean
     private TppConnectorImpl tppConnectorImpl;
@@ -55,6 +60,19 @@ class PaymentServiceImplTest {
     @Test
     void testGetRedirect(){
         when(retrievalRepository.findByRetrievalId(any())).thenReturn(Mono.just(RETRIEVAL));
+        when(paymentAttemptRepository.findByFiscalCodeAndTppIdAndOriginId("fiscalCode",RETRIEVAL.getTppId(),RETRIEVAL.getOriginId())).thenReturn(Mono.just(PAYMENT_ATTEMPT));
+        when(paymentAttemptRepository.save(any())).thenReturn(Mono.just(new PaymentAttempt()));
+
+        StepVerifier.create(paymentServiceImpl.getRedirect("retrievalId","fiscalCode","noticeNumber"))
+                .expectNext("deepLink?fiscalCode=fiscalCode&noticeNumber=noticeNumber")
+                .verifyComplete();
+    }
+
+    @Test
+    void testGetRedirectEmpty(){
+        when(retrievalRepository.findByRetrievalId(any())).thenReturn(Mono.just(RETRIEVAL));
+        when(paymentAttemptRepository.findByFiscalCodeAndTppIdAndOriginId("fiscalCode",RETRIEVAL.getTppId(),RETRIEVAL.getOriginId())).thenReturn(Mono.empty());
+        when(paymentAttemptRepository.save(any())).thenReturn(Mono.just(new PaymentAttempt()));
 
         StepVerifier.create(paymentServiceImpl.getRedirect("retrievalId","fiscalCode","noticeNumber"))
                 .expectNext("deepLink?fiscalCode=fiscalCode&noticeNumber=noticeNumber")
