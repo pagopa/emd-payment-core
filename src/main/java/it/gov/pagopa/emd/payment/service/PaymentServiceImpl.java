@@ -78,10 +78,6 @@ public class PaymentServiceImpl implements PaymentService {
                                 .switchIfEmpty(Mono.defer(() ->
                                         paymentAttemptRepository.save(createNewPaymentAttempt(retrievalResponseDTO, fiscalCode, noticeNumber))
                                 ))
-                                .onErrorMap(throwable -> {
-                                    log.info("[EMD][PAYMENT][GET-REDIRECT] Error {}",throwable.getCause()+throwable.getMessage());
-                                    return throwable;
-                                })
                                 .map(paymentAttempt ->
                                         buildDeepLink(retrievalResponseDTO.getDeeplink(), fiscalCode, noticeNumber)
                                 )
