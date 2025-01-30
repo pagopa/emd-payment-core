@@ -83,6 +83,7 @@ public class PaymentServiceImpl implements PaymentService {
     public Mono<List<PaymentAttemptResponseDTO>> getAllPaymentAttemptsByTppId(String tppId){
         log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID] Get payments by tppId: {}",inputSanify(tppId));
         return paymentAttemptRepository.findAllByTppId(tppId)
+                .collectList()
                 .map(this::convertPaymentAttemptModelToDTO)
                 .doOnSuccess(paymentAttemptResponseDTOS -> log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID] Got {} payments by tppId: {}",paymentAttemptResponseDTOS.size(),inputSanify(tppId)))
                 .doOnError(error -> log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID] Error {} to get Payment Attempts by tppId: {}",error.getMessage(),inputSanify(tppId)));
@@ -92,6 +93,7 @@ public class PaymentServiceImpl implements PaymentService {
     public Mono<List<PaymentAttemptResponseDTO>> getAllPaymentAttemptsByTppIdAndFiscalCode(String tppId, String fiscalCode){
         log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID-AND-FISCAL-CODE] Get payments by tppId: {} and fiscalCode: {}",inputSanify(tppId),Utils.createSHA256(fiscalCode));
         return paymentAttemptRepository.findAllByTppIdAndFiscalCode(tppId,fiscalCode)
+                .collectList()
                 .map(this::convertPaymentAttemptModelToDTO)
                 .doOnSuccess(paymentAttemptResponseDTOS -> log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID-AND-FISCAL-CODE] Got {} payments by tppId: {} and fiscalCode: {}",paymentAttemptResponseDTOS.size(),inputSanify(tppId),Utils.createSHA256(fiscalCode)))
                 .doOnError(error -> log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID-AND-FISCAL-CODE] Error {} to get Payment Attempts by tppId: {} and fiscalCode: {}",error.getMessage(),inputSanify(tppId),Utils.createSHA256(fiscalCode)));

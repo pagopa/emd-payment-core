@@ -13,10 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
-import java.util.List;
 
 import static it.gov.pagopa.emd.payment.faker.TestUtils.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -84,7 +83,7 @@ class PaymentServiceImplTest {
 
     @Test
     void testGetAllPaymentAttemptsByTppId(){
-        when(paymentAttemptRepository.findAllByTppId(anyString())).thenReturn(Mono.just(List.of(PAYMENT_ATTEMPT)));
+        when(paymentAttemptRepository.findAllByTppId(anyString())).thenReturn(Flux.just(PAYMENT_ATTEMPT));
 
         StepVerifier.create(paymentServiceImpl.getAllPaymentAttemptsByTppId("tppId")).expectNextCount(1)
                 .verifyComplete();
@@ -92,7 +91,7 @@ class PaymentServiceImplTest {
 
     @Test
     void testGetAllPaymentAttemptsByTppIdAndFiscalCode(){
-        when(paymentAttemptRepository.findAllByTppIdAndFiscalCode(anyString(),anyString())).thenReturn(Mono.just(List.of(PAYMENT_ATTEMPT)));
+        when(paymentAttemptRepository.findAllByTppIdAndFiscalCode(anyString(),anyString())).thenReturn(Flux.just(PAYMENT_ATTEMPT));
 
         StepVerifier.create(paymentServiceImpl.getAllPaymentAttemptsByTppIdAndFiscalCode("tppId","fiscalCode")).expectNextCount(1)
                 .verifyComplete();
