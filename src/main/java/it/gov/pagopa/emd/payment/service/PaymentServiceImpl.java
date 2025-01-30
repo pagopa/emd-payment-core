@@ -70,7 +70,7 @@ public class PaymentServiceImpl implements PaymentService {
     public Mono<String> getRedirect(String retrievalId, String fiscalCode, String noticeNumber) {
         log.info("[EMD][PAYMENT][GET-REDIRECT] Get redirect for retrievalId: {}, fiscalCode: {} and noticeNumber: {}",inputSanify(retrievalId), Utils.createSHA256(fiscalCode),noticeNumber);
         return getRetrievalByRetrievalId(retrievalId)
-                .flatMap(retrievalResponseDTO -> paymentAttemptRepository.findByFiscalCodeAndTppIdAndOriginId(fiscalCode,retrievalResponseDTO.getTppId(), retrievalResponseDTO.getOriginId())
+                .flatMap(retrievalResponseDTO -> paymentAttemptRepository.findByTppIdAndOriginIdAndFiscalCode(retrievalResponseDTO.getTppId(), retrievalResponseDTO.getOriginId(), fiscalCode)
                         .flatMap(paymentAttempt ->
                                 paymentAttemptRepository.save(addNewAttemptDetails(paymentAttempt,noticeNumber))
                         )

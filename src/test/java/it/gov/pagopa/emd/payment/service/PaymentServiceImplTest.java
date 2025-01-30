@@ -60,7 +60,7 @@ class PaymentServiceImplTest {
     @Test
     void testGetRedirect(){
         when(retrievalRepository.findByRetrievalId(any())).thenReturn(Mono.just(RETRIEVAL));
-        when(paymentAttemptRepository.findByFiscalCodeAndTppIdAndOriginId("fiscalCode",RETRIEVAL.getTppId(),RETRIEVAL.getOriginId())).thenReturn(Mono.just(PAYMENT_ATTEMPT));
+        when(paymentAttemptRepository.findByTppIdAndOriginIdAndFiscalCode(RETRIEVAL.getTppId(),RETRIEVAL.getOriginId(),"fiscalCode")).thenReturn(Mono.just(PAYMENT_ATTEMPT));
         when(paymentAttemptRepository.save(any())).thenReturn(Mono.just(new PaymentAttempt()));
 
         StepVerifier.create(paymentServiceImpl.getRedirect("retrievalId","fiscalCode","noticeNumber"))
@@ -71,7 +71,7 @@ class PaymentServiceImplTest {
     @Test
     void testGetRedirectEmpty(){
         when(retrievalRepository.findByRetrievalId(any())).thenReturn(Mono.just(RETRIEVAL));
-        when(paymentAttemptRepository.findByFiscalCodeAndTppIdAndOriginId("fiscalCode",RETRIEVAL.getTppId(),RETRIEVAL.getOriginId())).thenReturn(Mono.empty());
+        when(paymentAttemptRepository.findByTppIdAndOriginIdAndFiscalCode(RETRIEVAL.getTppId(),RETRIEVAL.getOriginId(),"fiscalCode")).thenReturn(Mono.empty());
         when(paymentAttemptRepository.save(any())).thenReturn(Mono.just(new PaymentAttempt()));
 
         StepVerifier.create(paymentServiceImpl.getRedirect("retrievalId","fiscalCode","noticeNumber"))

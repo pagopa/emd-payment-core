@@ -8,6 +8,6 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface PaymentAttemptRepository extends ReactiveMongoRepository<PaymentAttempt,String> {
 
-    Mono<PaymentAttempt> findByFiscalCodeAndTppIdAndOriginId(String fiscalCode, String tppId, String originId);
+    Mono<PaymentAttempt> findByTppIdAndOriginIdAndFiscalCode(String tppId, String originId, String fiscalCode);
 
 }
