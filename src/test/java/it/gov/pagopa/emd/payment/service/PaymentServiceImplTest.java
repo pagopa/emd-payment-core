@@ -83,7 +83,7 @@ class PaymentServiceImplTest {
 
     @Test
     void testGetAllPaymentAttemptsByTppId(){
-        when(paymentAttemptRepository.findAllByTppId(anyString())).thenReturn(Flux.just(PAYMENT_ATTEMPT));
+        when(paymentAttemptRepository.findByTppId(anyString())).thenReturn(Flux.just(PAYMENT_ATTEMPT));
 
         StepVerifier.create(paymentServiceImpl.getAllPaymentAttemptsByTppId("tppId")).expectNextCount(1)
                 .verifyComplete();
@@ -91,7 +91,7 @@ class PaymentServiceImplTest {
 
     @Test
     void testGetAllPaymentAttemptsByTppIdAndFiscalCode(){
-        when(paymentAttemptRepository.findAllByTppIdAndFiscalCode(anyString(),anyString())).thenReturn(Flux.just(PAYMENT_ATTEMPT));
+        when(paymentAttemptRepository.findByTppIdAndFiscalCode(anyString(),anyString())).thenReturn(Flux.just(PAYMENT_ATTEMPT));
 
         StepVerifier.create(paymentServiceImpl.getAllPaymentAttemptsByTppIdAndFiscalCode("tppId","fiscalCode")).expectNextCount(1)
                 .verifyComplete();

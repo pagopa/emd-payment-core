@@ -11,8 +11,8 @@ public interface PaymentAttemptRepository extends ReactiveMongoRepository<Paymen
 
     Mono<PaymentAttempt> findByTppIdAndOriginIdAndFiscalCode(String tppId, String originId, String fiscalCode);
 
-    Flux<PaymentAttempt> findAllByTppId(String tppId);
+    Flux<PaymentAttempt> findByTppId(String tppId);
 
-    Flux<PaymentAttempt> findAllByTppIdAndFiscalCode(String tppId, String fiscalCode);
+    Flux<PaymentAttempt> findByTppIdAndFiscalCode(String tppId, String fiscalCode);
 
 }
