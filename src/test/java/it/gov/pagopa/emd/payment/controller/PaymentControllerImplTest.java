@@ -1,5 +1,6 @@
 package it.gov.pagopa.emd.payment.controller;
 
+import it.gov.pagopa.emd.payment.dto.PaymentAttemptResponseDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
 import it.gov.pagopa.emd.payment.service.PaymentServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -12,8 +13,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
-import static it.gov.pagopa.emd.payment.faker.TestUtils.RETRIEVAL_REQUEST_DTO;
-import static it.gov.pagopa.emd.payment.faker.TestUtils.RETRIEVAL_RESPONSE_DTO;
+import java.util.List;
+
+import static it.gov.pagopa.emd.payment.faker.TestUtils.*;
+import static org.mockito.ArgumentMatchers.anyString;
 
 @WebFluxTest(PaymentControllerImpl.class)
 class PaymentControllerImplTest {
@@ -69,6 +72,37 @@ class PaymentControllerImplTest {
                 .exchange()
                 .expectStatus().isFound()
                 .expectHeader().exists("Location");
+    }
+
+    @Test
+    void testGetAllPaymentAttemptsByTppId() {
+        Mockito.when(paymentServiceImpl.getAllPaymentAttemptsByTppId(anyString())).thenReturn(Mono.just(List.of(PAYMENT_ATTEMPT_RESPONSE_DTO)));
+
+        webTestClient.get()
+                .uri("/emd/payment/paymentAttempts/{tppId}","tppId")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(PaymentAttemptResponseDTO.class)
+                .consumeWith(response -> {
+                    List<PaymentAttemptResponseDTO> resultResponse = response.getResponseBody();
+                    Assertions.assertNotNull(resultResponse);
+                });
+    }
+
+
+    @Test
+    void testGetAllAttemptDetailsByTppIdAndFiscalCode() {
+        Mockito.when(paymentServiceImpl.getAllPaymentAttemptsByTppIdAndFiscalCode(anyString(),anyString())).thenReturn(Mono.just(List.of(PAYMENT_ATTEMPT_RESPONSE_DTO)));
+
+        webTestClient.get()
+                .uri("/emd/payment/paymentAttempts/{tppId}/fiscalCode","tppId","fisclaCode")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(PaymentAttemptResponseDTO.class)
+                .consumeWith(response -> {
+                    List<PaymentAttemptResponseDTO> resultResponse = response.getResponseBody();
+                    Assertions.assertNotNull(resultResponse);
+                });
     }
 
 }

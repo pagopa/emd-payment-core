@@ -1,21 +1,24 @@
 package it.gov.pagopa.emd.payment.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class RetrievalRequestDTO {
+public class PaymentAttemptResponseDTO {
 
-    @NotNull
-    private String agent;
-    @NotNull
+    private String fiscalCode;
     private String originId;
+    private String tppId;
+
+    private List<AttemptDetailsResponseDTO> attemptDetails;
+
 }

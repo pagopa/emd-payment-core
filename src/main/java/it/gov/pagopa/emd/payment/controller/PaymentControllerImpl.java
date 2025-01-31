@@ -1,6 +1,7 @@
 package it.gov.pagopa.emd.payment.controller;
 
 
+import it.gov.pagopa.emd.payment.dto.PaymentAttemptResponseDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalRequestDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
 import it.gov.pagopa.emd.payment.service.PaymentServiceImpl;
@@ -8,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 
 @Controller
@@ -40,6 +43,18 @@ public class PaymentControllerImpl implements PaymentController {
                     .header("Location", deepLink)
                     .build()
             );
+  }
+
+  @Override
+  public Mono<ResponseEntity<List<PaymentAttemptResponseDTO>>> getAllPaymentAttemptsByTppId(String tppId){
+    return paymentServiceImpl.getAllPaymentAttemptsByTppId(tppId)
+           .map(ResponseEntity::ok);
+  }
+
+  @Override
+  public Mono<ResponseEntity<List<PaymentAttemptResponseDTO>>> getAllAttemptDetailsByTppIdAndFiscalCode(String tppId, String fiscalCode){
+    return paymentServiceImpl.getAllPaymentAttemptsByTppIdAndFiscalCode(tppId, fiscalCode)
+            .map(ResponseEntity::ok);
   }
 
 
