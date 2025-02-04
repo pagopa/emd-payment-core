@@ -42,6 +42,14 @@ public class ExceptionMap {
                         message
                 )
         );
+
+        exceptions.put(PaymentConstants.ExceptionName.AGENT_NOT_FOUND_IN_DEEP_LINKS, message ->
+                new ClientExceptionWithBody(
+                        HttpStatus.NOT_FOUND,
+                        PaymentConstants.ExceptionCode.AGENT_NOT_FOUND_IN_DEEP_LINKS,
+                        message
+                )
+        );
     }
 
     public RuntimeException throwException(String exceptionKey, String message) {
