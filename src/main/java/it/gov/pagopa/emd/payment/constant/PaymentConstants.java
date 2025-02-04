@@ -14,6 +14,8 @@ public class PaymentConstants {
         public static final String RETRIEVAL_NOT_FOUND = "Retrieval does not exist or is not active";
         public static final String GENERIC_ERROR = "GENERIC_ERROR";
         public static final String AGENT_DEEP_LINKS_EMPTY = "Agent deep links null or empty";
+        public static final String AGENT_NOT_FOUND_IN_DEEP_LINKS = "Agent not found in deep links";
+
 
         private ExceptionMessage() {}
     }
@@ -22,6 +24,7 @@ public class PaymentConstants {
         public static final String TPP_NOT_FOUND = "TPP_NOT_FOUND";
         public static final String RETRIEVAL_NOT_FOUND = "RETRIEVAL_NOT_FOUND";
         public static final String AGENT_DEEP_LINKS_EMPTY = "AGENT_DEEP_LINKS_EMPTY";
+        public static final String AGENT_NOT_FOUND_IN_DEEP_LINKS = "AGENT_NOT_FOUN_IN_DEEP_LINKS";
         public static final String GENERIC_ERROR = "GENERIC_ERROR";
 
         private ExceptionName() {}
