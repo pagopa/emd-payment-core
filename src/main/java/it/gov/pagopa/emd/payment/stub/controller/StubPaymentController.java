@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 
-@RequestMapping("stub/emd/payment")
+@RequestMapping("/stub/emd/payment")
 public interface StubPaymentController {
 
     @PostMapping("/retrievalTokens/{entityId}")
