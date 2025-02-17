@@ -43,4 +43,9 @@ public class StubPaymentControllerImpl implements StubPaymentController {
                 );
     }
 
+    @Override
+    public Mono<ResponseEntity<Void>> payment(String fiscalCode, String noticeNumber){
+        return stubPaymentCoreService.payment(fiscalCode,noticeNumber)
+                .map(ResponseEntity::ok);
+    }
 }
