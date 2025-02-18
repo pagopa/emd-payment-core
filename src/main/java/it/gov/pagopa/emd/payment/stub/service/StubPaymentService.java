@@ -12,6 +12,6 @@ public interface StubPaymentService {
 
   Mono<String> getRedirect(String retrievalId, String fiscalCode, String noticeNumber);
 
-  Mono<String> payment(String fiscalCode, String noticeNumber);
+  Mono<Void> payment(String fiscalCode, String noticeNumber);
 
 }

@@ -85,8 +85,8 @@ public class StubPaymentServiceImpl implements StubPaymentService {
     }
 
     @Override
-    public Mono<String> payment(String fiscalCode, String noticeNumber){
-        return Mono.just("payment");
+    public Mono<Void> payment(String fiscalCode, String noticeNumber){
+        return Mono.empty();
     }
 
     private PaymentAttempt addNewAttemptDetails(PaymentAttempt paymentAttempt, String noticeNumber){
