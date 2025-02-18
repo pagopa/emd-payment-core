@@ -79,11 +79,5 @@ class StubPaymentServiceImplTest {
                 .expectNext("deepLink?fiscalCode=fiscalCode&noticeNumber=noticeNumber")
                 .verifyComplete();
     }
-
-    @Test
-    void testPayment(){
-        StepVerifier.create(stubPaymentService.payment("fiscalCode","noticeNumber"))
-                .verifyComplete();
-    }
 }
 

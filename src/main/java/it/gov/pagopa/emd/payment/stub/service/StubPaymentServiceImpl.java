@@ -84,11 +84,6 @@ public class StubPaymentServiceImpl implements StubPaymentService {
                 );
     }
 
-    @Override
-    public Mono<Void> payment(String fiscalCode, String noticeNumber){
-        return Mono.empty();
-    }
-
     private PaymentAttempt addNewAttemptDetails(PaymentAttempt paymentAttempt, String noticeNumber){
         AttemptDetails attemptDetails = new AttemptDetails();
         attemptDetails.setPaymentAttemptDate(Calendar.getInstance().getTime());

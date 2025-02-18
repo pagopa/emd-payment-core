@@ -71,16 +71,5 @@ class StubPaymentControllerImplTest {
                 .expectHeader().exists("Location");
     }
 
-    @Test
-    void testPayment() {
-        Mockito.when(paymentServiceImpl.payment("fiscalCode","noticeNumber")).thenReturn(Mono.empty());
-
-        webTestClient.get()
-                .uri("/stub/emd/payment/payment?fiscalCode={fiscalCode}&noticeNumber={noticeNumber}","fiscalCode","noticeNumber")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk();
-    }
-
 }
 
