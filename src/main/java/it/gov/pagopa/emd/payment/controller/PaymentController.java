@@ -30,4 +30,5 @@ public interface PaymentController {
   @GetMapping("/paymentAttempts/{tppId}/{fiscalCode}")
   Mono<ResponseEntity<List<PaymentAttemptResponseDTO>>> getAllAttemptDetailsByTppIdAndFiscalCode(@Valid @PathVariable String tppId, @Valid @PathVariable String fiscalCode);
 
+
 }
