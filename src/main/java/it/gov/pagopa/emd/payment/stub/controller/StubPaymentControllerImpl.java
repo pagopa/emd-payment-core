@@ -43,4 +43,9 @@ public class StubPaymentControllerImpl implements StubPaymentController {
                 );
     }
 
+    @Override
+    public Mono<ResponseEntity<Void>> generateDeepLink() {
+        return null;
+    }
+
 }
