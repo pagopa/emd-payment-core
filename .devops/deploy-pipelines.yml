@@ -3,23 +3,21 @@
 
 parameters:
   - name: 'executeBuild'
-    displayName: 'Launch docker build'
+    displayName: 'Launch maven and docker build'
     type: boolean
     default: true
 
 trigger:
   branches:
     include:
-      - develop
-      - uat
+      - release-*
       - main
   paths:
     include:
       - src/*
-      - build.gradle.kts
       - helm/*
+      - pom.xml
       - Dockerfile
-      - settings.gradle.kts
 
 pr: none
 
@@ -34,95 +32,116 @@ variables:
   imageRepository: '$(K8S_IMAGE_REPOSITORY_NAME)'
   deployNamespace: '$(DEPLOY_NAMESPACE)'
   helmReleaseName : '$(HELM_RELEASE_NAME)'
+  settingsXmlROsecureFileName: '$(SETTINGS_XML_RO_SECURE_FILE_NAME)'
+  settingsXmlSecureFileName: '$(SETTINGS_XML_RO_SECURE_FILE_NAME)'
   canDeploy: true
 
-  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/uat') }}:
-    environment: 'UAT'
-    dockerRegistryName: '$(UAT_CONTAINER_REGISTRY_NAME)'
-    dockerRegistryServiceConnection: '$(UAT_CONTAINER_REGISTRY_SERVICE_CONN)'
-    kubernetesServiceConnection: '$(UAT_KUBERNETES_SERVICE_CONN)'
-    containerRegistry: '$(UAT_CONTAINER_REGISTRY_NAME)'
-    selfHostedAgentPool: $(UAT_AGENT_POOL)
-    postmanEnvFile: p4pa_UAT.postman_environment.json
-
-  ${{ elseif eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
-    environment: 'PROD'
-    dockerRegistryName: '$(PROD_CONTAINER_REGISTRY_NAME)'
-    dockerRegistryServiceConnection: '$(PROD_CONTAINER_REGISTRY_SERVICE_CONN)'
-    kubernetesServiceConnection: '$(PROD_KUBERNETES_SERVICE_CONN)'
-    containerRegistry: '$(PROD_CONTAINER_REGISTRY_NAME)'
-    selfHostedAgentPool: $(PROD_AGENT_POOL)
-    postmanEnvFile: p4pa_PROD.postman_environment.json #Not used
-
-  ${{ else }}:
+  # If the branch is develop or a feature branch starting with CEN, deploy in DEV environment
+  ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/release-dev') }}:
     environment: 'DEV'
-    dockerRegistryName: '$(DEV_CONTAINER_REGISTRY_NAME)'
     dockerRegistryServiceConnection: '$(DEV_CONTAINER_REGISTRY_SERVICE_CONN)'
     kubernetesServiceConnection: '$(DEV_KUBERNETES_SERVICE_CONN)'
     containerRegistry: '$(DEV_CONTAINER_REGISTRY_NAME)'
     selfHostedAgentPool: $(DEV_AGENT_POOL)
-    postmanEnvFile: p4pa_DEV.postman_environment.json
+
+  ${{ elseif startsWith(variables['Build.SourceBranch'], 'refs/heads/release-uat') }}:
+    environment: 'UAT'
+    dockerRegistryServiceConnection: '$(UAT_CONTAINER_REGISTRY_SERVICE_CONN)'
+    kubernetesServiceConnection: '$(UAT_KUBERNETES_SERVICE_CONN)'
+    containerRegistry: '$(UAT_CONTAINER_REGISTRY_NAME)'
+    selfHostedAgentPool: $(UAT_AGENT_POOL)
+
+  ${{ elseif or(eq(variables['Build.SourceBranch'], 'refs/heads/main'),eq(variables['Build.SourceBranch'], 'refs/heads/release-prod')) }}:
+    environment: 'PROD'
+    dockerRegistryServiceConnection: '$(PROD_CONTAINER_REGISTRY_SERVICE_CONN)'
+    kubernetesServiceConnection: '$(PROD_KUBERNETES_SERVICE_CONN)'
+    containerRegistry: '$(PROD_CONTAINER_REGISTRY_NAME)'
+    selfHostedAgentPool: $(PROD_AGENT_POOL)
+
+  ${{ else }}:
+    environment: 'DEV'
+    dockerRegistryServiceConnection: '$(DEV_CONTAINER_REGISTRY_SERVICE_CONN)'
+    kubernetesServiceConnection: '$(DEV_KUBERNETES_SERVICE_CONN)'
+    containerRegistry: '$(DEV_CONTAINER_REGISTRY_NAME)'
+    selfHostedAgentPool: $(DEV_AGENT_POOL)
 
 stages:
-  - stage: stage_build
+  - stage: 'pom_version'
+    displayName: Release
     condition: eq(variables.canDeploy, true)
-    displayName: 'Build and publish image to ${{ variables.environment }} registry'
     jobs:
-      - job: job_build
-        displayName: Build
+      - job: POM
+        displayName: POM
         pool:
           vmImage: $(vmImageNameDefault)
         steps:
           - task: Bash@3
-            displayName: Get app version
-            name: getAppVersion
+            displayName: Get POM version
+            name: getpomversion
             condition: and(succeeded(), eq(variables.canDeploy, true))
             inputs:
               targetType: 'inline'
               script: |
-                version=$(cat build.gradle.kts | grep "version = '.*'" | cut -d"'" -f2)
-                echo "Building $version version"
-                echo "##vso[task.setvariable variable=appVersion;isOutput=true]$version"
+                version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+                echo "##vso[task.setvariable variable=outputpomversion;isOutput=true]$version"
               failOnStderr: true
 
+  - stage: 'build'
+    displayName: 'Build_and_Publish_to_${{ variables.environment }}'
+    dependsOn: 'pom_version'
+    variables:
+      pomversion: $[ stageDependencies.Release.POM.outputs['getpomversion.outputpomversion'] ]
+    jobs:
+      - job: Build
+        displayName: Build
+        pool:
+          vmImage: $(vmImageNameDefault)
+        steps:
           - task: Docker@2
             condition: and(succeeded(), ${{ parameters.executeBuild }})
-            displayName: 'Build and publish $(imageRepository) image'
+            displayName: 'Publish_image_to_${{ variables.environment }}'
             inputs:
               containerRegistry: '$(dockerRegistryServiceConnection)'
               repository: '$(imageRepository)'
               command: 'buildAndPush'
               tags: |
+                $(Build.BuildId)
                 latest
-                $(Build.SourceVersion)
-                $(getAppVersion.appVersion)
+                $(pomversion)
+          # - task: PublishPipelineArtifact@1
+          #   displayName: 'Publish Artifact manifests'
+          #   condition: and(succeeded(), eq(variables.canDeploy, true))
+          #   inputs:
+          #     targetPath: '$(Build.Repository.LocalPath)/manifests'
+          #     artifact: 'manifests'
+          #     publishLocation: 'pipeline'
 
+  - stage: 'publish_artifact_helm'
+    displayName: 'Publish_artifact_Helm'
+    dependsOn: ['build']
+    jobs:
+      - job: Publish_artifact_helm
+        displayName: Publish_artifact_helm
+        pool:
+          vmImage: $(vmImageNameDefault)
+        steps:
           - task: PublishPipelineArtifact@1
-            displayName: 'Publish manifests into pipeline artifacts'
+            displayName: 'Publish Artifact manifests'
             condition: succeeded()
             inputs:
               targetPath: '$(Build.Repository.LocalPath)/helm'
               artifact: 'helm'
               publishLocation: 'pipeline'
-          - task: 'Bash@3'
-            displayName: 'Send message on Slack'
-            condition: in(variables['Agent.JobStatus'], 'SucceededWithIssues', 'Failed')
-            inputs:
-              targetType: 'inline'
-              script: >
-                curl -X POST \
-                  -H "Content-type: application/json" \
-                  --data '{"text": "*Attention: There is an error in pipeline $(System.DefinitionName) in step _build_!*\nCheck the logs for more details $(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId) to view the build results."}' \
-                  $(SLACK_WEBHOOK_URL)
-  - stage: stage_deploy
+
+  - stage: 'deploy'
     displayName: 'Deploy to ${{ variables.environment }} K8S'
-    dependsOn: [ stage_build ]
-    variables:
-      appVersion: $[ stageDependencies.stage_build.job_build.outputs['getAppVersion.appVersion'] ]
+    dependsOn: ['publish_artifact_helm']
     condition: and(succeeded(), eq(variables.canDeploy, true))
+    variables:
+      pomversion: $[ stageDependencies.Release.POM.outputs['getpomversion.outputpomversion'] ]
     jobs:
-      - deployment: job_deploy
-        displayName: 'Deploy'
+      - deployment: 'Deploy_to_${{ variables.environment }}'
+        displayName: 'Deploy to ${{ variables.environment }} K8S'
         pool:
           name: $(selfHostedAgentPool)
         environment: '$(environment)'
@@ -147,14 +166,6 @@ stages:
                       helm repo add pagopa-microservice https://pagopa.github.io/aks-microservice-chart-blueprint
                       helm dep build
                     failOnStderr: true
-                - bash: |
-                    echo 'microservice-chart:
-                       podAnnotations:
-                          "build/buildNumber": "$(Build.BuildNumber)"
-                          "build/appVersion": "$(appVersion)"
-                          "build/sourceVersion": "$(Build.SourceVersion)"' > buildMetadata.yaml
-                  displayName: Writing build metadata
-
                 - task: HelmDeploy@0
                   displayName: Helm upgrade
                   inputs:
@@ -168,15 +179,14 @@ stages:
                     valueFile: "$(Pipeline.Workspace)/helm/values-${{ lower(variables.environment) }}.yaml"
                     install: true
                     waitForExecution: true
-                    arguments: --timeout 5m0s
-                      --values buildMetadata.yaml
-                - task: 'Bash@3'
-                  displayName: 'Send message on Slack'
-                  condition: in(variables['Agent.JobStatus'], 'SucceededWithIssues', 'Failed')
+                    arguments: "--timeout 5m0s --debug"
+                - task: KubernetesManifest@0
+                  displayName: Patch
                   inputs:
-                    targetType: 'inline'
-                    script: >
-                      curl -X POST \
-                        -H "Content-type: application/json" \
-                        --data '{"text": "*Attention: There is an error in pipeline $(System.DefinitionName) in step _deploy_!*\nCheck the logs for more details $(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId) to view the build results."}' \
-                        $(SLACK_WEBHOOK_URL)
+                    kubernetesServiceConnection: ${{ variables.kubernetesServiceConnection }}
+                    namespace: '$(deployNamespace)'
+                    action: patch
+                    kind: deployment
+                    name: '$(helmReleaseName)-microservice-chart'
+                    mergeStrategy: strategic
+                    patch: '{"spec":{"template":{"metadata":{"annotations":{"buildNumber":"$(Build.BuildNumber)"}}}}}'
