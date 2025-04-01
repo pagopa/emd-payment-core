@@ -1,6 +1,8 @@
 package it.gov.pagopa.emd.payment.stub.service;
 
 import it.gov.pagopa.emd.payment.stub.model.PaymentInfo;
+import lombok.extern.java.Log;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.w3c.dom.Document;
@@ -14,6 +16,7 @@ import org.xml.sax.InputSource;
 import reactor.core.publisher.Mono;
 
 @Service
+@Slf4j
 public class PaymentService {
 
     private final WebClient webClient;
@@ -46,13 +49,14 @@ public class PaymentService {
         String body = createSoapRequest(fiscalCode, noticeNumber);
 
         return webClient.post()
-            .uri("https://api.uat.platform.pagopa.it/nodo/node-for-psp/v1")
-            .header("Content-Type", "application/xml")
-            .header("SOAPAction", "verifyPaymentNotice")
-            .header("Cache-Control", "no-cache")
-            .bodyValue(body)
-            .retrieve()
-            .bodyToMono(String.class);
+                .uri("https://api.uat.platform.pagopa.it/nodo/node-for-psp/v1")
+                .header("Content-Type", "application/xml")
+                .header("SOAPAction", "verifyPaymentNotice")
+                .header("Cache-Control", "no-cache")
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(String.class)
+                .doOnNext(response -> log.info("[SOAP RESPONSE] SOAP response: {} ",response));
     }
 
     public PaymentInfo parseSoapResponse(String xml) throws Exception {
