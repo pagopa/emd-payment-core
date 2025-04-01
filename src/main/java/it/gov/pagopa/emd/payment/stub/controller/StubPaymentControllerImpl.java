@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import java.net.URI;
+
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -45,7 +47,12 @@ public class StubPaymentControllerImpl implements StubPaymentController {
 
     @Override
     public Mono<ResponseEntity<Void>> generateDeepLink() {
-        return null;
+        String deepLinkUrl = "https://mil.weu.internal.uat.cstar.pagopa.it/emdpaymentcore/stub/emd/payment/payment?fiscalCode=LVLDAA85T50G702B&noticeNumber=329877";
+
+        return Mono.just(ResponseEntity
+                .status(HttpStatus.FOUND)
+                .location(URI.create(deepLinkUrl))
+                .build());
     }
 
 }
