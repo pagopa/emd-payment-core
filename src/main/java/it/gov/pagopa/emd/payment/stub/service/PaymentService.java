@@ -79,27 +79,99 @@ public class PaymentService {
 
     public String generateHtmlResponse(PaymentInfo info) {
         return String.format("""
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <meta charset=\"UTF-8\">
-              <title>Dettagli del Pagamento</title>
-              <style>
-                body { font-family: Arial; background: #f5f5f5; }
-                .container { max-width: 600px; margin: 50px auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-                h1 { text-align: center; color: #333; }
-                p { font-size: 18px; line-height: 1.6; }
-              </style>
-            </head>
-            <body>
-              <div class=\"container\">
-                <h1>Dettagli del Pagamento</h1>
-                <p><strong>Importo:</strong> %s €</p>
-                <p><strong>Scadenza:</strong> %s</p>
-                <p><strong>Note:</strong> %s</p>
-              </div>
-            </body>
-            </html>
-            """, info.getAmount(), info.getDueDate(), info.getPaymentNote());
-                }
+        <!DOCTYPE html>
+        <html lang="it">
+        <head>
+          <meta charset="UTF-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+          <title>TPP Platform</title>
+          <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+          <style>
+            body {
+              font-family: "Roboto", sans-serif;
+              background-color: #f5f5f5;
+              margin: 0;
+              padding: 0;
+            }
+            .box {
+              max-width: 600px;
+              margin: 50px auto;
+              background: #fff;
+              padding: 30px;
+              border-radius: 8px;
+              box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            }
+            h1 {
+              text-align: center;
+              color: #333;
+            }
+            p {
+              font-size: 18px;
+              text-align: center;
+            }
+            button {
+              width: 100%%;
+              padding: 12px;
+              margin-top: 20px;
+              font-size: 16px;
+              background-color: #1976d2;
+              color: white;
+              border: none;
+              border-radius: 4px;
+              cursor: pointer;
+            }
+            .modal {
+              display: none;
+              position: fixed;
+              z-index: 1;
+              left: 0;
+              top: 0;
+              width: 100%%;
+              height: 100%%;
+              overflow: auto;
+              background-color: rgba(0, 0, 0, 0.4);
+            }
+            .modal-content {
+              background-color: #fff;
+              margin: 15%% auto;
+              padding: 20px;
+              border: 1px solid #888;
+              width: 80%%;
+              max-width: 400px;
+              text-align: center;
+              border-radius: 6px;
+              box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            }
+          </style>
+        </head>
+        <body>
+          <div class="box">
+            <h1>TPP PLATFORM</h1>
+            <p><strong>Paga:</strong> €%s</p>
+            <p><strong>Data di scadenza:</strong> %s</p>
+            <p><strong>Note di pagamento:</strong> %s</p>
+            <button onclick="handlePayment()">Continua</button>
+          </div>
+
+          <div id="myModal" class="modal">
+            <div class="modal-content">
+              <p id="modalText">Pagamento in corso...</p>
+            </div>
+          </div>
+
+          <script>
+            function handlePayment() {
+              var modal = document.getElementById("myModal");
+              var text = document.getElementById("modalText");
+              modal.style.display = "block";
+              text.innerText = "Pagamento in corso...";
+              setTimeout(() => {
+                text.innerText = "Pagamento completato!";
+              }, 2000);
+            }
+          </script>
+        </body>
+        </html>
+        """, info.getAmount(), info.getDueDate(), info.getPaymentNote());
+    }
 }
