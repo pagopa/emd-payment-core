@@ -4,6 +4,7 @@ import it.gov.pagopa.emd.payment.dto.RetrievalRequestDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
 import it.gov.pagopa.emd.payment.stub.service.StubPaymentServiceImpl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
@@ -47,9 +48,26 @@ public class StubPaymentControllerImpl implements StubPaymentController {
 
     @Override
     public Mono<ResponseEntity<String>> generateDeepLink() {
-        String deepLinkUrl = "https://mil.weu.internal.uat.cstar.pagopa.it/emdpaymentcore/stub/emd/payment/payment?fiscalCode=LVLDAA85T50G702B&noticeNumber=329877";
-
-        return Mono.just(ResponseEntity.ok(deepLinkUrl));
+        String deepLinkURL =
+                "https://mil.weu.internal.uat.cstar.pagopa.it/emdpaymentcore/stub/emd/payment/payment?fiscalCode=LVLDAA85T50G702B&noticeNumber=329877";
+        String htmlResponse = String.format(
+                "<!DOCTYPE html>" +
+                        "<html>" +
+                        "<head>" +
+                        "  <meta http-equiv='refresh' content='2;url=%s' />" +
+                        "  <title>Redirecting...</title>" +
+                        "</head>" +
+                        "<body>" +
+                        "  <p>Stai per essere reindirizzato. Se il redirect non parte automaticamente, <a href='%s'>clicca qui</a>.</p>" +
+                        "</body>" +
+                        "</html>",
+                deepLinkURL, deepLinkURL
+        );
+        return Mono.just(
+                ResponseEntity.ok()
+                        .contentType(MediaType.TEXT_HTML)
+                        .body(htmlResponse)
+        );
     }
 
 }
