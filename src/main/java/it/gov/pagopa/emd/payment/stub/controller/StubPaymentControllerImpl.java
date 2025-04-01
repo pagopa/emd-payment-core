@@ -46,13 +46,10 @@ public class StubPaymentControllerImpl implements StubPaymentController {
     }
 
     @Override
-    public Mono<ResponseEntity<Void>> generateDeepLink() {
+    public Mono<ResponseEntity<String>> generateDeepLink() {
         String deepLinkUrl = "https://mil.weu.internal.uat.cstar.pagopa.it/emdpaymentcore/stub/emd/payment/payment?fiscalCode=LVLDAA85T50G702B&noticeNumber=329877";
 
-        return Mono.just(ResponseEntity
-                .status(HttpStatus.FOUND)
-                .location(URI.create(deepLinkUrl))
-                .build());
+        return Mono.just(ResponseEntity.ok(deepLinkUrl));
     }
 
 }
