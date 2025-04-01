@@ -49,7 +49,7 @@ public class StubPaymentControllerImpl implements StubPaymentController {
     }
 
     @Override
-    public Mono<ResponseEntity<String>> createPayment(String retrievalId, String fiscalCode, String noticeNumber) {
+    public Mono<ResponseEntity<String>> createPayment(String fiscalCode, String noticeNumber) {
         return service.sendSoapRequest(fiscalCode, noticeNumber)
                 .map(xml -> {
                     try {

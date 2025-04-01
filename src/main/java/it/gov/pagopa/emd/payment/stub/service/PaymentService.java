@@ -69,8 +69,8 @@ public class PaymentService {
     }
 
     private String getTagContent(Document doc, String tagName) {
-        NodeList nodes = doc.getElementsByTagNameNS("*", tagName);
-        return nodes.getLength() > 0 ? nodes.item(0).getTextContent() : "N/A";
+        NodeList all = doc.getElementsByTagName(tagName); // <-- rimosso namespace
+        return all.getLength() > 0 ? all.item(0).getTextContent() : "N/A";
     }
 
     public String generateHtmlResponse(PaymentInfo info) {
