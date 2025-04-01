@@ -132,6 +132,7 @@ public class PaymentService {
               background-color: rgba(0, 0, 0, 0.4);
             }
             .modal-content {
+              position: relative;
               background-color: #fff;
               margin: 15%% auto;
               padding: 20px;
@@ -142,19 +143,32 @@ public class PaymentService {
               border-radius: 6px;
               box-shadow: 0 4px 8px rgba(0,0,0,0.2);
             }
+            .close-btn {
+              position: absolute;
+              top: 10px;
+              right: 15px;
+              font-size: 20px;
+              font-weight: bold;
+              color: #aaa;
+              cursor: pointer;
+            }
+            .close-btn:hover {
+              color: #000;
+            }
           </style>
         </head>
         <body>
           <div class="box">
             <h1>TPP PLATFORM</h1>
-            <p><strong>Paga:</strong> €%s</p>
+            <p><strong>Importo:</strong> €%s</p>
             <p><strong>Data di scadenza:</strong> %s</p>
             <p><strong>Note di pagamento:</strong> %s</p>
-            <button onclick="handlePayment()">Continua</button>
+            <button onclick="handlePayment()">Paga</button>
           </div>
 
           <div id="myModal" class="modal">
             <div class="modal-content">
+              <span class="close-btn" onclick="closeModal()">&times;</span>
               <p id="modalText">Pagamento in corso...</p>
             </div>
           </div>
@@ -167,7 +181,14 @@ public class PaymentService {
               text.innerText = "Pagamento in corso...";
               setTimeout(() => {
                 text.innerText = "Pagamento completato!";
+                setTimeout(() => {
+                  modal.style.display = "none";
+                }, 2000);
               }, 2000);
+            }
+
+            function closeModal() {
+              document.getElementById("myModal").style.display = "none";
             }
           </script>
         </body>
