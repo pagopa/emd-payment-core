@@ -27,23 +27,23 @@ public class PaymentService {
 
     public String createSoapRequest(String fiscalCode, String noticeNumber) {
         return String.format("""
-                <?xml version=\"1.0\" encoding=\"utf-8\"?>
-                <Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">
-                  <Body>
-                    <verifyPaymentNoticeReq xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns=\"http://pagopa-api.pagopa.gov.it/node/nodeForPsp.xsd\">
-                      <idPSP>AGID_01</idPSP>
-                      <idBrokerPSP>97735020584</idBrokerPSP>
-                      <idChannel>97735020584_03</idChannel>
-                      <password>pwd_AgID</password>
-                      <qrCode>
-                        <fiscalCode>%s</fiscalCode>
-                        <noticeNumber>%s</noticeNumber>
-                      </qrCode>
-                    </verifyPaymentNoticeReq>
-                  </Body>
-                </Envelope>
-                """, fiscalCode, noticeNumber);
-                    }
+        <?xml version="1.0" encoding="utf-8"?>
+        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
+          <soapenv:Body>
+            <nfp:verifyPaymentNoticeReq xmlns:nfp="http://pagopa-api.pagopa.gov.it/node/nodeForPsp.xsd">
+              <idPSP>AGID_01</idPSP>
+              <idBrokerPSP>97735020584</idBrokerPSP>
+              <idChannel>97735020584_03</idChannel>
+              <password>pwd_AgID</password>
+              <qrCode>
+                <fiscalCode>%s</fiscalCode>
+                <noticeNumber>%s</noticeNumber>
+              </qrCode>
+            </nfp:verifyPaymentNoticeReq>
+          </soapenv:Body>
+        </soapenv:Envelope>
+        """, fiscalCode, noticeNumber);
+    }
 
     public Mono<String> sendSoapRequest(String fiscalCode, String noticeNumber) {
         String body = createSoapRequest(fiscalCode, noticeNumber);
