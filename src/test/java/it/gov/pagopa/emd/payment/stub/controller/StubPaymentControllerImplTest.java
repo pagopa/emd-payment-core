@@ -1,9 +1,6 @@
 package it.gov.pagopa.emd.payment.stub.controller;
 
-import it.gov.pagopa.emd.payment.connector.TppConnectorImpl;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
-import it.gov.pagopa.emd.payment.repository.PaymentAttemptRepository;
-import it.gov.pagopa.emd.payment.repository.RetrievalRepository;
 import it.gov.pagopa.emd.payment.stub.service.PaymentService;
 import it.gov.pagopa.emd.payment.stub.service.StubPaymentServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -16,8 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
-import static it.gov.pagopa.emd.payment.faker.TestUtils.*;
-import static org.mockito.ArgumentMatchers.any;
+import static it.gov.pagopa.emd.payment.faker.TestUtils.RETRIEVAL_REQUEST_DTO;
+import static it.gov.pagopa.emd.payment.faker.TestUtils.RETRIEVAL_RESPONSE_DTO;
 
 @WebFluxTest(StubPaymentControllerImpl.class)
 class StubPaymentControllerImplTest {
