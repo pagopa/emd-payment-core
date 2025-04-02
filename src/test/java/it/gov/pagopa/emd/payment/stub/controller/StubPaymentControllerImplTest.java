@@ -1,6 +1,7 @@
 package it.gov.pagopa.emd.payment.stub.controller;
 
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
+import it.gov.pagopa.emd.payment.stub.service.PaymentService;
 import it.gov.pagopa.emd.payment.stub.service.StubPaymentServiceImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,8 @@ class StubPaymentControllerImplTest {
     private StubPaymentServiceImpl paymentServiceImpl;
     @Autowired
     private WebTestClient webTestClient;
+    @MockBean
+    private PaymentService paymentService;
 
 
 
