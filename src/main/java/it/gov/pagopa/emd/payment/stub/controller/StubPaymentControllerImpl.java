@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -54,7 +57,15 @@ public class StubPaymentControllerImpl implements StubPaymentController {
                 .map(xml -> {
                     try {
                         PaymentInfo info = service.parseSoapResponse(xml);
-                        String html = service.generateHtmlResponse(info);
+                        String executionDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                        String htmlTemplate = service.readTemplateFromResources("payment-template.html");
+
+                        String html = htmlTemplate
+                                .replace("${amount}", info.getAmount())
+                                .replace("${noticeNumber}", noticeNumber)
+                                .replace("${fiscalCode}", fiscalCode)
+                                .replace("${executionDate}", executionDate);
+
                         return ResponseEntity.ok()
                                 .contentType(MediaType.TEXT_HTML)
                                 .body(html);

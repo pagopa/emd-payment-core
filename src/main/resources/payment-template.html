@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Riepilogo</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+        body {
+          margin: 0;
+          padding: 40px 0;
+          background-color: #e5e5ea;
+          font-family: 'Roboto', sans-serif;
+          display: flex;
+          justify-content: center;
+          align-items: flex-start;
+          height: 100vh;
+        }
+
+        .phone-frame {
+          background: #f2f2f7;
+          width: 390px;
+          height: 844px;
+          border-radius: 40px;
+          box-shadow: 0 0 20px rgba(0,0,0,0.2);
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+          position: relative;
+        }
+
+        .status-bar {
+          height: 44px;
+          background-color: #f2f2f7;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 16px;
+          font-size: 13px;
+          font-weight: 500;
+          position: relative;
+          z-index: 2;
+        }
+
+        .notch {
+          position: absolute;
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 210px;
+          height: 30px;
+          background: #000;
+          border-radius: 0 0 20px 20px;
+          z-index: 3;
+        }
+
+        .container {
+          flex: 1;
+          padding: 24px;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+        }
+
+        h1 {
+          text-align: center;
+          font-size: 16px;
+          font-weight: 500;
+          color: #333;
+          margin-bottom: 8px;
+        }
+
+        .amount-label {
+          text-align: center;
+          font-size: 13px;
+          color: #888;
+          margin-bottom: 4px;
+        }
+
+        .amount {
+          font-size: 30px;
+          font-weight: bold;
+          color: #000;
+          text-align: center;
+          margin-bottom: 24px;
+        }
+
+        .boxed {
+          background-color: #ffffff;
+          border-radius: 12px;
+          overflow: hidden;
+          margin-top: 20px;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .row-wrapper {
+          padding: 16px;
+          display: flex;
+          justify-content: space-between;
+          font-size: 15px;
+          color: #333;
+        }
+
+        .row-wrapper + .row-wrapper {
+          border-top: 1px solid #e5e5ea;
+        }
+
+        .button {
+          margin-top: 40px;
+          padding: 14px;
+          background-color: #007aff;
+          color: white;
+          font-size: 16px;
+          border: none;
+          border-radius: 10px;
+          width: 100%;
+          cursor: pointer;
+        }
+
+        #success {
+          display: none;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          height: 100%;
+          padding: 32px;
+          text-align: center;
+        }
+
+        .success-circle {
+          width: 90px;
+          height: 90px;
+          border-radius: 50%;
+          background-color: #007aff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 0 auto 24px auto;
+        }
+
+        .success-circle svg {
+          width: 40px;
+          height: 40px;
+          stroke: white;
+          stroke-width: 4;
+          fill: none;
+        }
+
+        .success-button {
+          background-color: #007aff;
+          color: white;
+          border: none;
+          border-radius: 10px;
+          padding: 12px 24px;
+          font-size: 16px;
+          cursor: pointer;
+          width: 100%;
+          margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+<div class="phone-frame">
+    <div class="status-bar">
+        <div>9:41</div>
+        <div>
+            <span>100%</span>
+            <svg width="18" height="12" viewBox="0 0 24 12" xmlns="http://www.w3.org/2000/svg" style="margin-left: 4px;">
+                <rect x="0.5" y="1" width="22" height="10" rx="2" ry="2" fill="none" stroke="black" stroke-width="1.5"/>
+                <rect x="2.5" y="3" width="18" height="6" rx="1" ry="1" fill="black"/>
+            </svg>
+        </div>
+        <div class="notch"></div>
+    </div>
+
+    <div id="main" class="container">
+        <div>
+            <h1>Riepilogo</h1>
+            <div class="amount-label">Importo</div>
+            <div class="amount">${amount} €</div>
+
+            <div class="boxed">
+                <div class="row-wrapper"><span>Codice Avviso</span><span>${noticeNumber}</span></div>
+                <div class="row-wrapper"><span>Cod. Fiscale Ente Creditore</span><span>${fiscalCode}</span></div>
+            </div>
+
+            <div class="boxed">
+                <div class="row-wrapper"><span>Tipologia bollettino</span><span>PagoPA</span></div>
+                <div class="row-wrapper"><span>Commissione PSP</span><span>1,99 €</span></div>
+                <div class="row-wrapper"><span>Data di esecuzione</span><span>${executionDate}</span></div>
+            </div>
+        </div>
+
+        <button id="confirmButton" class="button" onclick="mostraSuccess()">Conferma</button>
+    </div>
+
+    <div id="success" class="container">
+        <div class="success-circle">
+            <svg viewBox="0 0 24 24">
+                <polyline points="4 12 10 17 20 6" />
+            </svg>
+        </div>
+        <h2 style="margin-bottom: 16px;">Pagamento effettuato</h2>
+        <p style="font-size: 14px; color: #333;">L'Avviso di pagamento è stato eseguito e pagato correttamente.<br>
+            Per visualizzarne la ricevuta, fai riferimento alla tua lista movimenti in app.</p>
+        <button class="success-button">Torna alla home</button>
+    </div>
+</div>
+
+<script>
+    function mostraSuccess() {
+      document.getElementById("main").style.display = "none";
+      document.getElementById("success").style.display = "flex";
+    }
+</script>
+</body>
+</html>
