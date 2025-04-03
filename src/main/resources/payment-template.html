@@ -203,7 +203,7 @@
         <h2 style="margin-bottom: 16px;">Pagamento effettuato</h2>
         <p style="font-size: 14px; color: #333;">L'Avviso di pagamento è stato eseguito e pagato correttamente.<br>
             Per visualizzarne la ricevuta, fai riferimento alla tua lista movimenti in app.</p>
-        <button class="success-button">Torna alla home</button>
+        <button class="success-button" onclick="tornaAllaHome()">Torna alla home</button>
     </div>
 </div>
 
@@ -211,6 +211,13 @@
     function mostraSuccess() {
       document.getElementById("main").style.display = "none";
       document.getElementById("success").style.display = "flex";
+    }
+  
+    function tornaAllaHome() {
+      window.close();
+      setTimeout(() => {
+        alert("Puoi chiudere manualmente questa scheda.");
+      }, 500);
     }
 </script>
 </body>
