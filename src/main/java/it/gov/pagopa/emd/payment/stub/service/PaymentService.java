@@ -1,19 +1,18 @@
 package it.gov.pagopa.emd.payment.stub.service;
 
 import it.gov.pagopa.emd.payment.stub.model.PaymentInfo;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import reactor.core.publisher.Mono;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.StringReader;
-
-import org.xml.sax.InputSource;
-import reactor.core.publisher.Mono;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 @Service
 @Slf4j
@@ -77,122 +76,12 @@ public class PaymentService {
         return all.getLength() > 0 ? all.item(0).getTextContent() : "N/A";
     }
 
-    public String generateHtmlResponse(PaymentInfo info) {
-        return String.format("""
-        <!DOCTYPE html>
-        <html lang="it">
-        <head>
-          <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-          <title>TPP Platform</title>
-          <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
-          <style>
-            body {
-              font-family: "Roboto", sans-serif;
-              background-color: #f5f5f5;
-              margin: 0;
-              padding: 0;
-            }
-            .box {
-              max-width: 600px;
-              margin: 50px auto;
-              background: #fff;
-              padding: 30px;
-              border-radius: 8px;
-              box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            }
-            h1 {
-              text-align: center;
-              color: #333;
-            }
-            p {
-              font-size: 18px;
-              text-align: center;
-            }
-            button {
-              width: 100%%;
-              padding: 12px;
-              margin-top: 20px;
-              font-size: 16px;
-              background-color: #1976d2;
-              color: white;
-              border: none;
-              border-radius: 4px;
-              cursor: pointer;
-            }
-            .modal {
-              display: none;
-              position: fixed;
-              z-index: 1;
-              left: 0;
-              top: 0;
-              width: 100%%;
-              height: 100%%;
-              overflow: auto;
-              background-color: rgba(0, 0, 0, 0.4);
-            }
-            .modal-content {
-              position: relative;
-              background-color: #fff;
-              margin: 15%% auto;
-              padding: 20px;
-              border: 1px solid #888;
-              width: 80%%;
-              max-width: 400px;
-              text-align: center;
-              border-radius: 6px;
-              box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            }
-            .close-btn {
-              position: absolute;
-              top: 10px;
-              right: 15px;
-              font-size: 20px;
-              font-weight: bold;
-              color: #aaa;
-              cursor: pointer;
-            }
-            .close-btn:hover {
-              color: #000;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="box">
-            <h1>TPP PLATFORM</h1>
-            <p><strong>Importo:</strong> €%s</p>
-            <p><strong>Data di scadenza:</strong> %s</p>
-            <p><strong>Note di pagamento:</strong> %s</p>
-            <button onclick="handlePayment()">Paga</button>
-          </div>
-
-          <div id="myModal" class="modal">
-            <div class="modal-content">
-              <span class="close-btn" onclick="closeModal()">&times;</span>
-              <p id="modalText">Pagamento in corso...</p>
-            </div>
-          </div>
-
-          <script>
-            function handlePayment() {
-              var modal = document.getElementById("myModal");
-              var text = document.getElementById("modalText");
-              modal.style.display = "block";
-              text.innerText = "Pagamento in corso...";
-              setTimeout(() => {
-                text.innerText = "Pagamento completato!";
-                setTimeout(() => {
-                  modal.style.display = "none";
-                }, 2000);
-              }, 2000);
-            }
-
-            function closeModal() {
-              document.getElementById("myModal").style.display = "none";
-            }
-          </script>
-        </body>
-        </html>
-        """, info.getAmount(), info.getDueDate(), info.getPaymentNote());
+    public String readTemplateFromResources(String filename) {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(filename)) {
+            if (is == null) throw new FileNotFoundException("File non trovato: " + filename);
+            return new String(is.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new UncheckedIOException("Errore durante la lettura del template", e);
+        }
     }
 }
