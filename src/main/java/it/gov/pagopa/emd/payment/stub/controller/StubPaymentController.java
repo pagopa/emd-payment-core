@@ -22,6 +22,6 @@ public interface StubPaymentController {
     Mono<ResponseEntity<Void>> generateDeepLink(@Valid @RequestParam String retrievalId, @Valid @RequestParam String fiscalCode, @Valid @RequestParam String noticeNumber);
 
     @GetMapping("/payment")
-    Mono<ResponseEntity<Void>> generateDeepLink();
+    Mono<ResponseEntity<String>> createPayment(@Valid @RequestParam String fiscalCode, @Valid @RequestParam String noticeNumber);
 
 }

@@ -2,12 +2,18 @@ package it.gov.pagopa.emd.payment.stub.controller;
 
 import it.gov.pagopa.emd.payment.dto.RetrievalRequestDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
+import it.gov.pagopa.emd.payment.stub.model.PaymentInfo;
+import it.gov.pagopa.emd.payment.stub.service.PaymentService;
 import it.gov.pagopa.emd.payment.stub.service.StubPaymentServiceImpl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 
 @RestController
@@ -15,9 +21,11 @@ import reactor.core.publisher.Mono;
 public class StubPaymentControllerImpl implements StubPaymentController {
 
     private final StubPaymentServiceImpl stubPaymentCoreService;
+    private  final PaymentService service;
 
-    public StubPaymentControllerImpl(StubPaymentServiceImpl stubPaymentCoreService) {
+    public StubPaymentControllerImpl(StubPaymentServiceImpl stubPaymentCoreService, PaymentService service) {
         this.stubPaymentCoreService = stubPaymentCoreService;
+        this.service = service;
     }
 
     @Override
@@ -44,8 +52,27 @@ public class StubPaymentControllerImpl implements StubPaymentController {
     }
 
     @Override
-    public Mono<ResponseEntity<Void>> generateDeepLink() {
-        return null;
+    public Mono<ResponseEntity<String>> createPayment(String fiscalCode, String noticeNumber) {
+        return service.sendSoapRequest(fiscalCode, noticeNumber)
+                .map(xml -> {
+                    try {
+                        PaymentInfo info = service.parseSoapResponse(xml);
+                        String executionDate = LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                        String htmlTemplate = service.readTemplateFromResources("payment-template.html");
+
+                        String html = htmlTemplate
+                                .replace("${amount}", info.getAmount())
+                                .replace("${noticeNumber}", noticeNumber)
+                                .replace("${fiscalCode}", fiscalCode)
+                                .replace("${executionDate}", executionDate);
+
+                        return ResponseEntity.ok()
+                                .contentType(MediaType.TEXT_HTML)
+                                .body(html);
+                    } catch (Exception e) {
+                        return ResponseEntity.status(500).body("<h1>Errore durante il parsing della risposta SOAP</h1>");
+                    }
+                });
     }
 
 }
