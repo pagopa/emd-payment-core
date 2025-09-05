@@ -15,6 +15,7 @@ import it.gov.pagopa.emd.payment.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
@@ -32,7 +33,6 @@ public class StubPaymentServiceImpl implements StubPaymentService {
     private final PaymentAttemptRepository paymentAttemptRepository;
     private final TppConnectorImpl tppControllerImpl;
     private final ExceptionMap exceptionMap;
-    private static final String DEEP_LINK = "<deepLink>?fiscalCode=<payee fiscal code>&noticeNumber=<notice number>";
     private static final int TTL = 1;
     public StubPaymentServiceImpl(RetrievalRepository retrievalRepository,
                                   PaymentAttemptRepository paymentAttemptRepository,
@@ -139,10 +139,12 @@ public class StubPaymentServiceImpl implements StubPaymentService {
     }
 
     private String buildDeepLink(String deepLink, String fiscalCode, String noticeNumber){
-        return DEEP_LINK
-                .replace("<deepLink>",deepLink)
-                .replace("<payee fiscal code>",fiscalCode)
-                .replace("<notice number>",noticeNumber);
+        return UriComponentsBuilder
+                .fromUriString(deepLink)
+                .queryParam("fiscalCode", fiscalCode)
+                .queryParam("noticeNumber", noticeNumber)
+                .build(true)
+                .toUriString();
     }
 
 }
