@@ -39,6 +39,14 @@ public class PaymentServiceImpl implements PaymentService {
         this.exceptionMap = exceptionMap;
     }
 
+    /**
+     * Find the TPP information by fiscal code. Create a new Retrieval using tppId, tpp payment button and the retrival request,
+     * finally save on the database
+     * 
+     * @param entityId the fiscal code of the TPP
+     * @param retrievalRequestDTO retrieval object
+     * @return retrieval saved
+     */
     @Override
     public Mono<RetrievalResponseDTO> saveRetrieval(String entityId, RetrievalRequestDTO retrievalRequestDTO) {
         log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Save retrieval for entityId:{} and agent: {}",inputSanify(entityId),retrievalRequestDTO.getAgent());
@@ -52,6 +60,12 @@ public class PaymentServiceImpl implements PaymentService {
                 .doOnSuccess(retrievalResponseDTO -> log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for entityId:{} and agent: {}",inputSanify(retrievalResponseDTO.getRetrievalId()),inputSanify(entityId),retrievalRequestDTO.getAgent()));
     }
 
+    /**
+     * Get the retrival from the db by retrievalId and map it to the response dto
+     * 
+     * @param retrievalId to get
+     * @return retrieval found
+     */
     @Override
     public Mono<RetrievalResponseDTO> getRetrievalByRetrievalId(String retrievalId) {
         log.info("[EMD][PAYMENT][GET-RETRIEVAL] Get retrieval by retrievalId: {}",inputSanify(retrievalId));
@@ -61,6 +75,16 @@ public class PaymentServiceImpl implements PaymentService {
                 .map(this::createResponseByModel);
     }
 
+    /**
+     * Get the retrival from the db by retrievalId and the payment attempt by tppId, originId and fiscalCode.
+     * If the payment attempt is present update the attempt details with the new notice number and save, otherwise create a new payment attempt
+     * with the notice number and save it. Finally build the deep link with fiscal code and notice number and return it
+     * 
+     * @param retrievalId to get
+     * @param fiscalCode fiscal code of the TPP
+     * @param noticeNumber  
+     * @return generated deep link
+     */
     @Override
     public Mono<String> getRedirect(String retrievalId, String fiscalCode, String noticeNumber) {
         log.info("[EMD][PAYMENT][GET-REDIRECT] Get redirect for retrievalId: {}, fiscalCode: {} and noticeNumber: {}",inputSanify(retrievalId), Utils.createSHA256(fiscalCode),noticeNumber);
@@ -79,6 +103,12 @@ public class PaymentServiceImpl implements PaymentService {
                 );
     }
 
+    /**
+     * Retrive a list of payment attempt by tppId
+     * 
+     * @param tppId
+     * @return payment attempt list
+     */
     @Override
     public Mono<List<PaymentAttemptResponseDTO>> getAllPaymentAttemptsByTppId(String tppId){
         log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID] Get payments by tppId: {}",inputSanify(tppId));
@@ -89,6 +119,13 @@ public class PaymentServiceImpl implements PaymentService {
                 .doOnError(error -> log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID] Error {} to get Payment Attempts by tppId: {}",error.getMessage(),inputSanify(tppId)));
     }
 
+    /**
+     * Retrieve a list of payment attempt by tppId and fiscal code
+     * 
+     * @param tppId
+     * @param fiscalCode
+     * @return 
+     */
     @Override
     public Mono<List<PaymentAttemptResponseDTO>> getAllPaymentAttemptsByTppIdAndFiscalCode(String tppId, String fiscalCode){
         log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID-AND-FISCAL-CODE] Get payments by tppId: {} and fiscalCode: {}",inputSanify(tppId),Utils.createSHA256(fiscalCode));
