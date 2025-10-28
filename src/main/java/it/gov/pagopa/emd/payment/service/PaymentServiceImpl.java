@@ -20,6 +20,9 @@ import java.util.*;
 
 import static it.gov.pagopa.emd.payment.utils.Utils.inputSanify;
 
+/**
+ * Implementation of the {@link PaymentService} interface providing payment operations and retrieval management.
+ */
 @Slf4j
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -40,12 +43,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     /**
-     * Find the TPP information by fiscal code. Create a new Retrieval using tppId, tpp payment button and the retrival request,
-     * finally save on the database
-     * 
-     * @param entityId the fiscal code of the TPP
-     * @param retrievalRequestDTO retrieval object
-     * @return retrieval saved
+     * {@inheritDoc}
      */
     @Override
     public Mono<RetrievalResponseDTO> saveRetrieval(String entityId, RetrievalRequestDTO retrievalRequestDTO) {
@@ -54,6 +52,7 @@ public class PaymentServiceImpl implements PaymentService {
                 .switchIfEmpty(Mono.error(exceptionMap.throwException
                         (PaymentConstants.ExceptionName.TPP_NOT_FOUND, PaymentConstants.ExceptionMessage.TPP_NOT_FOUND)))
                 .flatMap(tppDTO ->
+                        //Crea un retrival con le info tipo payment button ecc e lo salva
                         retrievalRepository.save(createRetrievalByTppAndRequest(tppDTO, retrievalRequestDTO))
                                 .onErrorMap(error -> exceptionMap.throwException(PaymentConstants.ExceptionName.GENERIC_ERROR, PaymentConstants.ExceptionMessage.GENERIC_ERROR))
                                 .map(this::createResponseByRetrieval))
@@ -61,10 +60,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     /**
-     * Get the retrival from the db by retrievalId and map it to the response dto
-     * 
-     * @param retrievalId to get
-     * @return retrieval found
+     * {@inheritDoc}
      */
     @Override
     public Mono<RetrievalResponseDTO> getRetrievalByRetrievalId(String retrievalId) {
@@ -76,14 +72,11 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     /**
+     * {@inheritDoc}
+     * <p>
      * Get the retrival from the db by retrievalId and the payment attempt by tppId, originId and fiscalCode.
      * If the payment attempt is present update the attempt details with the new notice number and save, otherwise create a new payment attempt
-     * with the notice number and save it. Finally build the deep link with fiscal code and notice number and return it
-     * 
-     * @param retrievalId to get
-     * @param fiscalCode fiscal code of the TPP
-     * @param noticeNumber  
-     * @return generated deep link
+     * with the notice number and save it. Finally build the deep link with fiscal code and notice number and return it.
      */
     @Override
     public Mono<String> getRedirect(String retrievalId, String fiscalCode, String noticeNumber) {
@@ -104,10 +97,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     /**
-     * Retrive a list of payment attempt by tppId
-     * 
-     * @param tppId
-     * @return payment attempt list
+     * {@inheritDoc}
      */
     @Override
     public Mono<List<PaymentAttemptResponseDTO>> getAllPaymentAttemptsByTppId(String tppId){
@@ -120,11 +110,7 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     /**
-     * Retrieve a list of payment attempt by tppId and fiscal code
-     * 
-     * @param tppId
-     * @param fiscalCode
-     * @return 
+     * {@inheritDoc}
      */
     @Override
     public Mono<List<PaymentAttemptResponseDTO>> getAllPaymentAttemptsByTppIdAndFiscalCode(String tppId, String fiscalCode){
@@ -136,6 +122,12 @@ public class PaymentServiceImpl implements PaymentService {
                 .doOnError(error -> log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID-AND-FISCAL-CODE] Error {} to get Payment Attempts by tppId: {} and fiscalCode: {}",error.getMessage(),inputSanify(tppId),Utils.createSHA256(fiscalCode)));
     }
 
+    /**
+     * Converts a list of PaymentAttempt entities to PaymentAttemptResponseDTO objects.
+     * 
+     * @param paymentAttemptList list of PaymentAttempt entities to convert
+     * @return list of converted PaymentAttemptResponseDTO objects
+     */
     private List<PaymentAttemptResponseDTO> convertPaymentAttemptModelToDTO(List<PaymentAttempt> paymentAttemptList){
         List<PaymentAttemptResponseDTO> paymentAttemptResponseDTOList = new ArrayList<>();
         for(PaymentAttempt paymentAttempt : paymentAttemptList){
@@ -149,6 +141,12 @@ public class PaymentServiceImpl implements PaymentService {
         return paymentAttemptResponseDTOList;
     }
 
+    /**
+     * Converts a list of AttemptDetails entities to AttemptDetailsResponseDTO objects.
+     * 
+     * @param attemptDetails list of AttemptDetails entities to convert
+     * @return list of converted AttemptDetailsResponseDTO objects
+     */
     private List<AttemptDetailsResponseDTO> convertAttemptDetailsModelToDTO(List<AttemptDetails> attemptDetails){
         List<AttemptDetailsResponseDTO> attemptDetailsResponseDTOList = new ArrayList<>();
         for(AttemptDetails attemptDetail : attemptDetails){
@@ -163,7 +161,13 @@ public class PaymentServiceImpl implements PaymentService {
 
 
 
-
+    /**
+     * Adds new attempt details to an existing payment attempt.
+     *
+     * @param paymentAttempt the existing payment attempt to update
+     * @param noticeNumber the notice number for the new attempt
+     * @return the updated PaymentAttempt with new attempt details added
+     */
     private PaymentAttempt addNewAttemptDetails(PaymentAttempt paymentAttempt, String noticeNumber){
         AttemptDetails attemptDetails = new AttemptDetails();
         attemptDetails.setPaymentAttemptDate(Calendar.getInstance().getTime());
@@ -172,6 +176,14 @@ public class PaymentServiceImpl implements PaymentService {
         return paymentAttempt;
     }
 
+    /**
+     * Creates a new payment attempt with initial attempt details.
+     * 
+     * @param retrievalResponseDTO the retrieval response containing TPP and origin information
+     * @param fiscalCode the fiscal code
+     * @param noticeNumber the notice number for the first attempt
+     * @return new PaymentAttempt entity with initial attempt details
+     */
     private PaymentAttempt createNewPaymentAttempt(RetrievalResponseDTO retrievalResponseDTO, String fiscalCode, String noticeNumber){
         PaymentAttempt paymentAttempt = new PaymentAttempt();
         paymentAttempt.setFiscalCode(fiscalCode);
@@ -182,6 +194,13 @@ public class PaymentServiceImpl implements PaymentService {
         return paymentAttempt;
     }
 
+    /**
+     * Creates a Retrieval entity from TPP information and retrieval request.
+     * 
+     * @param tppDTO the TPP information including deep links and payment button configuration
+     * @param retrievalRequestDTO the retrieval request containing agent and origin information
+     * @return new Retrieval entity with configured properties and unique ID
+     */
     private Retrieval createRetrievalByTppAndRequest(TppDTO tppDTO, RetrievalRequestDTO retrievalRequestDTO){
         Retrieval retrieval = new Retrieval();
         HashMap<String, String> agentDeepLinks = tppDTO.getAgentDeepLinks();
@@ -202,12 +221,24 @@ public class PaymentServiceImpl implements PaymentService {
         return retrieval;
     }
 
+    /**
+     * Creates a minimal RetrievalResponseDTO from a Retrieval entity for save operations.
+     *
+     * @param retrieval the Retrieval entity to convert
+     * @return RetrievalResponseDTO containing only the retrieval ID
+     */
     private RetrievalResponseDTO createResponseByRetrieval(Retrieval retrieval){
         RetrievalResponseDTO retrievalResponseDTO = new RetrievalResponseDTO();
         retrievalResponseDTO.setRetrievalId(retrieval.getRetrievalId());
         return retrievalResponseDTO;
     }
 
+    /**
+     * Creates a complete RetrievalResponseDTO from a Retrieval entity.
+     * 
+     * @param retrieval the Retrieval entity to convert
+     * @return RetrievalResponseDTO containing all retrieval information
+     */
     private RetrievalResponseDTO createResponseByModel(Retrieval retrieval){
         RetrievalResponseDTO retrievalResponseDTO = new RetrievalResponseDTO();
         retrievalResponseDTO.setRetrievalId(retrieval.getRetrievalId());
@@ -218,6 +249,14 @@ public class PaymentServiceImpl implements PaymentService {
         return retrievalResponseDTO;
     }
 
+    /**
+     * Builds a complete deep link URL with fiscal code and notice number parameters.
+     *
+     * @param deepLink the base deep link URL
+     * @param fiscalCode the fiscal code to append as query parameter
+     * @param noticeNumber the notice number to append as query parameter
+     * @return complete deep link URL with query parameters
+     */
     private String buildDeepLink(String deepLink, String fiscalCode, String noticeNumber){
         return UriComponentsBuilder
                 .fromUriString(deepLink)

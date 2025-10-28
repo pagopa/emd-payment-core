@@ -10,56 +10,64 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-
+/**
+ * REST controller interface for managing payment-related operations.
+ * <p>
+ * Base Path: {@code /emd/payment}
+ */
 @RestController
 @RequestMapping("/emd/payment")
 public interface PaymentController {
 
   /**
-   * Save new Retrieval
+   * Creates a new retrieval token for the specified TPP.
    * 
    * @param entityId the fiscal code of the TPP
-   * @param retrievalRequestDTO retrieval object
-   * @return outcome of saving the retrieval
+   * @param retrievalRequestDTO the retrieval configuration object
+   * @return a {@link Mono} containing a {@link ResponseEntity} with the 
+   *         {@link RetrievalResponseDTO} representing the outcome of the token creation
    */
   @PostMapping("/retrievalTokens/{entityId}")
   Mono<ResponseEntity<RetrievalResponseDTO>> retrievalTokens(@Valid @PathVariable String entityId, @Valid @RequestBody RetrievalRequestDTO retrievalRequestDTO);
 
   /**
-   * Get a retrieval by retrievalId
+   * Get a retrieval by retrievalId.
    * 
-   * @param retrievalId to get
-   * @return outcome of getting retrieval
+   * @param retrievalId the unique identifier of the retrieval
+   * @return a {@link Mono} containing a {@link ResponseEntity} with the 
+   *         {@link RetrievalResponseDTO} if found
    */
   @GetMapping("/retrievalTokens/{retrievalId}")
   Mono<ResponseEntity<RetrievalResponseDTO>> getRetrieval(@Valid @PathVariable String retrievalId) ;
 
   /**
-   * Generate deep link by retrievalId, fiscalCode and noticeNumber
+   * Generate deep link by retrievalId, fiscalCode and noticeNumber.
    * 
-   * @param retrievalId to get 
+   * @param retrievalId the unique identifier of the retrieval
    * @param fiscalCode the fiscal code of the TPP
-   * @param noticeNumber
-   * @return outcome of generate deep link
+   * @param noticeNumber the notice number
+   * @return a {@link Mono} containing a {@link ResponseEntity} with void body.
    */
   @GetMapping("/token")
   Mono<ResponseEntity<Void>> generateDeepLink(@Valid @RequestParam String retrievalId, @Valid @RequestParam String fiscalCode, @Valid @RequestParam String noticeNumber);
 
   /**
-   * Retrive a list of payment attempt by tppId
+   * Retrieves all payment attempts associated with a specific TPP.
    * 
-   * @param tppId to get
-   * @return outcome of get all payment attempts
+   * @param tppId the unique identifier of the TPP
+   * @return a {@link Mono} containing a {@link ResponseEntity} with a list of 
+   *         {@link PaymentAttemptResponseDTO} objects representing all payment attempts
    */
   @GetMapping("/paymentAttempts/{tppId}")
   Mono<ResponseEntity<List<PaymentAttemptResponseDTO>>> getAllPaymentAttemptsByTppId(@Valid @PathVariable String tppId);
 
   /**
-   * Retrive a list of payment attempt by tppId and fiscal code
+   * Retrieves payment attempts filtered by TPP ID and fiscal code.
    * 
-   * @param tppId to get
-   * @param fiscalCode the fiscal code of the TPP
-   * @return outcome of get all payment attempts
+   * @param tppId tppId the unique identifier of the Third Party Provider
+   * @param fiscalCode the fiscal code
+   * @return a {@link Mono} containing a {@link ResponseEntity} with a list of 
+   *         {@link PaymentAttemptResponseDTO} objects
    */
   @GetMapping("/paymentAttempts/{tppId}/{fiscalCode}")
   Mono<ResponseEntity<List<PaymentAttemptResponseDTO>>> getAllAttemptDetailsByTppIdAndFiscalCode(@Valid @PathVariable String tppId, @Valid @PathVariable String fiscalCode);

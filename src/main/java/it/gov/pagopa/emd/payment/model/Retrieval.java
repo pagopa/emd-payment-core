@@ -8,7 +8,9 @@ import org.springframework.data.annotation.CreatedDate;
 
 import java.util.Date;
 
-
+/**
+ * Entity class representing a retrieval operation with creation timestamp.
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 @AllArgsConstructor

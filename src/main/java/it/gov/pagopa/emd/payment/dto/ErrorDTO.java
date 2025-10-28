@@ -5,6 +5,9 @@ import it.gov.pagopa.emd.payment.exception.ServiceExceptionPayload;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
+/**
+ * Data Transfer Object representing an error response.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

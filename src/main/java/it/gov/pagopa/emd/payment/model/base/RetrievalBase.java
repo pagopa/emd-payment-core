@@ -5,6 +5,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
+/**
+ * Base class containing common retrieval information.
+ */
 @Data
 @SuperBuilder
 @NoArgsConstructor

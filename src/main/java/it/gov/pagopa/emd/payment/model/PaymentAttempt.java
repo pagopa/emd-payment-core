@@ -11,7 +11,9 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
 
-
+/**
+ * MongoDB document entity representing a payment attempt record.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

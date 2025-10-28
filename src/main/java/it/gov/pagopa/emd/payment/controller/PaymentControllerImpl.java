@@ -12,7 +12,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-
+/**
+ * Implementation of the {@link PaymentController} interface 
+ */
 @Controller
 public class PaymentControllerImpl implements PaymentController {
 
@@ -22,20 +24,27 @@ public class PaymentControllerImpl implements PaymentController {
     this.paymentServiceImpl = paymentServiceImpl;
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Mono<ResponseEntity<RetrievalResponseDTO>> retrievalTokens(String entityId, RetrievalRequestDTO retrievalRequestDTO) {
     return paymentServiceImpl.saveRetrieval(entityId, retrievalRequestDTO)
             .map(ResponseEntity::ok);
   }
 
-
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Mono<ResponseEntity<RetrievalResponseDTO>> getRetrieval(String retrievalId) {
     return paymentServiceImpl.getRetrievalByRetrievalId(retrievalId)
             .map(ResponseEntity::ok);
   }
 
-
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Mono<ResponseEntity<Void>> generateDeepLink(String retrievalId, String fiscalCode, String noticeNumber){
     return paymentServiceImpl.getRedirect(retrievalId,fiscalCode,noticeNumber)
@@ -45,12 +54,18 @@ public class PaymentControllerImpl implements PaymentController {
             );
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Mono<ResponseEntity<List<PaymentAttemptResponseDTO>>> getAllPaymentAttemptsByTppId(String tppId){
     return paymentServiceImpl.getAllPaymentAttemptsByTppId(tppId)
            .map(ResponseEntity::ok);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Mono<ResponseEntity<List<PaymentAttemptResponseDTO>>> getAllAttemptDetailsByTppIdAndFiscalCode(String tppId, String fiscalCode){
     return paymentServiceImpl.getAllPaymentAttemptsByTppIdAndFiscalCode(tppId, fiscalCode)

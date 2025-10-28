@@ -25,6 +25,9 @@ import java.util.UUID;
 
 import static it.gov.pagopa.emd.payment.utils.Utils.inputSanify;
 
+/**
+ * Implementation of the {@link StubPaymentService} interface.
+ */
 @Slf4j
 @Service
 public class StubPaymentServiceImpl implements StubPaymentService {
@@ -44,6 +47,9 @@ public class StubPaymentServiceImpl implements StubPaymentService {
         this.exceptionMap = exceptionMap;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Mono<RetrievalResponseDTO> saveRetrieval(String entityId, RetrievalRequestDTO retrievalRequestDTO) {
         log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Save retrieval for entityId:{} and agent: {}",inputSanify(entityId),retrievalRequestDTO.getAgent());
@@ -57,6 +63,9 @@ public class StubPaymentServiceImpl implements StubPaymentService {
                 .doOnSuccess(retrievalResponseDTO -> log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for entityId:{} and agent: {}",inputSanify(retrievalResponseDTO.getRetrievalId()),inputSanify(entityId),retrievalRequestDTO.getAgent()));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Mono<RetrievalResponseDTO> getRetrievalByRetrievalId(String retrievalId) {
         log.info("[EMD][PAYMENT][GET-RETRIEVAL] Get retrieval by retrievalId: {}",inputSanify(retrievalId));
@@ -66,6 +75,9 @@ public class StubPaymentServiceImpl implements StubPaymentService {
                 .map(this::createResponseByModel);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Mono<String> getRedirect(String retrievalId, String fiscalCode, String noticeNumber) {
         log.info("[EMD][PAYMENT][GET-REDIRECT] Get redirect for retrievalId: {}, fiscalCode: {} and noticeNumber: {}",inputSanify(retrievalId), Utils.createSHA256(fiscalCode),noticeNumber);
@@ -84,6 +96,13 @@ public class StubPaymentServiceImpl implements StubPaymentService {
                 );
     }
 
+    /**
+     * Adds new attempt details to an existing payment attempt.
+     * 
+     * @param paymentAttempt the existing payment attempt to update
+     * @param noticeNumber the notice number for the new attempt
+     * @return the updated PaymentAttempt with new attempt details added
+     */
     private PaymentAttempt addNewAttemptDetails(PaymentAttempt paymentAttempt, String noticeNumber){
         AttemptDetails attemptDetails = new AttemptDetails();
         attemptDetails.setPaymentAttemptDate(Calendar.getInstance().getTime());
@@ -92,6 +111,14 @@ public class StubPaymentServiceImpl implements StubPaymentService {
         return paymentAttempt;
     }
 
+    /**
+     * Creates a new payment attempt with initial attempt details.
+     * 
+     * @param retrievalResponseDTO the retrieval response containing TPP and origin information
+     * @param fiscalCode the taxpayer's fiscal code
+     * @param noticeNumber the notice number for the first attempt
+     * @return new PaymentAttempt entity with initial attempt details
+     */
     private PaymentAttempt createNewPaymentAttempt(RetrievalResponseDTO retrievalResponseDTO, String fiscalCode, String noticeNumber){
         PaymentAttempt paymentAttempt = new PaymentAttempt();
         paymentAttempt.setFiscalCode(fiscalCode);
@@ -102,6 +129,13 @@ public class StubPaymentServiceImpl implements StubPaymentService {
         return paymentAttempt;
     }
 
+    /**
+     * Creates a Retrieval entity from TPP information and retrieval request.
+     * 
+     * @param tppDTO the TPP information including deep links and payment button configuration
+     * @param retrievalRequestDTO the retrieval request containing agent and origin information
+     * @return new Retrieval entity with configured properties and unique ID
+     */
     private Retrieval createRetrievalByTppAndRequest(TppDTO tppDTO, RetrievalRequestDTO retrievalRequestDTO){
         Retrieval retrieval = new Retrieval();
         HashMap<String, String> agentDeepLinks = tppDTO.getAgentDeepLinks();
@@ -122,12 +156,24 @@ public class StubPaymentServiceImpl implements StubPaymentService {
         return retrieval;
     }
 
+    /**
+     * Creates a minimal RetrievalResponseDTO from a Retrieval entity for save operations.
+     * 
+     * @param retrieval the Retrieval entity to convert
+     * @return RetrievalResponseDTO containing only the retrieval ID
+     */
     private RetrievalResponseDTO createResponseByRetrieval(Retrieval retrieval){
         RetrievalResponseDTO retrievalResponseDTO = new RetrievalResponseDTO();
         retrievalResponseDTO.setRetrievalId(retrieval.getRetrievalId());
         return retrievalResponseDTO;
     }
 
+    /**
+     * Creates a complete RetrievalResponseDTO from a Retrieval entity.
+     * 
+     * @param retrieval the Retrieval entity to convert
+     * @return RetrievalResponseDTO containing all retrieval information
+     */
     private RetrievalResponseDTO createResponseByModel(Retrieval retrieval){
         RetrievalResponseDTO retrievalResponseDTO = new RetrievalResponseDTO();
         retrievalResponseDTO.setRetrievalId(retrieval.getRetrievalId());
@@ -138,6 +184,14 @@ public class StubPaymentServiceImpl implements StubPaymentService {
         return retrievalResponseDTO;
     }
 
+    /**
+     * Builds a complete deep link URL with fiscal code and notice number parameters.
+     * 
+     * @param deepLink the base deep link URL
+     * @param fiscalCode the fiscal code to append as query parameter
+     * @param noticeNumber the notice number to append as query parameter
+     * @return complete deep link URL with query parameters
+     */
     private String buildDeepLink(String deepLink, String fiscalCode, String noticeNumber){
         return UriComponentsBuilder
                 .fromUriString(deepLink)

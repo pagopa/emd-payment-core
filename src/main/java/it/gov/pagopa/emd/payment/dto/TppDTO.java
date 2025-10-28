@@ -13,6 +13,9 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 
+/**
+ * Data Transfer Object representing a TPP entity.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

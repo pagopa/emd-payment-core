@@ -5,6 +5,9 @@ import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
+/**
+ * Reactive MongoDB repository interface for managing {@link Retrieval} entities.
+ */
 @Repository
 public interface RetrievalRepository extends ReactiveMongoRepository<Retrieval,String> {
 
