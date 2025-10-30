@@ -22,7 +22,7 @@ public interface PaymentController {
   /**
    * Creates a new retrieval token for the specified TPP.
    * 
-   * @param entityId the fiscal code of the TPP
+   * @param entityId identifier of the TPP
    * @param retrievalRequestDTO the retrieval configuration object
    * @return a {@link Mono} containing a {@link ResponseEntity} with the 
    *         {@link RetrievalResponseDTO} representing the outcome of the token creation

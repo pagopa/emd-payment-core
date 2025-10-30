@@ -12,7 +12,7 @@ public interface TppConnector {
     /**
      * Retrieves a TPP by its entity identifier.
      *
-     * @param entityId the fiscal code of the TPP to retrieve.
+     * @param entityId the identifier of the TPP to retrieve.
      *                This represents the unique identifier of the TPP entity.
      * @return a {@link Mono} that emits the {@link TppDTO} object containing the TPP
      *         information when found, or completes empty if no TPP exists with the
