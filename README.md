@@ -1,5 +1,5 @@
 # emd-payment-core
-Service that manages the ability to make payments via third-party Apps
+Service that manages communication between SEND and third-party Apps. It also manages the ability to make payments via third-party Apps
 
 The microservice is responsible for:
 - Registering a retrieval token by the user to access the digital notification
