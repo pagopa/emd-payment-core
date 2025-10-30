@@ -24,8 +24,14 @@ public class PaymentAttempt {
   @Id
   private ObjectId id;
 
+  /**
+   * Fiscal code or P.iva of TPP
+   */
   private String fiscalCode;
   private String tppId;
+  /**
+   * Unique numeric identifier (IUN) of the notification
+   */
   private String originId;
 
   private List<AttemptDetails> attemptDetails;
