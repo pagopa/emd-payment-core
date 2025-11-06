@@ -1282,6 +1282,13 @@
       "sha256": "75NN2sb0J1nXHDA6KERUSlbPOBszQ3FJlV09jJkr7F0="
     },
     {
+      "id": "org.testcontainers:testcontainers:jar:1.21.3",
+      "artifactId": "testcontainers",
+      "groupId": "org.testcontainers",
+      "version": "1.21.3",
+      "sha256": "75NN2sb0J1nXHDA6KERUSlbPOBszQ3FJlV09jJkr7F0="
+    },
+    {
       "id": "org.testcontainers:mongodb:jar:1.21.3",
       "artifactId": "mongodb",
       "groupId": "org.testcontainers",
