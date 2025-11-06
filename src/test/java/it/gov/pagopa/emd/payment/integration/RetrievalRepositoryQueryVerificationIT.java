@@ -54,7 +54,6 @@ public class RetrievalRepositoryQueryVerificationIT extends BaseIT {
         
         StepVerifier.create(
             mongoTemplate.save(testRetrieval, COLLECTION_NAME)
-                //.then(mongoTemplate.save(testConsent2, COLLECTION_NAME))
         ).expectNextCount(1).verifyComplete();
 
     }
@@ -63,7 +62,7 @@ public class RetrievalRepositoryQueryVerificationIT extends BaseIT {
     void testFindByFiscalCode() {
         log.info("=== EXECUTING findByFiscalCode ===");
 
-        StepVerifier.create(
+       StepVerifier.create(
                 repository.findByRetrievalId(TPP_RETRIEVAL_ID)
             )
             .assertNext(retrieval -> {
@@ -83,7 +82,7 @@ public class RetrievalRepositoryQueryVerificationIT extends BaseIT {
         StepVerifier.create(
                 repository.findByRetrievalId("wrong_retrieval_id")
             )
-            .verifyComplete();
+            .verifyComplete(); 
 
         log.info("=== TEST COMPLETED ===");
     }

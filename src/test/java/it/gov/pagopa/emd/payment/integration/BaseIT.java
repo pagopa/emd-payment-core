@@ -10,25 +10,30 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.testcontainers.containers.MongoDBContainer;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 /**
  * Base astratta per test di integrazione.
  * Utilizza:
- * - @Testcontainers e @Container per la gestione automatica dei container (avvio/stop).
+ * - @Testcontainers per la gestione automatica dei container (avvio/stop).
  * - @DynamicPropertySource per configurare Spring
  */
 @Testcontainers
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureWebTestClient
 abstract class BaseIT {
-
     private static final Logger log = LoggerFactory.getLogger(BaseIT.class);
-
-    @Container
-    protected static final MongoDBContainer mongo = new MongoDBContainer("mongo:8.0.15-noble");
+    
+    // Container statico condiviso tra tutti i test
+    protected static final MongoDBContainer mongo;
+    
+    static {
+        mongo = new MongoDBContainer("mongo:8.0.15-noble")
+            .withReuse(true); // Abilita il riutilizzo del container
+        mongo.start();
+    }
 
     @Autowired
     protected WebTestClient webTestClient;
