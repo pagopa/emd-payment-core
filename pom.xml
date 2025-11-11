@@ -12,7 +12,7 @@
 	<artifactId>emd-payment-core</artifactId>
 	<name>emd-payment-core</name>
 	<description>Payment Core Microservice</description>
-	<version>1.0.4</version>
+	<version>1.0.5-SNAPSHOT</version>
 
 	<properties>
 		<java.version>21</java.version>
