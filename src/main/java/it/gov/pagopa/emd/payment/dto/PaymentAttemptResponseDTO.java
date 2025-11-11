@@ -8,6 +8,9 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+/**
+ * Data Transfer Object representing the response for payment attempt.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

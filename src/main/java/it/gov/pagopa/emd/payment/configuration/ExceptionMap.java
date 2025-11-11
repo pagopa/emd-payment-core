@@ -12,12 +12,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * Configuration class that provides a centralized mapping of exception names to their corresponding
+ * ClientException instances for the payment module.
+ */
 @Configuration
 @Slf4j
 public class ExceptionMap {
 
+    /**
+     * Internal map that stores the association between exception names and their corresponding
+     * exception factory functions
+     */    
     private final Map<String, Function<String, ClientException>> exceptions = new HashMap<>();
 
+    /**
+     * Constructs a new ExceptionMap and initializes the internal exception mappings.
+     */
     public ExceptionMap() {
         exceptions.put(PaymentConstants.ExceptionName.TPP_NOT_FOUND, message ->
                 new ClientExceptionWithBody(
@@ -52,6 +63,13 @@ public class ExceptionMap {
         );
     }
 
+    /**
+     * Creates and returns a RuntimeException based on the provided exception key and message.
+     * 
+     * @param exceptionKey the key identifying the type of exception to create.
+     * @param message message the error message to be included in the exception
+     * @return a {@link RuntimeException} instance
+     */
     public RuntimeException throwException(String exceptionKey, String message) {
         if (exceptions.containsKey(exceptionKey)) {
             return exceptions.get(exceptionKey).apply(message);

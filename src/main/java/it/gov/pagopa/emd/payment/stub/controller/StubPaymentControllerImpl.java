@@ -15,7 +15,9 @@ import reactor.core.publisher.Mono;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-
+/**
+ * REST controller implementation for stub payment operations and retrieval management.
+ */
 @RestController
 @CrossOrigin(origins = "*")
 public class StubPaymentControllerImpl implements StubPaymentController {
@@ -28,20 +30,27 @@ public class StubPaymentControllerImpl implements StubPaymentController {
         this.service = service;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Mono<ResponseEntity<RetrievalResponseDTO>> retrievalTokens(String entityId, RetrievalRequestDTO retrievalRequestDTO) {
         return stubPaymentCoreService.saveRetrieval(entityId, retrievalRequestDTO)
                 .map(ResponseEntity::ok);
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Mono<ResponseEntity<RetrievalResponseDTO>> getRetrieval(String retrievalId) {
         return stubPaymentCoreService.getRetrievalByRetrievalId(retrievalId)
                 .map(ResponseEntity::ok);
     }
 
-
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Mono<ResponseEntity<Void>> generateDeepLink(String retrievalId, String fiscalCode, String noticeNumber){
         return stubPaymentCoreService.getRedirect(retrievalId,fiscalCode,noticeNumber)
@@ -51,6 +60,15 @@ public class StubPaymentControllerImpl implements StubPaymentController {
                 );
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Sends a SOAP request to simulate payment processing, parses
+     * the response to extract payment information, and generates an HTML response using
+     * a template. Returns HTML content with
+     * appropriate content type or an error page if processing fails.
+     * </p>
+     */
     @Override
     public Mono<ResponseEntity<String>> createPayment(String fiscalCode, String noticeNumber) {
         return service.sendSoapRequest(fiscalCode, noticeNumber)

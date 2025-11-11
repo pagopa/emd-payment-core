@@ -1,6 +1,13 @@
 package it.gov.pagopa.emd.payment.constant;
 
+/**
+ * Utility class that contains constant definitions for the payment module.
+ */
 public class PaymentConstants {
+
+    /**
+     * Contains constant definitions for exception codes.
+     */
     public static final class ExceptionCode {
         public static final String TPP_NOT_FOUND = "TPP_NOT_FOUND";
         public static final String RETRIEVAL_NOT_FOUND = "RETRIEVAL_NOT_FOUND";
@@ -11,6 +18,9 @@ public class PaymentConstants {
         private ExceptionCode() {}
     }
 
+    /**
+     * Contains constant definitions for exception messages.
+     */
     public static final class ExceptionMessage {
         public static final String TPP_NOT_FOUND = "TPP does not exist or is not active";
         public static final String RETRIEVAL_NOT_FOUND = "Retrieval does not exist or is not active";
@@ -22,6 +32,9 @@ public class PaymentConstants {
         private ExceptionMessage() {}
     }
 
+    /**
+     * Contains constant definitions for exception names used in exception mapping and handling.
+     */
     public static final class ExceptionName {
         public static final String TPP_NOT_FOUND = "TPP_NOT_FOUND";
         public static final String RETRIEVAL_NOT_FOUND = "RETRIEVAL_NOT_FOUND";
