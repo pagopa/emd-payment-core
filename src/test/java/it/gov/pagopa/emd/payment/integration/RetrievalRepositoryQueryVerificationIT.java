@@ -13,12 +13,10 @@ import it.gov.pagopa.emd.payment.repository.RetrievalRepository;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-
 /**
- * Integration test verifying MongoDB aggregation queries.
+ * Integration test verifying MongoDB queries for Retrieval repository.
  *
- * <p>Uses MongoDB driver debug logging to inspect generated pipelines.
- * Check console output for actual query structure.</p>
+ * <p>Tests payment retrieval operations by retrieval ID.</p>
  */
 @TestPropertySource(properties = {
     "logging.level.org.springframework.data.mongodb.core.ReactiveMongoTemplate=DEBUG",
@@ -35,32 +33,36 @@ public class RetrievalRepositoryQueryVerificationIT extends BaseIT {
     @Autowired 
     RetrievalRepository repository;
 
-
     @BeforeEach
     void setup() {
-        // Drop collection
+        // Clean up and insert test retrieval record
         StepVerifier.create(
             mongoTemplate.dropCollection(COLLECTION_NAME)
                 .onErrorResume(e -> Mono.empty())
         ).verifyComplete();
 
+        // Create retrieval record with payment UI components (deeplink, button)
         Retrieval testRetrieval = Retrieval.builder()
-            .retrievalId(TPP_RETRIEVAL_ID)
-            .deeplink("deeplink")
-            .paymentButton("paymentButton")
-            .originId("originId")
-            .tppId("tppId")
+            .retrievalId(TPP_RETRIEVAL_ID)  // Unique identifier for payment retrieval
+            .deeplink("deeplink")           // Mobile app deep link
+            .paymentButton("paymentButton") // Payment UI button configuration
+            .originId("originId")           // Original transaction ID
+            .tppId("tppId")                // TPP that created this retrieval
         .build();
         
         StepVerifier.create(
             mongoTemplate.save(testRetrieval, COLLECTION_NAME)
         ).expectNextCount(1).verifyComplete();
-
     }
 
+    /**
+     * Test Case: Successful retrieval lookup by ID
+     * Scenario: Find payment retrieval record using its unique ID
+     * Expected: Returns the matching retrieval with all payment UI data
+     */
     @Test
     void testFindByFiscalCode() {
-        log.info("=== EXECUTING findByFiscalCode ===");
+        log.info("=== EXECUTING findByRetrievalId ===");
 
        StepVerifier.create(
                 repository.findByRetrievalId(TPP_RETRIEVAL_ID)
@@ -68,16 +70,20 @@ public class RetrievalRepositoryQueryVerificationIT extends BaseIT {
             .assertNext(retrieval -> {
                 log.info("Found retrieval: {}", retrieval);
                 assert retrieval.getRetrievalId().equals(TPP_RETRIEVAL_ID);
-
             })
             .verifyComplete();
 
         log.info("=== TEST COMPLETED - CHECK LOGS ABOVE FOR QUERY DETAILS ===");
     }
 
+    /**
+     * Test Case: Handle non-existent retrieval ID
+     * Scenario: Query for retrieval that doesn't exist
+     * Expected: Returns empty result gracefully
+     */
     @Test
     void testFindByFiscalCodeNotFound() {
-        log.info("=== EXECUTING findByFiscalCode (not found) ===");
+        log.info("=== EXECUTING findByRetrievalId (not found) ===");
 
         StepVerifier.create(
                 repository.findByRetrievalId("wrong_retrieval_id")
@@ -86,5 +92,4 @@ public class RetrievalRepositoryQueryVerificationIT extends BaseIT {
 
         log.info("=== TEST COMPLETED ===");
     }
-
 }
