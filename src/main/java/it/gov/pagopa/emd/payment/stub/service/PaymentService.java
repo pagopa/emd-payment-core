@@ -14,6 +14,9 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Service class for handling payment operations through SOAP web services integration.
+ */
 @Service
 @Slf4j
 public class PaymentService {
@@ -24,6 +27,13 @@ public class PaymentService {
         this.webClient = builder.build();
     }
 
+    /**
+     * Creates a SOAP request XML
+     * 
+     * @param fiscalCode the fiscal code
+     * @param noticeNumber the notice number
+     * @return formatted SOAP XML request as a string
+     */
     public String createSoapRequest(String fiscalCode, String noticeNumber) {
         return String.format("""
         <?xml version="1.0" encoding="utf-8"?>
@@ -44,6 +54,14 @@ public class PaymentService {
         """, fiscalCode, noticeNumber);
     }
 
+    /**
+     * Sends a SOAP request to the PagoPA platform for payment notice verification.
+     * 
+     * @param fiscalCode the fiscal code
+     * @param noticeNumber the payment notice number
+     * @return Mono containing the SOAP response as a string
+     */
+     
     public Mono<String> sendSoapRequest(String fiscalCode, String noticeNumber) {
         String body = createSoapRequest(fiscalCode, noticeNumber);
 
@@ -58,6 +76,12 @@ public class PaymentService {
                 .doOnNext(response -> log.info("[SOAP RESPONSE] SOAP response: {} ",response));
     }
 
+    /**
+     * Parses a SOAP response XML to extract payment information.
+     * 
+     * @param xml the SOAP response XML string to parse
+     * @return PaymentInfo object containing extracted payment details
+     */
     public PaymentInfo parseSoapResponse(String xml) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);
@@ -71,11 +95,24 @@ public class PaymentService {
         return new PaymentInfo(amount, dueDate, paymentNote);
     }
 
+    /**
+     * Extracts text content from XML elements by tag name.
+     * 
+     * @param doc the XML document to search
+     * @param tagName the name of the XML tag to find
+     * @return text content of the first matching element or "N/A" if not found
+     */
     private String getTagContent(Document doc, String tagName) {
         NodeList all = doc.getElementsByTagName(tagName); // <-- rimosso namespace
         return all.getLength() > 0 ? all.item(0).getTextContent() : "N/A";
     }
 
+    /**
+     * Reads an HTML template file from the classpath resources.
+     * 
+     * @param filename the name of the template file to read from resources
+     * @return the template content as a UTF-8 string
+     */
     public String readTemplateFromResources(String filename) {
         try (InputStream is = getClass().getClassLoader().getResourceAsStream(filename)) {
             if (is == null) throw new FileNotFoundException("File non trovato: " + filename);

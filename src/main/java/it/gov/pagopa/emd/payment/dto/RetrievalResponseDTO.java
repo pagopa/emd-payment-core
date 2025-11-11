@@ -5,6 +5,9 @@ import it.gov.pagopa.emd.payment.model.base.RetrievalBase;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+/**
+ * Data Transfer Object representing the response for retrieval operations.
+ */
 @EqualsAndHashCode(callSuper = true)
 @Data
 @SuperBuilder

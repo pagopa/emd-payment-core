@@ -8,7 +8,9 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
-
+/**
+ * Entity class representing the details of a payment attempt.
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

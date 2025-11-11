@@ -1,5 +1,8 @@
 package it.gov.pagopa.emd.payment.stub.model;
 
+/**
+ * Data class representing payment information.
+ */
 public class PaymentInfo {
     private String amount;
     private String dueDate;
