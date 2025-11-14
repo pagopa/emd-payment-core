@@ -28,6 +28,7 @@ public class TppDTOFaker {
                 .agentDeepLinks(new HashMap<>() {{
                     put("agent", "link");
                 }})
+                .isPaymentEnabled(Boolean.TRUE)
                 .build();
     }
 

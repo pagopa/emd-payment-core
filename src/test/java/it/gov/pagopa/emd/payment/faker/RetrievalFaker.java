@@ -10,6 +10,7 @@ public class RetrievalFaker {
                 .deeplink("deepLink")
                 .paymentButton("paymentButton")
                 .originId("originId")
+                .isPaymentEnabled(Boolean.TRUE)
                 .build();
 
     }
