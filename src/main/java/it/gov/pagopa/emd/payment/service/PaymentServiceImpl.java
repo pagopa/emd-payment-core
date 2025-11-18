@@ -246,7 +246,7 @@ public class PaymentServiceImpl implements PaymentService {
         retrievalResponseDTO.setPaymentButton(retrieval.getPaymentButton());
         retrievalResponseDTO.setOriginId(retrieval.getOriginId());
         retrievalResponseDTO.setTppId(retrieval.getTppId());
-        retrievalResponseDTO.setIsPaymentEnabled(Boolean.TRUE);
+        retrievalResponseDTO.setIsPaymentEnabled(retrieval.getIsPaymentEnabled());
         return retrievalResponseDTO;
     }
 
