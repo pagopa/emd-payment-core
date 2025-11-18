@@ -148,7 +148,7 @@ public class StubPaymentServiceImpl implements StubPaymentService {
             throw exceptionMap.throwException(PaymentConstants.ExceptionName.AGENT_NOT_FOUND_IN_DEEP_LINKS, PaymentConstants.ExceptionMessage.AGENT_NOT_FOUND_IN_DEEP_LINKS);
         }
         retrieval.setDeeplink(agentDeepLinks.get(retrievalRequestDTO.getAgent()));
-        retrieval.setPaymentButton(tppDTO.getPaymentButton());
+        retrieval.setPspDenomination(tppDTO.getPspDenomination());
         retrieval.setOriginId(retrievalRequestDTO.getOriginId());
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MINUTE, TTL);
@@ -178,7 +178,7 @@ public class StubPaymentServiceImpl implements StubPaymentService {
         RetrievalResponseDTO retrievalResponseDTO = new RetrievalResponseDTO();
         retrievalResponseDTO.setRetrievalId(retrieval.getRetrievalId());
         retrievalResponseDTO.setDeeplink(retrieval.getDeeplink());
-        retrievalResponseDTO.setPaymentButton(retrieval.getPaymentButton());
+        retrievalResponseDTO.setPspDenomination(retrieval.getPspDenomination());
         retrievalResponseDTO.setOriginId(retrieval.getOriginId());
         retrievalResponseDTO.setTppId(retrieval.getTppId());
         return retrievalResponseDTO;
