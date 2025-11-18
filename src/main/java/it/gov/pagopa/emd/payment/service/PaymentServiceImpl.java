@@ -215,6 +215,7 @@ public class PaymentServiceImpl implements PaymentService {
         retrieval.setDeeplink(agentDeepLinks.get(retrievalRequestDTO.getAgent()));
         retrieval.setPaymentButton(tppDTO.getPaymentButton());
         retrieval.setOriginId(retrievalRequestDTO.getOriginId());
+        retrieval.setIsPaymentEnabled(tppDTO.getIsPaymentEnabled());
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MINUTE, TTL);
         retrieval.setCreatedAt(calendar.getTime());
