@@ -24,7 +24,7 @@ public class TppDTOFaker {
                 .contact(contact)
                 .lastUpdateDate(null)
                 .creationDate(null)
-                .paymentButton("#button")
+                .pspDenomination("#button")
                 .agentDeepLinks(new HashMap<>() {{
                     put("agent", "link");
                 }})

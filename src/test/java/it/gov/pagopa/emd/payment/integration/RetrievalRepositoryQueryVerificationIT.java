@@ -45,7 +45,7 @@ public class RetrievalRepositoryQueryVerificationIT extends BaseIT {
         Retrieval testRetrieval = Retrieval.builder()
             .retrievalId(TPP_RETRIEVAL_ID)  // Unique identifier for payment retrieval
             .deeplink("deeplink")           // Mobile app deep link
-            .paymentButton("paymentButton") // Payment UI button configuration
+            .pspDenomination("pspDenomination") // Payment UI button configuration
             .originId("originId")           // Original transaction ID
             .tppId("tppId")                // TPP that created this retrieval
         .build();

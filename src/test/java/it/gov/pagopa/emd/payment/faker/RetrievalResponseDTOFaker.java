@@ -8,7 +8,7 @@ public class RetrievalResponseDTOFaker {
         return RetrievalResponseDTO.builder()
                 .retrievalId("retrievalId")
                 .deeplink("deepLink")
-                .paymentButton("paymentButton")
+                .pspDenomination("pspDenomination")
                 .originId("originId")
                 .build();
 

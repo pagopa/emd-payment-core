@@ -8,7 +8,7 @@ public class RetrievalFaker {
         return Retrieval.builder()
                 .retrievalId("retrievalId")
                 .deeplink("deepLink")
-                .paymentButton("paymentButton")
+                .pspDenomination("pspDenomination")
                 .originId("originId")
                 .build();
 
