@@ -24,4 +24,5 @@ public class RetrievalBase {
    */
   private String originId;
   private String tppId;
+  private Boolean isPaymentEnabled;
 }

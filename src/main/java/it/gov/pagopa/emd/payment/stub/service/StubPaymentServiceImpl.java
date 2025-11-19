@@ -181,6 +181,7 @@ public class StubPaymentServiceImpl implements StubPaymentService {
         retrievalResponseDTO.setPspDenomination(retrieval.getPspDenomination());
         retrievalResponseDTO.setOriginId(retrieval.getOriginId());
         retrievalResponseDTO.setTppId(retrieval.getTppId());
+        retrievalResponseDTO.setIsPaymentEnabled(Boolean.TRUE);
         return retrievalResponseDTO;
     }
 

@@ -56,5 +56,8 @@ public class TppDTO {
 
     @NotNull(message = "Agent Deep Link must not be null")
     private HashMap<String, String> agentDeepLinks;
+
+    @NotNull(message = "IsPaymentEnabled must not be null")
+    private Boolean isPaymentEnabled;
 }
 

@@ -10,6 +10,7 @@ public class RetrievalFaker {
                 .deeplink("deepLink")
                 .pspDenomination("pspDenomination")
                 .originId("originId")
+                .isPaymentEnabled(Boolean.TRUE)
                 .build();
 
     }
