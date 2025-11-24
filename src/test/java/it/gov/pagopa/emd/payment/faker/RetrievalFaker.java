@@ -9,7 +9,7 @@ public class RetrievalFaker {
                 .retrievalId("retrievalId")
                 .deeplink("deepLink")
                 .pspDenomination("pspDenomination")
-                .paymentBUtton("copyOfpspDenomination")
+                .paymentButton("copyOfpspDenomination")
                 .originId("originId")
                 .isPaymentEnabled(Boolean.TRUE)
                 .build();

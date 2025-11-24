@@ -19,7 +19,7 @@ public class RetrievalBase {
    */
   private String deeplink;
   private String pspDenomination;
-  private String paymentBUtton;
+  private String paymentButton;
   /**
    * Unique Numeric Identifier (IUN) of the notification
    */
