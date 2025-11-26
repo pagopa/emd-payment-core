@@ -149,7 +149,9 @@ public class StubPaymentServiceImpl implements StubPaymentService {
         }
         retrieval.setDeeplink(agentDeepLinks.get(retrievalRequestDTO.getAgent()));
         retrieval.setPspDenomination(tppDTO.getPspDenomination());
+        retrieval.setPaymentButton(tppDTO.getPspDenomination());
         retrieval.setOriginId(retrievalRequestDTO.getOriginId());
+        retrieval.setIsPaymentEnabled(tppDTO.getIsPaymentEnabled());
         Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MINUTE, TTL);
         retrieval.setCreatedAt(calendar.getTime());
@@ -179,9 +181,10 @@ public class StubPaymentServiceImpl implements StubPaymentService {
         retrievalResponseDTO.setRetrievalId(retrieval.getRetrievalId());
         retrievalResponseDTO.setDeeplink(retrieval.getDeeplink());
         retrievalResponseDTO.setPspDenomination(retrieval.getPspDenomination());
+        retrievalResponseDTO.setPaymentButton(retrieval.getPaymentButton());
         retrievalResponseDTO.setOriginId(retrieval.getOriginId());
         retrievalResponseDTO.setTppId(retrieval.getTppId());
-        retrievalResponseDTO.setIsPaymentEnabled(Boolean.TRUE);
+        retrievalResponseDTO.setIsPaymentEnabled(retrieval.getIsPaymentEnabled());
         return retrievalResponseDTO;
     }
 

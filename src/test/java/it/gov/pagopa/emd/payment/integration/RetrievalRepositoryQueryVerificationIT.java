@@ -46,6 +46,7 @@ public class RetrievalRepositoryQueryVerificationIT extends BaseIT {
             .retrievalId(TPP_RETRIEVAL_ID)  // Unique identifier for payment retrieval
             .deeplink("deeplink")           // Mobile app deep link
             .pspDenomination("pspDenomination") // Payment UI button configuration
+            .paymentButton("copyOfpspDenomination") // Payment UI button configuration
             .originId("originId")           // Original transaction ID
             .tppId("tppId")                // TPP that created this retrieval
         .build();

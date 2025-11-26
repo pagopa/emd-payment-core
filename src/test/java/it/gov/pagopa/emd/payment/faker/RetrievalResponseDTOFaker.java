@@ -9,6 +9,7 @@ public class RetrievalResponseDTOFaker {
                 .retrievalId("retrievalId")
                 .deeplink("deepLink")
                 .pspDenomination("pspDenomination")
+                .paymentButton("copyOfpspDenomination")
                 .originId("originId")
                 .isPaymentEnabled(Boolean.TRUE)
                 .build();
