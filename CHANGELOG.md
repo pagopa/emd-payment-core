@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/pagopa/emd-payment-core/compare/v1.1.0...v1.2.0) (2025-11-26)
+
+
+### Features
+
+* [MMC-275] add payment button ([#43](https://github.com/pagopa/emd-payment-core/issues/43)) ([fd9831b](https://github.com/pagopa/emd-payment-core/commit/fd9831b4bbf173ba732907d1cdcb91edb6365782))
+
 ## [1.1.0](https://github.com/pagopa/emd-payment-core/compare/v1.0.4...v1.1.0) (2025-11-19)
 
 
