@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/pagopa/emd-payment-core/compare/v1.2.0...v1.2.1) (2025-11-28)
+
+
+### Bug Fixes
+
+* [MMC-239] remove payment button from retrieval payload ([#47](https://github.com/pagopa/emd-payment-core/issues/47)) ([d6ea6b4](https://github.com/pagopa/emd-payment-core/commit/d6ea6b4611b92165403996e90851d46d535c89d7))
+
 ## [1.2.0](https://github.com/pagopa/emd-payment-core/compare/v1.1.0...v1.2.0) (2025-11-26)
 
 
