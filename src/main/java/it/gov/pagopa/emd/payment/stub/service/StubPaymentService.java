@@ -32,8 +32,9 @@ public interface StubPaymentService {
    * @param retrievalId the unique retrieval identifier
    * @param fiscalCode the fiscal code
    * @param noticeNumber the payment notice number
+   * @param amount amount of the payment
    * @return {@link Mono} containing the generated redirect URL string
    */
-  Mono<String> getRedirect(String retrievalId, String fiscalCode, String noticeNumber);
+  Mono<String> getRedirect(String retrievalId, String fiscalCode, String noticeNumber, String amount);
 
 }

@@ -52,8 +52,8 @@ public class StubPaymentControllerImpl implements StubPaymentController {
      * {@inheritDoc}
      */
     @Override
-    public Mono<ResponseEntity<Void>> generateDeepLink(String retrievalId, String fiscalCode, String noticeNumber){
-        return stubPaymentCoreService.getRedirect(retrievalId,fiscalCode,noticeNumber)
+    public Mono<ResponseEntity<Void>> generateDeepLink(String retrievalId, String fiscalCode, String noticeNumber, String amount){
+        return stubPaymentCoreService.getRedirect(retrievalId,fiscalCode,noticeNumber, amount)
                 .map(deepLink ->ResponseEntity.status(HttpStatus.FOUND)
                         .header("Location", deepLink)
                         .build()

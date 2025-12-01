@@ -79,7 +79,7 @@ public class StubPaymentServiceImpl implements StubPaymentService {
      * {@inheritDoc}
      */
     @Override
-    public Mono<String> getRedirect(String retrievalId, String fiscalCode, String noticeNumber) {
+    public Mono<String> getRedirect(String retrievalId, String fiscalCode, String noticeNumber, String amount) {
         log.info("[EMD][PAYMENT][GET-REDIRECT] Get redirect for retrievalId: {}, fiscalCode: {} and noticeNumber: {}",inputSanify(retrievalId), Utils.createSHA256(fiscalCode),noticeNumber);
         return getRetrievalByRetrievalId(retrievalId)
                 .flatMap(retrievalResponseDTO ->
@@ -88,7 +88,7 @@ public class StubPaymentServiceImpl implements StubPaymentService {
                                         paymentAttemptRepository.save(addNewAttemptDetails(paymentAttempt,noticeNumber))
                                 )
                                 .switchIfEmpty(Mono.defer(() ->
-                                        paymentAttemptRepository.save(createNewPaymentAttempt(retrievalResponseDTO, fiscalCode, noticeNumber))
+                                        paymentAttemptRepository.save(createNewPaymentAttempt(retrievalResponseDTO, fiscalCode, noticeNumber, amount))
                                 ))
                                 .map(paymentAttempt ->
                                         buildDeepLink(retrievalResponseDTO.getDeeplink(), fiscalCode, noticeNumber)
@@ -117,13 +117,15 @@ public class StubPaymentServiceImpl implements StubPaymentService {
      * @param retrievalResponseDTO the retrieval response containing TPP and origin information
      * @param fiscalCode the taxpayer's fiscal code
      * @param noticeNumber the notice number for the first attempt
+     * @param amount amount of the payment
      * @return new PaymentAttempt entity with initial attempt details
      */
-    private PaymentAttempt createNewPaymentAttempt(RetrievalResponseDTO retrievalResponseDTO, String fiscalCode, String noticeNumber){
+    private PaymentAttempt createNewPaymentAttempt(RetrievalResponseDTO retrievalResponseDTO, String fiscalCode, String noticeNumber, String amount){
         PaymentAttempt paymentAttempt = new PaymentAttempt();
         paymentAttempt.setFiscalCode(fiscalCode);
         paymentAttempt.setTppId(retrievalResponseDTO.getTppId());
         paymentAttempt.setOriginId(retrievalResponseDTO.getOriginId());
+        paymentAttempt.setAmount(amount);
         paymentAttempt.setAttemptDetails(new ArrayList<>());
         addNewAttemptDetails(paymentAttempt, noticeNumber);
         return paymentAttempt;
