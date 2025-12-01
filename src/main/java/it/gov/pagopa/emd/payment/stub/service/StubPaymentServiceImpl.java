@@ -91,7 +91,7 @@ public class StubPaymentServiceImpl implements StubPaymentService {
                                         paymentAttemptRepository.save(createNewPaymentAttempt(retrievalResponseDTO, fiscalCode, noticeNumber, amount))
                                 ))
                                 .map(paymentAttempt ->
-                                        buildDeepLink(retrievalResponseDTO.getDeeplink(), fiscalCode, noticeNumber)
+                                        buildDeepLink(retrievalResponseDTO.getDeeplink(), fiscalCode, noticeNumber, amount)
                                 )
                 );
     }
@@ -194,13 +194,15 @@ public class StubPaymentServiceImpl implements StubPaymentService {
      * @param deepLink the base deep link URL
      * @param fiscalCode the fiscal code to append as query parameter
      * @param noticeNumber the notice number to append as query parameter
+     * @param amount amount of the payment
      * @return complete deep link URL with query parameters
      */
-    private String buildDeepLink(String deepLink, String fiscalCode, String noticeNumber){
+    private String buildDeepLink(String deepLink, String fiscalCode, String noticeNumber, String amount){
         return UriComponentsBuilder
                 .fromUriString(deepLink)
                 .queryParam("fiscalCode", fiscalCode)
                 .queryParam("noticeNumber", noticeNumber)
+                .queryParam("amount", amount)
                 .build(true)
                 .toUriString();
     }
