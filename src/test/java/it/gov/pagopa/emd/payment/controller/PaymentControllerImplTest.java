@@ -64,10 +64,10 @@ class PaymentControllerImplTest {
 
     @Test
     void testGenerateDeepLink() {
-        Mockito.when(paymentServiceImpl.getRedirect("retrievalId","fiscalCode","noticeNumber")).thenReturn(Mono.just("string"));
+        Mockito.when(paymentServiceImpl.getRedirect("retrievalId","fiscalCode","noticeNumber", "amount")).thenReturn(Mono.just("string"));
 
         webTestClient.get()
-                .uri("/emd/payment/token?retrievalId={retrievalId}&fiscalCode={fiscalCode}&noticeNumber={noticeNumber}","retrievalId","fiscalCode","noticeNumber")
+                .uri("/emd/payment/token?retrievalId={retrievalId}&fiscalCode={fiscalCode}&noticeNumber={noticeNumber}&amount={amount}","retrievalId","fiscalCode","noticeNumber","amount")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isFound()

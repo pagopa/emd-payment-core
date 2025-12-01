@@ -65,8 +65,8 @@ class PaymentServiceImplTest {
         when(paymentAttemptRepository.findByTppIdAndOriginIdAndFiscalCode(RETRIEVAL.getTppId(),RETRIEVAL.getOriginId(),"fiscalCode")).thenReturn(Mono.just(PAYMENT_ATTEMPT));
         when(paymentAttemptRepository.save(any())).thenReturn(Mono.just(PAYMENT_ATTEMPT));
 
-        StepVerifier.create(paymentServiceImpl.getRedirect("retrievalId","fiscalCode","noticeNumber"))
-                .expectNext("deepLink?fiscalCode=fiscalCode&noticeNumber=noticeNumber")
+        StepVerifier.create(paymentServiceImpl.getRedirect("retrievalId","fiscalCode","noticeNumber","amount"))
+                .expectNext("deepLink?fiscalCode=fiscalCode&noticeNumber=noticeNumber&amount=amount")
                 .verifyComplete();
     }
 
@@ -76,8 +76,8 @@ class PaymentServiceImplTest {
         when(paymentAttemptRepository.findByTppIdAndOriginIdAndFiscalCode(RETRIEVAL.getTppId(),RETRIEVAL.getOriginId(),"fiscalCode")).thenReturn(Mono.empty());
         when(paymentAttemptRepository.save(any())).thenReturn(Mono.just(new PaymentAttempt()));
 
-        StepVerifier.create(paymentServiceImpl.getRedirect("retrievalId","fiscalCode","noticeNumber"))
-                .expectNext("deepLink?fiscalCode=fiscalCode&noticeNumber=noticeNumber")
+        StepVerifier.create(paymentServiceImpl.getRedirect("retrievalId","fiscalCode","noticeNumber","amount"))
+                .expectNext("deepLink?fiscalCode=fiscalCode&noticeNumber=noticeNumber&amount=amount")
                 .verifyComplete();
     }
 

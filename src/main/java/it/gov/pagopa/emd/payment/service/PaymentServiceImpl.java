@@ -79,7 +79,7 @@ public class PaymentServiceImpl implements PaymentService {
      * with the notice number and save it. Finally build the deep link with fiscal code and notice number and return it.
      */
     @Override
-    public Mono<String> getRedirect(String retrievalId, String fiscalCode, String noticeNumber) {
+    public Mono<String> getRedirect(String retrievalId, String fiscalCode, String noticeNumber, String amount) {
         log.info("[EMD][PAYMENT][GET-REDIRECT] Get redirect for retrievalId: {}, fiscalCode: {} and noticeNumber: {}",inputSanify(retrievalId), Utils.createSHA256(fiscalCode),noticeNumber);
         return getRetrievalByRetrievalId(retrievalId)
                 .flatMap(retrievalResponseDTO ->
@@ -88,10 +88,10 @@ public class PaymentServiceImpl implements PaymentService {
                                         paymentAttemptRepository.save(addNewAttemptDetails(paymentAttempt,noticeNumber))
                                 )
                                 .switchIfEmpty(Mono.defer(() ->
-                                        paymentAttemptRepository.save(createNewPaymentAttempt(retrievalResponseDTO, fiscalCode, noticeNumber))
+                                        paymentAttemptRepository.save(createNewPaymentAttempt(retrievalResponseDTO, fiscalCode, noticeNumber, amount))
                                 ))
                                 .map(paymentAttempt ->
-                                        buildDeepLink(retrievalResponseDTO.getDeeplink(), fiscalCode, noticeNumber)
+                                        buildDeepLink(retrievalResponseDTO.getDeeplink(), fiscalCode, noticeNumber, amount)
                                 )
                 );
     }
@@ -182,13 +182,15 @@ public class PaymentServiceImpl implements PaymentService {
      * @param retrievalResponseDTO the retrieval response containing TPP and origin information
      * @param fiscalCode the fiscal code
      * @param noticeNumber the notice number for the first attempt
+     * @param amount amount of the payment
      * @return new PaymentAttempt entity with initial attempt details
      */
-    private PaymentAttempt createNewPaymentAttempt(RetrievalResponseDTO retrievalResponseDTO, String fiscalCode, String noticeNumber){
+    private PaymentAttempt createNewPaymentAttempt(RetrievalResponseDTO retrievalResponseDTO, String fiscalCode, String noticeNumber, String amount){
         PaymentAttempt paymentAttempt = new PaymentAttempt();
         paymentAttempt.setFiscalCode(fiscalCode);
         paymentAttempt.setTppId(retrievalResponseDTO.getTppId());
         paymentAttempt.setOriginId(retrievalResponseDTO.getOriginId());
+        paymentAttempt.setAmount(amount);
         paymentAttempt.setAttemptDetails(new ArrayList<>());
         addNewAttemptDetails(paymentAttempt, noticeNumber);
         return paymentAttempt;
@@ -257,13 +259,15 @@ public class PaymentServiceImpl implements PaymentService {
      * @param deepLink the base deep link URL
      * @param fiscalCode the fiscal code to append as query parameter
      * @param noticeNumber the notice number to append as query parameter
+     * @param amount amount of the payment
      * @return complete deep link URL with query parameters
      */
-    private String buildDeepLink(String deepLink, String fiscalCode, String noticeNumber){
+    private String buildDeepLink(String deepLink, String fiscalCode, String noticeNumber,String amount){
         return UriComponentsBuilder
                 .fromUriString(deepLink)
                 .queryParam("fiscalCode", fiscalCode)
                 .queryParam("noticeNumber", noticeNumber)
+                .queryParam("amount", amount)
                 .build(true)
                 .toUriString();
 

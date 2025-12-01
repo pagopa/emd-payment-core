@@ -33,6 +33,7 @@ public class PaymentAttempt {
    * Unique numeric identifier (IUN) of the notification
    */
   private String originId;
+  private String amount;
 
   private List<AttemptDetails> attemptDetails;
 
