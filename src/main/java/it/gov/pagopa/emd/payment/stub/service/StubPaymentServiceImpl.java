@@ -80,7 +80,8 @@ public class StubPaymentServiceImpl implements StubPaymentService {
      */
     @Override
     public Mono<String> getRedirect(String retrievalId, String fiscalCode, String noticeNumber, String amount) {
-        log.info("[EMD][PAYMENT][GET-REDIRECT] Get redirect for retrievalId: {}, fiscalCode: {} and noticeNumber: {}",inputSanify(retrievalId), Utils.createSHA256(fiscalCode),noticeNumber);
+        log.info("[EMD][PAYMENT][GET-REDIRECT] Get redirect for retrievalId: {}, fiscalCode: {}, noticeNumber: {} and amount:{}",inputSanify(retrievalId), Utils.createSHA256(fiscalCode),noticeNumber, amount);
+
         return getRetrievalByRetrievalId(retrievalId)
                 .flatMap(retrievalResponseDTO ->
                         paymentAttemptRepository.findByTppIdAndOriginIdAndFiscalCode(retrievalResponseDTO.getTppId(), retrievalResponseDTO.getOriginId(), fiscalCode)
