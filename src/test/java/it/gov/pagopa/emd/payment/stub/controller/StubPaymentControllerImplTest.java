@@ -74,5 +74,17 @@ class StubPaymentControllerImplTest {
                 .expectHeader().exists("Location");
     }
 
+  @Test
+  void testGenerateDeepLinkWithoutAmount() {
+    Mockito.when(paymentServiceImpl.getRedirect("retrievalId","fiscalCode","noticeNumber",null)).thenReturn(Mono.just("string"));
+
+    webTestClient.get()
+        .uri("/stub/emd/payment/token?retrievalId={retrievalId}&fiscalCode={fiscalCode}&noticeNumber={noticeNumber}","retrievalId","fiscalCode","noticeNumber")
+        .accept(MediaType.APPLICATION_JSON)
+        .exchange()
+        .expectStatus().isFound()
+        .expectHeader().exists("Location");
+  }
+
 }
 

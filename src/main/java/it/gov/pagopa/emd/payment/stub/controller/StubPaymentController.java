@@ -39,11 +39,12 @@ public interface StubPaymentController {
      * @param retrievalId the unique identifier of the retrieval
      * @param fiscalCode the fiscal code
      * @param noticeNumber the payment notice number
-     * @param amount amount of the payment
+     * @param amount (optional) amount of the payment
      * @return {@link Mono} containing ResponseEntity with redirect information
      */
     @GetMapping("/token")
-    Mono<ResponseEntity<Void>> generateDeepLink(@Valid @RequestParam String retrievalId, @Valid @RequestParam String fiscalCode, @Valid @RequestParam String noticeNumber, @Valid @RequestParam String amount);
+    Mono<ResponseEntity<Void>> generateDeepLink(@Valid @RequestParam String retrievalId, @Valid @RequestParam String fiscalCode,
+        @Valid @RequestParam String noticeNumber, @RequestParam(required = false) String amount);
 
     /**
      * Creates a payment for testing purposes.
