@@ -64,8 +64,8 @@ class StubPaymentServiceImplTest {
         when(paymentAttemptRepository.findByTppIdAndOriginIdAndFiscalCode(RETRIEVAL.getTppId(),RETRIEVAL.getOriginId(),"fiscalCode")).thenReturn(Mono.just(PAYMENT_ATTEMPT));
         when(paymentAttemptRepository.save(any())).thenReturn(Mono.just(PAYMENT_ATTEMPT));
 
-        StepVerifier.create(stubPaymentService.getRedirect("retrievalId","fiscalCode","noticeNumber"))
-                .expectNext("deepLink?fiscalCode=fiscalCode&noticeNumber=noticeNumber")
+        StepVerifier.create(stubPaymentService.getRedirect("retrievalId","fiscalCode","noticeNumber","amount"))
+                .expectNext("deepLink?fiscalCode=fiscalCode&noticeNumber=noticeNumber&amount=amount")
                 .verifyComplete();
     }
 
@@ -75,8 +75,8 @@ class StubPaymentServiceImplTest {
         when(paymentAttemptRepository.findByTppIdAndOriginIdAndFiscalCode(RETRIEVAL.getTppId(),RETRIEVAL.getOriginId(),"fiscalCode")).thenReturn(Mono.empty());
         when(paymentAttemptRepository.save(any())).thenReturn(Mono.just(new PaymentAttempt()));
 
-        StepVerifier.create(stubPaymentService.getRedirect("retrievalId","fiscalCode","noticeNumber"))
-                .expectNext("deepLink?fiscalCode=fiscalCode&noticeNumber=noticeNumber")
+        StepVerifier.create(stubPaymentService.getRedirect("retrievalId","fiscalCode","noticeNumber","amount"))
+                .expectNext("deepLink?fiscalCode=fiscalCode&noticeNumber=noticeNumber&amount=amount")
                 .verifyComplete();
     }
 }

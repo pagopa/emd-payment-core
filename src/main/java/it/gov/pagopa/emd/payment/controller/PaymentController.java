@@ -49,7 +49,7 @@ public interface PaymentController {
    * @return a {@link Mono} containing a {@link ResponseEntity} with void body.
    */
   @GetMapping("/token")
-  Mono<ResponseEntity<Void>> generateDeepLink(@Valid @RequestParam String retrievalId, @Valid @RequestParam String fiscalCode, @Valid @RequestParam String noticeNumber);
+  Mono<ResponseEntity<Void>> generateDeepLink(@Valid @RequestParam String retrievalId, @Valid @RequestParam String fiscalCode, @Valid @RequestParam String noticeNumber, @Valid @RequestParam String amount);
 
   /**
    * Retrieves all payment attempts associated with a specific TPP.
