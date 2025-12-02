@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/pagopa/emd-payment-core/compare/v1.3.0...v1.3.1) (2025-12-02)
+
+
+### Bug Fixes
+
+* [MMC-280] set amount as optional ([#53](https://github.com/pagopa/emd-payment-core/issues/53)) ([9c0a1a4](https://github.com/pagopa/emd-payment-core/commit/9c0a1a4286b6d56aa293caaa0cc1e090fd31e404))
+
 ## [1.3.0](https://github.com/pagopa/emd-payment-core/compare/v1.2.1...v1.3.0) (2025-12-02)
 
 
