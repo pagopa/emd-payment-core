@@ -3,9 +3,11 @@ package it.gov.pagopa.emd.payment.stub.service;
 import it.gov.pagopa.emd.payment.configuration.ExceptionMap;
 import it.gov.pagopa.emd.payment.connector.TppConnectorImpl;
 import it.gov.pagopa.emd.payment.constant.PaymentConstants;
+import it.gov.pagopa.emd.payment.dto.AgentDeepLink;
 import it.gov.pagopa.emd.payment.dto.RetrievalRequestDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
 import it.gov.pagopa.emd.payment.dto.TppDTO;
+import it.gov.pagopa.emd.payment.dto.VersionDetails;
 import it.gov.pagopa.emd.payment.model.AttemptDetails;
 import it.gov.pagopa.emd.payment.model.PaymentAttempt;
 import it.gov.pagopa.emd.payment.model.Retrieval;
@@ -51,13 +53,13 @@ public class StubPaymentServiceImpl implements StubPaymentService {
      * {@inheritDoc}
      */
     @Override
-    public Mono<RetrievalResponseDTO> saveRetrieval(String entityId, RetrievalRequestDTO retrievalRequestDTO) {
+    public Mono<RetrievalResponseDTO> saveRetrieval(String entityId, String linkVersion, RetrievalRequestDTO retrievalRequestDTO) {
         log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Save retrieval for entityId:{} and agent: {}",inputSanify(entityId),retrievalRequestDTO.getAgent());
         return tppControllerImpl.getTppByEntityId(entityId)
                 .switchIfEmpty(Mono.error(exceptionMap.throwException
                         (PaymentConstants.ExceptionName.TPP_NOT_FOUND, PaymentConstants.ExceptionMessage.TPP_NOT_FOUND)))
                 .flatMap(tppDTO ->
-                        retrievalRepository.save(createRetrievalByTppAndRequest(tppDTO, retrievalRequestDTO))
+                        retrievalRepository.save(createRetrievalByTppAndRequest(tppDTO, retrievalRequestDTO, linkVersion))
                                 .onErrorMap(error -> exceptionMap.throwException(PaymentConstants.ExceptionName.GENERIC_ERROR, PaymentConstants.ExceptionMessage.GENERIC_ERROR))
                                 .map(this::createResponseByRetrieval))
                 .doOnSuccess(retrievalResponseDTO -> log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for entityId:{} and agent: {}",inputSanify(retrievalResponseDTO.getRetrievalId()),inputSanify(entityId),retrievalRequestDTO.getAgent()));
@@ -139,9 +141,9 @@ public class StubPaymentServiceImpl implements StubPaymentService {
      * @param retrievalRequestDTO the retrieval request containing agent and origin information
      * @return new Retrieval entity with configured properties and unique ID
      */
-    private Retrieval createRetrievalByTppAndRequest(TppDTO tppDTO, RetrievalRequestDTO retrievalRequestDTO){
+    private Retrieval createRetrievalByTppAndRequest(TppDTO tppDTO, RetrievalRequestDTO retrievalRequestDTO, String linkVersion){
         Retrieval retrieval = new Retrieval();
-        HashMap<String, String> agentDeepLinks = tppDTO.getAgentDeepLinks();
+        HashMap<String, AgentDeepLink> agentDeepLinks = tppDTO.getAgentDeepLinks();
         retrieval.setRetrievalId(String.format("%s-%d", UUID.randomUUID(), System.currentTimeMillis()));
         retrieval.setTppId(tppDTO.getTppId());
         if(ObjectUtils.isEmpty(agentDeepLinks)){
@@ -150,7 +152,18 @@ public class StubPaymentServiceImpl implements StubPaymentService {
         if(!agentDeepLinks.containsKey(retrievalRequestDTO.getAgent())){
             throw exceptionMap.throwException(PaymentConstants.ExceptionName.AGENT_NOT_FOUND_IN_DEEP_LINKS, PaymentConstants.ExceptionMessage.AGENT_NOT_FOUND_IN_DEEP_LINKS);
         }
-        retrieval.setDeeplink(agentDeepLinks.get(retrievalRequestDTO.getAgent()));
+
+        String deepLink;
+        AgentDeepLink agentDeepLinkModel = agentDeepLinks.get(retrievalRequestDTO.getAgent());
+        HashMap<String, VersionDetails> versionMap = agentDeepLinkModel.getVersions();
+        if(versionMap != null && versionMap.containsKey(linkVersion)){
+            deepLink = versionMap.get(linkVersion).getLink();
+        }
+        else{
+            deepLink = agentDeepLinkModel.getFallBackLink();
+        }
+        
+        retrieval.setDeeplink(deepLink);
         retrieval.setPspDenomination(tppDTO.getPspDenomination());
         retrieval.setOriginId(retrievalRequestDTO.getOriginId());
         retrieval.setIsPaymentEnabled(tppDTO.getIsPaymentEnabled());
