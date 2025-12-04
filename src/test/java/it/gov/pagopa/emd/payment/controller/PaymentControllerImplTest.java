@@ -31,10 +31,10 @@ class PaymentControllerImplTest {
 
     @Test
     void testRetrievalTokens() {
-        Mockito.when(paymentServiceImpl.saveRetrieval("tppId", RETRIEVAL_REQUEST_DTO)).thenReturn(Mono.just(RETRIEVAL_RESPONSE_DTO));
+        Mockito.when(paymentServiceImpl.saveRetrieval("tppId","1.0.0", RETRIEVAL_REQUEST_DTO)).thenReturn(Mono.just(RETRIEVAL_RESPONSE_DTO));
 
         webTestClient.post()
-                .uri("/emd/payment/retrievalTokens/{tppId}","tppId")
+                .uri("/emd/payment/retrievalTokens/{tppId}?linkVersion=1.0.0","tppId")
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(RETRIEVAL_REQUEST_DTO)

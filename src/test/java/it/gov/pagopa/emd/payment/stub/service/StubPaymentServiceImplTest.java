@@ -46,7 +46,7 @@ class StubPaymentServiceImplTest {
         RetrievalResponseDTO retrievalResponseDTO = new RetrievalResponseDTO();
         retrievalResponseDTO.setRetrievalId("retrievalId");
 
-        StepVerifier.create(stubPaymentService.saveRetrieval("tppId",RETRIEVAL_REQUEST_DTO)).expectNext(retrievalResponseDTO)
+        StepVerifier.create(stubPaymentService.saveRetrieval("tppId","1.0.0", RETRIEVAL_REQUEST_DTO)).expectNext(retrievalResponseDTO)
                 .verifyComplete();
     }
 

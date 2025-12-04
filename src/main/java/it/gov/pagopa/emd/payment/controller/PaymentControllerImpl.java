@@ -28,8 +28,8 @@ public class PaymentControllerImpl implements PaymentController {
    * {@inheritDoc}
    */
   @Override
-  public Mono<ResponseEntity<RetrievalResponseDTO>> retrievalTokens(String entityId, RetrievalRequestDTO retrievalRequestDTO) {
-    return paymentServiceImpl.saveRetrieval(entityId, retrievalRequestDTO)
+  public Mono<ResponseEntity<RetrievalResponseDTO>> retrievalTokens(String entityId, String linkVersion, RetrievalRequestDTO retrievalRequestDTO) {
+    return paymentServiceImpl.saveRetrieval(entityId, linkVersion, retrievalRequestDTO)
             .map(ResponseEntity::ok);
   }
 

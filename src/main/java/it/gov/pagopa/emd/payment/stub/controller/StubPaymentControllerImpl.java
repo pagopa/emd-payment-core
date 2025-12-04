@@ -34,8 +34,8 @@ public class StubPaymentControllerImpl implements StubPaymentController {
      * {@inheritDoc}
      */
     @Override
-    public Mono<ResponseEntity<RetrievalResponseDTO>> retrievalTokens(String entityId, RetrievalRequestDTO retrievalRequestDTO) {
-        return stubPaymentCoreService.saveRetrieval(entityId, retrievalRequestDTO)
+    public Mono<ResponseEntity<RetrievalResponseDTO>> retrievalTokens(String entityId, String linkVersion, RetrievalRequestDTO retrievalRequestDTO) {
+        return stubPaymentCoreService.saveRetrieval(entityId, linkVersion, retrievalRequestDTO)
                 .map(ResponseEntity::ok);
     }
 

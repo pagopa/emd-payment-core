@@ -23,12 +23,13 @@ public interface PaymentController {
    * Creates a new retrieval token for the specified TPP.
    * 
    * @param entityId identifier of the TPP
+   * @param linkVersion version of the link, if null default link version is used
    * @param retrievalRequestDTO the retrieval configuration object
    * @return a {@link Mono} containing a {@link ResponseEntity} with the 
    *         {@link RetrievalResponseDTO} representing the outcome of the token creation
    */
   @PostMapping("/retrievalTokens/{entityId}")
-  Mono<ResponseEntity<RetrievalResponseDTO>> retrievalTokens(@Valid @PathVariable String entityId, @Valid @RequestBody RetrievalRequestDTO retrievalRequestDTO);
+  Mono<ResponseEntity<RetrievalResponseDTO>> retrievalTokens(@Valid @PathVariable String entityId, @RequestParam String linkVersion, @Valid @RequestBody RetrievalRequestDTO retrievalRequestDTO);
 
   /**
    * Get a retrieval by retrievalId.

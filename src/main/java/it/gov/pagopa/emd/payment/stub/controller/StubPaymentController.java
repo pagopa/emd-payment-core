@@ -22,7 +22,7 @@ public interface StubPaymentController {
      * @return {@link Mono} containing ResponseEntity with the created RetrievalResponseDTO
      */
     @PostMapping("/retrievalTokens/{entityId}")
-    Mono<ResponseEntity<RetrievalResponseDTO>> retrievalTokens(@Valid @PathVariable String entityId, @Valid @RequestBody RetrievalRequestDTO retrievalRequestDTO);
+    Mono<ResponseEntity<RetrievalResponseDTO>> retrievalTokens(@Valid @PathVariable String entityId, @RequestParam String linkVersion, @Valid @RequestBody RetrievalRequestDTO retrievalRequestDTO);
 
     /**
      * Retrieves an existing retrieval token by its unique identifier.
