@@ -1,7 +1,7 @@
 package it.gov.pagopa.emd.payment.faker;
 
 
-import it.gov.pagopa.emd.payment.dto.AgentDeepLink;
+import it.gov.pagopa.emd.payment.dto.AgentLink;
 import it.gov.pagopa.emd.payment.dto.Contact;
 import it.gov.pagopa.emd.payment.dto.TppDTO;
 import it.gov.pagopa.emd.payment.dto.VersionDetails;
@@ -14,7 +14,7 @@ public class TppDTOFaker {
 
         Contact contact = new Contact("name","number", "email");
         VersionDetails versionDetails = new VersionDetails("1.0.0");
-        AgentDeepLink agentDeepLink = new AgentDeepLink("ios", new HashMap<>() {{
+        AgentLink agentLink = new AgentLink("ios", new HashMap<>() {{
             put("v1", versionDetails);
         }});
 
@@ -32,7 +32,10 @@ public class TppDTOFaker {
                 .creationDate(null)
                 .pspDenomination("#button")
                 .agentDeepLinks(new HashMap<>() {{
-                    put("agent", agentDeepLink);
+                    put("agent", "link");
+                }})
+                .agentLinks(new HashMap<>() {{
+                    put("agent", agentLink);
                 }})
                 .isPaymentEnabled(Boolean.TRUE)
                 .build();

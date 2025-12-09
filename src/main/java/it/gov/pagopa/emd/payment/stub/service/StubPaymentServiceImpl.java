@@ -3,7 +3,7 @@ package it.gov.pagopa.emd.payment.stub.service;
 import it.gov.pagopa.emd.payment.configuration.ExceptionMap;
 import it.gov.pagopa.emd.payment.connector.TppConnectorImpl;
 import it.gov.pagopa.emd.payment.constant.PaymentConstants;
-import it.gov.pagopa.emd.payment.dto.AgentDeepLink;
+import it.gov.pagopa.emd.payment.dto.AgentLink;
 import it.gov.pagopa.emd.payment.dto.RetrievalRequestDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
 import it.gov.pagopa.emd.payment.dto.TppDTO;
@@ -143,27 +143,29 @@ public class StubPaymentServiceImpl implements StubPaymentService {
      */
     private Retrieval createRetrievalByTppAndRequest(TppDTO tppDTO, RetrievalRequestDTO retrievalRequestDTO, String linkVersion){
         Retrieval retrieval = new Retrieval();
-        HashMap<String, AgentDeepLink> agentDeepLinks = tppDTO.getAgentDeepLinks();
+        HashMap<String, String> agentDeepLinks = tppDTO.getAgentDeepLinks();
+        HashMap<String, AgentLink> agentLinks = tppDTO.getAgentLinks();
         retrieval.setRetrievalId(String.format("%s-%d", UUID.randomUUID(), System.currentTimeMillis()));
         retrieval.setTppId(tppDTO.getTppId());
-        if(ObjectUtils.isEmpty(agentDeepLinks)){
+        
+        if(ObjectUtils.isEmpty(agentDeepLinks) && ObjectUtils.isEmpty(agentLinks)){
             throw exceptionMap.throwException(PaymentConstants.ExceptionName.AGENT_DEEP_LINKS_EMPTY, PaymentConstants.ExceptionMessage.AGENT_DEEP_LINKS_EMPTY);
         }
-        if(!agentDeepLinks.containsKey(retrievalRequestDTO.getAgent())){
+        if(!agentDeepLinks.containsKey(retrievalRequestDTO.getAgent()) && !agentLinks.containsKey(retrievalRequestDTO.getAgent())){
             throw exceptionMap.throwException(PaymentConstants.ExceptionName.AGENT_NOT_FOUND_IN_DEEP_LINKS, PaymentConstants.ExceptionMessage.AGENT_NOT_FOUND_IN_DEEP_LINKS);
         }
 
-        String deepLink;
-        AgentDeepLink agentDeepLinkModel = agentDeepLinks.get(retrievalRequestDTO.getAgent());
-        HashMap<String, VersionDetails> versionMap = agentDeepLinkModel.getVersions();
+        String deepLinkV2;
+        AgentLink agentLinkModel = agentLinks.get(retrievalRequestDTO.getAgent());
+        HashMap<String, VersionDetails> versionMap = agentLinkModel.getVersions();
         if(versionMap != null && versionMap.containsKey(linkVersion)){
-            deepLink = versionMap.get(linkVersion).getLink();
+            deepLinkV2 = versionMap.get(linkVersion).getLink();
         }
         else{
-            deepLink = agentDeepLinkModel.getFallBackLink();
+            deepLinkV2 = agentLinkModel.getFallBackLink();
         }
-        
-        retrieval.setDeeplink(deepLink);
+        retrieval.setDeeplink(agentDeepLinks.get(retrievalRequestDTO.getAgent()));
+        retrieval.setDeeplinkV2(deepLinkV2);
         retrieval.setPspDenomination(tppDTO.getPspDenomination());
         retrieval.setOriginId(retrievalRequestDTO.getOriginId());
         retrieval.setIsPaymentEnabled(tppDTO.getIsPaymentEnabled());
