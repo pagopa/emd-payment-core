@@ -3,9 +3,11 @@ package it.gov.pagopa.emd.payment.stub.service;
 import it.gov.pagopa.emd.payment.configuration.ExceptionMap;
 import it.gov.pagopa.emd.payment.connector.TppConnectorImpl;
 import it.gov.pagopa.emd.payment.constant.PaymentConstants;
+import it.gov.pagopa.emd.payment.dto.AgentLink;
 import it.gov.pagopa.emd.payment.dto.RetrievalRequestDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
 import it.gov.pagopa.emd.payment.dto.TppDTO;
+import it.gov.pagopa.emd.payment.dto.VersionDetails;
 import it.gov.pagopa.emd.payment.model.AttemptDetails;
 import it.gov.pagopa.emd.payment.model.PaymentAttempt;
 import it.gov.pagopa.emd.payment.model.Retrieval;
@@ -52,7 +54,7 @@ public class StubPaymentServiceImpl implements StubPaymentService {
      */
     @Override
     public Mono<RetrievalResponseDTO> saveRetrieval(String entityId, RetrievalRequestDTO retrievalRequestDTO) {
-        log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Save retrieval for entityId:{} and agent: {}",inputSanify(entityId),retrievalRequestDTO.getAgent());
+        log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Save retrieval for entityId:{} and agent: {} and linkVersion:{}",inputSanify(entityId),retrievalRequestDTO.getAgent(), retrievalRequestDTO.getLinkVersion());
         return tppControllerImpl.getTppByEntityId(entityId)
                 .switchIfEmpty(Mono.error(exceptionMap.throwException
                         (PaymentConstants.ExceptionName.TPP_NOT_FOUND, PaymentConstants.ExceptionMessage.TPP_NOT_FOUND)))
@@ -141,16 +143,27 @@ public class StubPaymentServiceImpl implements StubPaymentService {
      */
     private Retrieval createRetrievalByTppAndRequest(TppDTO tppDTO, RetrievalRequestDTO retrievalRequestDTO){
         Retrieval retrieval = new Retrieval();
-        HashMap<String, String> agentDeepLinks = tppDTO.getAgentDeepLinks();
+        HashMap<String, AgentLink> agentLinks = tppDTO.getAgentLinks();
         retrieval.setRetrievalId(String.format("%s-%d", UUID.randomUUID(), System.currentTimeMillis()));
         retrieval.setTppId(tppDTO.getTppId());
-        if(ObjectUtils.isEmpty(agentDeepLinks)){
+        
+        if(ObjectUtils.isEmpty(agentLinks)){
             throw exceptionMap.throwException(PaymentConstants.ExceptionName.AGENT_DEEP_LINKS_EMPTY, PaymentConstants.ExceptionMessage.AGENT_DEEP_LINKS_EMPTY);
         }
-        if(!agentDeepLinks.containsKey(retrievalRequestDTO.getAgent())){
+        if(!agentLinks.containsKey(retrievalRequestDTO.getAgent())){
             throw exceptionMap.throwException(PaymentConstants.ExceptionName.AGENT_NOT_FOUND_IN_DEEP_LINKS, PaymentConstants.ExceptionMessage.AGENT_NOT_FOUND_IN_DEEP_LINKS);
         }
-        retrieval.setDeeplink(agentDeepLinks.get(retrievalRequestDTO.getAgent()));
+
+        String deepLink;
+        AgentLink agentLinkModel = agentLinks.get(retrievalRequestDTO.getAgent());
+        HashMap<String, VersionDetails> versionMap = agentLinkModel.getVersions();
+        if(versionMap != null && versionMap.containsKey(retrievalRequestDTO.getLinkVersion())){
+            deepLink = versionMap.get(retrievalRequestDTO.getLinkVersion()).getLink();
+        }
+        else{
+            deepLink = agentLinkModel.getFallBackLink();
+        }
+        retrieval.setDeeplink(deepLink);
         retrieval.setPspDenomination(tppDTO.getPspDenomination());
         retrieval.setOriginId(retrievalRequestDTO.getOriginId());
         retrieval.setIsPaymentEnabled(tppDTO.getIsPaymentEnabled());

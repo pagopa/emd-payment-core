@@ -54,8 +54,8 @@ public class TppDTO {
     @NotNull(message = "pspDenomination must not be null")
     private String pspDenomination;
 
-    @NotNull(message = "Agent Deep Link must not be null")
-    private HashMap<String, String> agentDeepLinks;
+    @NotNull(message = "Agent Link must not be null")
+    private HashMap<String, AgentLink> agentLinks;
 
     @NotNull(message = "IsPaymentEnabled must not be null")
     private Boolean isPaymentEnabled;

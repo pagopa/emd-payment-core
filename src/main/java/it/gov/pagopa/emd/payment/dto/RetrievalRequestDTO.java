@@ -21,4 +21,5 @@ public class RetrievalRequestDTO {
     private String agent;
     @NotNull
     private String originId;
+    private String linkVersion;
 }
