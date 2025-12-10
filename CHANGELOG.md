@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0](https://github.com/pagopa/emd-payment-core/compare/v1.3.1...v1.4.0) (2025-12-10)
+
+
+### Features
+
+* [MMC-279] update agentDeepLinks structure ([#56](https://github.com/pagopa/emd-payment-core/issues/56)) ([2adf2ad](https://github.com/pagopa/emd-payment-core/commit/2adf2ade7eacacef3a584d7cfc8079bad2ada284))
+
 ## [1.3.1](https://github.com/pagopa/emd-payment-core/compare/v1.3.0...v1.3.1) (2025-12-02)
 
 
