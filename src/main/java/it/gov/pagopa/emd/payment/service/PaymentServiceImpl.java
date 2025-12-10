@@ -205,29 +205,27 @@ public class PaymentServiceImpl implements PaymentService {
      */
     private Retrieval createRetrievalByTppAndRequest(TppDTO tppDTO, RetrievalRequestDTO retrievalRequestDTO, String linkVersion){
         Retrieval retrieval = new Retrieval();
-        HashMap<String, String> agentDeepLinks = tppDTO.getAgentDeepLinks();
-        HashMap<String, AgentLink> agentLinks = tppDTO.getAgentLinks();
+        HashMap<String, AgentLink> agentLinkMap = tppDTO.getAgentLinks();
         retrieval.setRetrievalId(String.format("%s-%d", UUID.randomUUID(), System.currentTimeMillis()));
         retrieval.setTppId(tppDTO.getTppId());
 
-        if(ObjectUtils.isEmpty(agentDeepLinks) && ObjectUtils.isEmpty(agentLinks)){
+        if(ObjectUtils.isEmpty(agentLinkMap)){
             throw exceptionMap.throwException(PaymentConstants.ExceptionName.AGENT_DEEP_LINKS_EMPTY, PaymentConstants.ExceptionMessage.AGENT_DEEP_LINKS_EMPTY);
         }
-        if(!agentDeepLinks.containsKey(retrievalRequestDTO.getAgent()) && !agentLinks.containsKey(retrievalRequestDTO.getAgent())){
+        if(!agentLinkMap.containsKey(retrievalRequestDTO.getAgent())){
             throw exceptionMap.throwException(PaymentConstants.ExceptionName.AGENT_NOT_FOUND_IN_DEEP_LINKS, PaymentConstants.ExceptionMessage.AGENT_NOT_FOUND_IN_DEEP_LINKS);
         }
         
-        String deepLinkV2;
-        AgentLink agentLinkModel = agentLinks.get(retrievalRequestDTO.getAgent());
-        HashMap<String, VersionDetails> versionMap = agentLinkModel.getVersions();
+        String deepLink;
+        AgentLink agentLink = agentLinkMap.get(retrievalRequestDTO.getAgent());
+        HashMap<String, VersionDetails> versionMap = agentLink.getVersions();
         if(versionMap != null && versionMap.containsKey(linkVersion)){
-            deepLinkV2 = versionMap.get(linkVersion).getLink();
+            deepLink = versionMap.get(linkVersion).getLink();
         }
         else{
-            deepLinkV2 = agentLinkModel.getFallBackLink();
+            deepLink = agentLink.getFallBackLink();
         }
-        retrieval.setDeeplink(agentDeepLinks.get(retrievalRequestDTO.getAgent()));
-        retrieval.setDeeplinkV2(deepLinkV2);
+        retrieval.setDeeplink(deepLink);
         
         retrieval.setPspDenomination(tppDTO.getPspDenomination());
         retrieval.setOriginId(retrievalRequestDTO.getOriginId());

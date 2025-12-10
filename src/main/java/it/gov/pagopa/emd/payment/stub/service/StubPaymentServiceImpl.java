@@ -143,29 +143,27 @@ public class StubPaymentServiceImpl implements StubPaymentService {
      */
     private Retrieval createRetrievalByTppAndRequest(TppDTO tppDTO, RetrievalRequestDTO retrievalRequestDTO, String linkVersion){
         Retrieval retrieval = new Retrieval();
-        HashMap<String, String> agentDeepLinks = tppDTO.getAgentDeepLinks();
         HashMap<String, AgentLink> agentLinks = tppDTO.getAgentLinks();
         retrieval.setRetrievalId(String.format("%s-%d", UUID.randomUUID(), System.currentTimeMillis()));
         retrieval.setTppId(tppDTO.getTppId());
         
-        if(ObjectUtils.isEmpty(agentDeepLinks) && ObjectUtils.isEmpty(agentLinks)){
+        if(ObjectUtils.isEmpty(agentLinks)){
             throw exceptionMap.throwException(PaymentConstants.ExceptionName.AGENT_DEEP_LINKS_EMPTY, PaymentConstants.ExceptionMessage.AGENT_DEEP_LINKS_EMPTY);
         }
-        if(!agentDeepLinks.containsKey(retrievalRequestDTO.getAgent()) && !agentLinks.containsKey(retrievalRequestDTO.getAgent())){
+        if(!agentLinks.containsKey(retrievalRequestDTO.getAgent())){
             throw exceptionMap.throwException(PaymentConstants.ExceptionName.AGENT_NOT_FOUND_IN_DEEP_LINKS, PaymentConstants.ExceptionMessage.AGENT_NOT_FOUND_IN_DEEP_LINKS);
         }
 
-        String deepLinkV2;
+        String deepLink;
         AgentLink agentLinkModel = agentLinks.get(retrievalRequestDTO.getAgent());
         HashMap<String, VersionDetails> versionMap = agentLinkModel.getVersions();
         if(versionMap != null && versionMap.containsKey(linkVersion)){
-            deepLinkV2 = versionMap.get(linkVersion).getLink();
+            deepLink = versionMap.get(linkVersion).getLink();
         }
         else{
-            deepLinkV2 = agentLinkModel.getFallBackLink();
+            deepLink = agentLinkModel.getFallBackLink();
         }
-        retrieval.setDeeplink(agentDeepLinks.get(retrievalRequestDTO.getAgent()));
-        retrieval.setDeeplinkV2(deepLinkV2);
+        retrieval.setDeeplink(deepLink);
         retrieval.setPspDenomination(tppDTO.getPspDenomination());
         retrieval.setOriginId(retrievalRequestDTO.getOriginId());
         retrieval.setIsPaymentEnabled(tppDTO.getIsPaymentEnabled());

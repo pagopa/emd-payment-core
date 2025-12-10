@@ -18,7 +18,6 @@ public class RetrievalBase {
    * Notification address link
    */
   private String deeplink;
-  private String deeplinkV2;
   private String pspDenomination;
   /**
    * Unique Numeric Identifier (IUN) of the notification
