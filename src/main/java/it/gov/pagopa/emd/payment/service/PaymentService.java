@@ -16,11 +16,10 @@ public interface PaymentService {
    * Creates and saves a new retrieval record for a TTP.
    * 
    * @param tppId the TPP identifier
-   * @param linkVersion version of the link, if null default link version is used
    * @param retrievalRequestDTO the retrieval request containing origin and agent information
    * @return {@link Mono} containing the created {@link RetrievalResponseDTO} with retrieval details
    */
-  Mono<RetrievalResponseDTO> saveRetrieval(String tppId, String linkVersion, RetrievalRequestDTO retrievalRequestDTO);
+  Mono<RetrievalResponseDTO> saveRetrieval(String tppId, RetrievalRequestDTO retrievalRequestDTO);
 
   /**
    * Retrieves an existing retrieval record by its unique identifier.

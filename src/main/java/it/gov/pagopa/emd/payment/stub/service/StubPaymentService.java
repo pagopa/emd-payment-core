@@ -13,11 +13,10 @@ public interface StubPaymentService {
    * Creates and saves a new retrieval record in the stub environment.
    * 
    * @param tppId the TPP identifier
-   * @param linkVersion version of the link, if null default link version is used
    * @param retrievalRequestDTO the retrieval request containing agent and origin information
    * @return {@link Mono} containing the created {@link RetrievalResponseDTO} with retrieval details
    */
-  Mono<RetrievalResponseDTO> saveRetrieval(String tppId, String linkVersion, RetrievalRequestDTO retrievalRequestDTO);
+  Mono<RetrievalResponseDTO> saveRetrieval(String tppId, RetrievalRequestDTO retrievalRequestDTO);
 
   /**
    * Retrieves an existing retrieval record by its unique identifier.

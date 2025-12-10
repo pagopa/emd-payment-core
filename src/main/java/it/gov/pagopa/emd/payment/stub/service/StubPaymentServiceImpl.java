@@ -53,13 +53,13 @@ public class StubPaymentServiceImpl implements StubPaymentService {
      * {@inheritDoc}
      */
     @Override
-    public Mono<RetrievalResponseDTO> saveRetrieval(String entityId, String linkVersion, RetrievalRequestDTO retrievalRequestDTO) {
-        log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Save retrieval for entityId:{} and agent: {}",inputSanify(entityId),retrievalRequestDTO.getAgent());
+    public Mono<RetrievalResponseDTO> saveRetrieval(String entityId, RetrievalRequestDTO retrievalRequestDTO) {
+        log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Save retrieval for entityId:{} and agent: {} and linkVersion:{}",inputSanify(entityId),retrievalRequestDTO.getAgent(), retrievalRequestDTO.getLinkVersion());
         return tppControllerImpl.getTppByEntityId(entityId)
                 .switchIfEmpty(Mono.error(exceptionMap.throwException
                         (PaymentConstants.ExceptionName.TPP_NOT_FOUND, PaymentConstants.ExceptionMessage.TPP_NOT_FOUND)))
                 .flatMap(tppDTO ->
-                        retrievalRepository.save(createRetrievalByTppAndRequest(tppDTO, retrievalRequestDTO, linkVersion))
+                        retrievalRepository.save(createRetrievalByTppAndRequest(tppDTO, retrievalRequestDTO))
                                 .onErrorMap(error -> exceptionMap.throwException(PaymentConstants.ExceptionName.GENERIC_ERROR, PaymentConstants.ExceptionMessage.GENERIC_ERROR))
                                 .map(this::createResponseByRetrieval))
                 .doOnSuccess(retrievalResponseDTO -> log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for entityId:{} and agent: {}",inputSanify(retrievalResponseDTO.getRetrievalId()),inputSanify(entityId),retrievalRequestDTO.getAgent()));
@@ -141,7 +141,7 @@ public class StubPaymentServiceImpl implements StubPaymentService {
      * @param retrievalRequestDTO the retrieval request containing agent and origin information
      * @return new Retrieval entity with configured properties and unique ID
      */
-    private Retrieval createRetrievalByTppAndRequest(TppDTO tppDTO, RetrievalRequestDTO retrievalRequestDTO, String linkVersion){
+    private Retrieval createRetrievalByTppAndRequest(TppDTO tppDTO, RetrievalRequestDTO retrievalRequestDTO){
         Retrieval retrieval = new Retrieval();
         HashMap<String, AgentLink> agentLinks = tppDTO.getAgentLinks();
         retrieval.setRetrievalId(String.format("%s-%d", UUID.randomUUID(), System.currentTimeMillis()));
@@ -157,8 +157,8 @@ public class StubPaymentServiceImpl implements StubPaymentService {
         String deepLink;
         AgentLink agentLinkModel = agentLinks.get(retrievalRequestDTO.getAgent());
         HashMap<String, VersionDetails> versionMap = agentLinkModel.getVersions();
-        if(versionMap != null && versionMap.containsKey(linkVersion)){
-            deepLink = versionMap.get(linkVersion).getLink();
+        if(versionMap != null && versionMap.containsKey(retrievalRequestDTO.getLinkVersion())){
+            deepLink = versionMap.get(retrievalRequestDTO.getLinkVersion()).getLink();
         }
         else{
             deepLink = agentLinkModel.getFallBackLink();
