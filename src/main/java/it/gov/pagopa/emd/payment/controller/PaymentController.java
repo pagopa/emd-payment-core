@@ -85,7 +85,7 @@ public interface PaymentController {
                             "Creates or updates payment attempt tracking and returns a 302 redirect " +
                             "to the TPP's payment application with fiscal code and notice number.")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Deeplink generated successfully",
+        @ApiResponse(responseCode = "302", description = "Deeplink generated successfully",
             content = @Content(schema = @Schema(implementation = RetrievalResponseDTO.class))),
         @ApiResponse(responseCode = "400", description = "Invalid parameters")
     })
