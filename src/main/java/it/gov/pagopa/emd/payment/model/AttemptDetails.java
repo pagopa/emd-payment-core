@@ -18,6 +18,11 @@ import java.util.Date;
 public class AttemptDetails {
 
   private String noticeNumber;
+  /**
+   * Fiscal code or P.iva of TPP
+   */
+  private String fiscalCode;
+  private String amount;
   private Date paymentAttemptDate;
 
 }

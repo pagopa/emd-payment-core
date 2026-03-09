@@ -86,9 +86,9 @@ public class StubPaymentServiceImpl implements StubPaymentService {
 
         return getRetrievalByRetrievalId(retrievalId)
                 .flatMap(retrievalResponseDTO ->
-                        paymentAttemptRepository.findByTppIdAndOriginIdAndFiscalCode(retrievalResponseDTO.getTppId(), retrievalResponseDTO.getOriginId(), fiscalCode)
+                        paymentAttemptRepository.findByTppIdAndOriginId(retrievalResponseDTO.getTppId(), retrievalResponseDTO.getOriginId())
                                 .flatMap(paymentAttempt ->
-                                        paymentAttemptRepository.save(addNewAttemptDetails(paymentAttempt,noticeNumber))
+                                        paymentAttemptRepository.save(addNewAttemptDetails(paymentAttempt, noticeNumber, fiscalCode, amount))
                                 )
                                 .switchIfEmpty(Mono.defer(() ->
                                         paymentAttemptRepository.save(createNewPaymentAttempt(retrievalResponseDTO, fiscalCode, noticeNumber, amount))
@@ -104,12 +104,16 @@ public class StubPaymentServiceImpl implements StubPaymentService {
      * 
      * @param paymentAttempt the existing payment attempt to update
      * @param noticeNumber the notice number for the new attempt
+     * @param fiscalCode the fiscal code for the new attempt
+     * @param amount amount of the payment for the new attempt
      * @return the updated PaymentAttempt with new attempt details added
      */
-    private PaymentAttempt addNewAttemptDetails(PaymentAttempt paymentAttempt, String noticeNumber){
+    private PaymentAttempt addNewAttemptDetails(PaymentAttempt paymentAttempt, String noticeNumber, String fiscalCode, String amount){
         AttemptDetails attemptDetails = new AttemptDetails();
         attemptDetails.setPaymentAttemptDate(Calendar.getInstance().getTime());
         attemptDetails.setNoticeNumber(noticeNumber);
+        attemptDetails.setFiscalCode(fiscalCode);
+        attemptDetails.setAmount(amount);
         paymentAttempt.getAttemptDetails().add(attemptDetails);
         return paymentAttempt;
     }
@@ -125,12 +129,10 @@ public class StubPaymentServiceImpl implements StubPaymentService {
      */
     private PaymentAttempt createNewPaymentAttempt(RetrievalResponseDTO retrievalResponseDTO, String fiscalCode, String noticeNumber, String amount){
         PaymentAttempt paymentAttempt = new PaymentAttempt();
-        paymentAttempt.setFiscalCode(fiscalCode);
         paymentAttempt.setTppId(retrievalResponseDTO.getTppId());
         paymentAttempt.setOriginId(retrievalResponseDTO.getOriginId());
-        paymentAttempt.setAmount(amount);
         paymentAttempt.setAttemptDetails(new ArrayList<>());
-        addNewAttemptDetails(paymentAttempt, noticeNumber);
+        addNewAttemptDetails(paymentAttempt, noticeNumber, fiscalCode, amount);
         return paymentAttempt;
     }
 

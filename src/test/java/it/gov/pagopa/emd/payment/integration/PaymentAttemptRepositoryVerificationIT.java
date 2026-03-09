@@ -57,16 +57,19 @@ public class PaymentAttemptRepositoryVerificationIT extends BaseIT {
         List<AttemptDetails> attemptDetailsList1 = List.of(
             AttemptDetails.builder()
                 .noticeNumber("noticeNumber1")  // First payment notice
+                .fiscalCode(TEST_CF)        // Who is making the payment
+                .amount("100")
                 .build(),
             AttemptDetails.builder()
                 .noticeNumber("noticeNumber2")  // Second payment notice
+                .fiscalCode(TEST_CF)        // Who is making the payment
+                .amount("200")
                 .build()
         );
 
         // Build a complete PaymentAttempt entity for testing
         // Links together TPP, citizen, and transaction for payment processing
         PaymentAttempt testPayment1 = PaymentAttempt.builder()
-            .fiscalCode(TEST_CF)        // Who is making the payment
             .tppId(TEST_TTP_ID)         // Which TPP is processing it
             .originId(TEST_ORIGIN_ID)   // Unique identifier for this payment session
             .attemptDetails(attemptDetailsList1)  // What is being paid
@@ -79,24 +82,24 @@ public class PaymentAttemptRepositoryVerificationIT extends BaseIT {
     }
 
     /**
-     * Test Case: Exact payment attempt lookup using all three primary keys
+     * Test Case: Exact payment attempt lookup using all two primary keys
      * 
      * Scenario: Find a specific payment attempt using the complete composite key
-     * Expected: Should return the exact payment attempt matching all three criteria
-     * MongoDB Query: db.payment_attempt.findOne({"tppId": "tppId1", "originId": "origin-id-1", "fiscalCode": "fiscalCode1"})
+     * Expected: Should return the exact payment attempt matching all two criteria
+     * MongoDB Query: db.payment_attempt.findOne({"tppId": "tppId1", "originId": "origin-id-1"})
      * 
      * Business Logic: This is the most specific query, typically used when you need
      * to retrieve a specific payment session for a particular citizen via a specific TPP
      */
     @Test
-    void testFindByTppIdAndOriginIdAndFiscalCode(){
-        log.info("=== EXECUTING testFindByTppIdAndOriginIdAndFiscalCode ===");
+    void testFindByTppIdAndOriginId(){
+        log.info("=== EXECUTING testFindByTppIdAndOriginId ===");
         
         StepVerifier.create(
-                repository.findByTppIdAndOriginIdAndFiscalCode(TEST_TTP_ID, TEST_ORIGIN_ID, TEST_CF)
+                repository.findByTppIdAndOriginId(TEST_TTP_ID, TEST_ORIGIN_ID)
             ).assertNext(paymentAttempt -> {
                 log.info("Found payment attempt: {}", paymentAttempt);
-                assert paymentAttempt.getFiscalCode().equals(TEST_CF);
+                assert paymentAttempt.getOriginId().equals(TEST_ORIGIN_ID);
             })
             .verifyComplete();
         
@@ -104,18 +107,18 @@ public class PaymentAttemptRepositoryVerificationIT extends BaseIT {
     }
 
     /**
-     * Test Case: Failed lookup with incorrect fiscal code
+     * Test Case: Failed lookup with incorrect originId but correct TPP ID
      * 
-     * Scenario: Attempt to find payment attempt with wrong fiscal code but correct TPP and origin
+     * Scenario: Attempt to find payment attempt with wrong originId but correct TPP
      * Expected: Should return empty result (no matching records)
-     * Purpose: Verify that fiscal code validation works correctly in composite queries
+     * Purpose: Verify that originId validation works correctly in composite queries
      */
     @Test
-    void testFindByTppIdAndOriginIdAndFiscalCodeNotFound(){
-        log.info("=== EXECUTING testFindByTppIdAndOriginIdAndFiscalCodeNotFound (not found) ===");
+    void testFindByTppIdAndOriginIdNotFound(){
+        log.info("=== EXECUTING testFindByTppIdAndOriginIdNotFound (not found) ===");
         
         StepVerifier.create(
-                repository.findByTppIdAndOriginIdAndFiscalCode("Wrong_cf", TEST_TTP_ID, TEST_ORIGIN_ID)
+                repository.findByTppIdAndOriginId("Wrong_tpp_id", TEST_ORIGIN_ID)
             )
             .verifyComplete();
         
@@ -140,7 +143,7 @@ public class PaymentAttemptRepositoryVerificationIT extends BaseIT {
                 repository.findByTppId(TEST_TTP_ID)
             ).assertNext(paymentAttempt -> {
                 log.info("Found payment attempt: {}", paymentAttempt);
-                assert paymentAttempt.getFiscalCode().equals(TEST_CF);
+                assert paymentAttempt.getOriginId().equals(TEST_ORIGIN_ID);
             })
             .verifyComplete();
 
@@ -180,14 +183,14 @@ public class PaymentAttemptRepositoryVerificationIT extends BaseIT {
      * useful for troubleshooting or payment history inquiries
      */
     @Test
-    void testFindByTppIdAndFiscalCode(){
-        log.info("=== EXECUTING testFindByTppIdAndFiscalCode ===");
+    void findByTppIdAndAttemptDetailsFiscalCode(){
+        log.info("=== EXECUTING findByTppIdAndAttemptDetailsFiscalCode ===");
         
         StepVerifier.create(
-                repository.findByTppIdAndFiscalCode(TEST_TTP_ID, TEST_CF)
+                repository.findByTppIdAndAttemptDetailsFiscalCode(TEST_TTP_ID, TEST_CF)
             ).assertNext(paymentAttempt -> {
                 log.info("Found payment attempt: {}", paymentAttempt);
-                assert paymentAttempt.getFiscalCode().equals(TEST_CF);
+                assert paymentAttempt.getOriginId().equals(TEST_ORIGIN_ID);
             })
             .verifyComplete();
         
@@ -202,11 +205,11 @@ public class PaymentAttemptRepositoryVerificationIT extends BaseIT {
      * Purpose: Verify that fiscal code filtering works correctly in two-parameter queries
      */
     @Test
-    void testFindByTppIdAndFiscalCodeNotFound(){
-        log.info("=== EXECUTING testFindByTppIdAndFiscalCodeNotFound (not found) ===");
+    void testFindByTppIdAndAttemptDetailsFiscalCodeotFound(){
+        log.info("=== EXECUTING testFindByTppIdAndAttemptDetailsFiscalCodeNotFound (not found) ===");
 
         StepVerifier.create(
-                repository.findByTppIdAndFiscalCode(TEST_TTP_ID, "Wrong_cf")
+                repository.findByTppIdAndAttemptDetailsFiscalCode(TEST_TTP_ID, "Wrong_cf")
             )
             .verifyComplete();
 

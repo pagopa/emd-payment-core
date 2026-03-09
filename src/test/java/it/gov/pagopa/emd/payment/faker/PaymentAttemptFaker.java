@@ -14,7 +14,6 @@ public class PaymentAttemptFaker {
         return PaymentAttempt.builder()
                 .attemptDetails(attemptDetails)
                 .tppId("tppId")
-                .fiscalCode("fiscalCode")
                 .originId("originId")
                 .build();
 
