@@ -113,13 +113,14 @@ public class PaymentServiceImpl implements PaymentService {
      * {@inheritDoc}
      */
     @Override
-    public Mono<List<PaymentAttemptResponseDTO>> getAllPaymentAttemptsByTppIdAndFiscalCode(String tppId, String fiscalCode){
-        log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID-AND-FISCAL-CODE] Get payments by tppId: {} and fiscalCode: {}",inputSanify(tppId),Utils.createSHA256(fiscalCode));
-        return paymentAttemptRepository.findByTppIdAndAttemptDetailsFiscalCode(tppId,fiscalCode)
-                .collectList()
-                .map(this::convertPaymentAttemptModelToDTO)
-                .doOnSuccess(paymentAttemptResponseDTOS -> log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID-AND-FISCAL-CODE] Got {} payments by tppId: {} and fiscalCode: {}",paymentAttemptResponseDTOS.size(),inputSanify(tppId),Utils.createSHA256(fiscalCode)))
-                .doOnError(error -> log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID-AND-FISCAL-CODE] Error {} to get Payment Attempts by tppId: {} and fiscalCode: {}",error.getMessage(),inputSanify(tppId),Utils.createSHA256(fiscalCode)));
+    public Mono<PaymentAttemptResponseDTO> getPaymentAttemptByTppIdAndOriginId(String tppId, String originId){
+        log.info("[EMD][PAYMENT][GET-PAYMENT-ATTEMPT-BY-TPP-ID-AND-ORIGIN-ID] Get payment attempt by tppId: {} and originId: {}",inputSanify(tppId),inputSanify(originId));
+        return paymentAttemptRepository.findByTppIdAndOriginId(tppId, originId)
+                .map(paymentAttempt -> {
+                    return convertPaymentAttemptModelToDTO(List.of(paymentAttempt)).get(0);
+                })
+                .doOnSuccess(paymentAttemptResponseDTOS -> log.info("[EMD][PAYMENT][GET-PAYMENT-ATTEMPT-BY-TPP-ID-AND-ORIGIN-ID] Got payment attempt by tppId: {} and originId: {}",paymentAttemptResponseDTOS,inputSanify(tppId),inputSanify(originId)))
+                .doOnError(error -> log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID-AND-ORIGIN-ID] Error {} to get Payment Attempts by tppId: {} and originId: {}",error.getMessage(),inputSanify(tppId),inputSanify(originId)));
     }
 
     /**

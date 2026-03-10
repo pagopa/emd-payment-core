@@ -171,48 +171,4 @@ public class PaymentAttemptRepositoryVerificationIT extends BaseIT {
         log.info("=== TEST COMPLETED ===");
     }
 
-    /**
-     * Test Case: Find payment attempts by TPP and citizen fiscal code
-     * 
-     * Scenario: Retrieve payment attempts for a specific citizen through a specific TPP
-     * Expected: Should return payment attempts matching both TPP ID and fiscal code
-     * MongoDB Query: db.payment_attempt.find({"tppId": "tppId1", "fiscalCode": "fiscalCode1"})
-     * 
-     * Business Use Case: Customer service scenarios where you need to see all
-     * payment attempts made by a specific citizen through a particular TPP,
-     * useful for troubleshooting or payment history inquiries
-     */
-    @Test
-    void findByTppIdAndAttemptDetailsFiscalCode(){
-        log.info("=== EXECUTING findByTppIdAndAttemptDetailsFiscalCode ===");
-        
-        StepVerifier.create(
-                repository.findByTppIdAndAttemptDetailsFiscalCode(TEST_TTP_ID, TEST_CF)
-            ).assertNext(paymentAttempt -> {
-                log.info("Found payment attempt: {}", paymentAttempt);
-                assert paymentAttempt.getOriginId().equals(TEST_ORIGIN_ID);
-            })
-            .verifyComplete();
-        
-        log.info("=== TEST COMPLETED - CHECK LOGS ABOVE FOR QUERY DETAILS ===");
-    }
-
-    /**
-     * Test Case: Failed lookup with incorrect fiscal code in TPP+fiscal code query
-     * 
-     * Scenario: Search for payment attempts with valid TPP but invalid fiscal code
-     * Expected: Should return empty result
-     * Purpose: Verify that fiscal code filtering works correctly in two-parameter queries
-     */
-    @Test
-    void testFindByTppIdAndAttemptDetailsFiscalCodeotFound(){
-        log.info("=== EXECUTING testFindByTppIdAndAttemptDetailsFiscalCodeNotFound (not found) ===");
-
-        StepVerifier.create(
-                repository.findByTppIdAndAttemptDetailsFiscalCode(TEST_TTP_ID, "Wrong_cf")
-            )
-            .verifyComplete();
-
-        log.info("=== TEST COMPLETED ===");
-    }
 }

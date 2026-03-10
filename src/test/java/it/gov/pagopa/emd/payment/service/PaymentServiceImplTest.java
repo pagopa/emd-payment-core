@@ -90,10 +90,10 @@ class PaymentServiceImplTest {
     }
 
     @Test
-    void testGetAllPaymentAttemptsByTppIdAndFiscalCode(){
-        when(paymentAttemptRepository.findByTppIdAndAttemptDetailsFiscalCode(anyString(),anyString())).thenReturn(Flux.just(PAYMENT_ATTEMPT));
+    void testGetPaymentAttemptByTppIdAndOriginId(){
+        when(paymentAttemptRepository.findByTppIdAndOriginId(anyString(),anyString())).thenReturn(Mono.just(PAYMENT_ATTEMPT));
 
-        StepVerifier.create(paymentServiceImpl.getAllPaymentAttemptsByTppIdAndFiscalCode("tppId","fiscalCode")).expectNextCount(1)
+        StepVerifier.create(paymentServiceImpl.getPaymentAttemptByTppIdAndOriginId("tppId","originId")).expectNextCount(1)
                 .verifyComplete();
     }
 

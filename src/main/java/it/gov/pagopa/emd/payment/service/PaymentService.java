@@ -49,12 +49,12 @@ public interface PaymentService {
   Mono<List<PaymentAttemptResponseDTO>> getAllPaymentAttemptsByTppId(String tppId);
 
   /**
-   * Retrieve a list of payment attempt by tppId and fiscal code.
+   * Retrieve payment attempt by tppId and fiscal code.
    * 
    * @param tppId the TPP identifier
-   * @param fiscalCode the fiscal code
-   * @return {@link Mono} containing a list of {@link PaymentAttemptResponseDTO} objects
+   * @param originId the origin identifier (IUN) of the notification
+   * @return {@link Mono} containing {@link PaymentAttemptResponseDTO} object
    */
-  Mono<List<PaymentAttemptResponseDTO>> getAllPaymentAttemptsByTppIdAndFiscalCode(String tppId, String fiscalCode);
+  Mono<PaymentAttemptResponseDTO> getPaymentAttemptByTppIdAndOriginId(String tppId, String originId);
 
 }

@@ -32,15 +32,4 @@ public interface PaymentAttemptRepository extends ReactiveMongoRepository<Paymen
      */
     Flux<PaymentAttempt> findByTppId(String tppId);
 
-    /**
-     * Finds all payment attempts for a specific TPP and fiscal code combination.
-     * Query = { 'tppId': ?0, 'attemptDetails.fiscalCode': ?1 }
-     * 
-     * @param tppId the TPP identifier
-     * @param fiscalCode the fiscal code to filter payment attempts
-     * @return {@link Flux} containing all PaymentAttempt entities for the specified TPP and fiscal code,
-     *         or empty Flux if no attempts are found for the combination
-     */
-    Flux<PaymentAttempt> findByTppIdAndAttemptDetailsFiscalCode(String tppId, String fiscalCode);
-
 }

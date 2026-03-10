@@ -67,8 +67,8 @@ public class PaymentControllerImpl implements PaymentController {
    * {@inheritDoc}
    */
   @Override
-  public Mono<ResponseEntity<List<PaymentAttemptResponseDTO>>> getAllAttemptDetailsByTppIdAndFiscalCode(String tppId, String fiscalCode){
-    return paymentServiceImpl.getAllPaymentAttemptsByTppIdAndFiscalCode(tppId, fiscalCode)
+  public Mono<ResponseEntity<PaymentAttemptResponseDTO>> getPaymentAttemptByTppIdAndOriginId(String tppId, String originId){
+    return paymentServiceImpl.getPaymentAttemptByTppIdAndOriginId(tppId, originId)
             .map(ResponseEntity::ok);
   }
 

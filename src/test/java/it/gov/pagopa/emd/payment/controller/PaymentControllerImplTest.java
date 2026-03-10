@@ -105,7 +105,7 @@ class PaymentControllerImplTest {
 
     @Test
     void testGetAllAttemptDetailsByTppIdAndFiscalCode() {
-        Mockito.when(paymentServiceImpl.getAllPaymentAttemptsByTppIdAndFiscalCode(anyString(),anyString())).thenReturn(Mono.just(List.of(PAYMENT_ATTEMPT_RESPONSE_DTO)));
+        Mockito.when(paymentServiceImpl.getPaymentAttemptByTppIdAndOriginId(anyString(),anyString())).thenReturn(Mono.just((PAYMENT_ATTEMPT_RESPONSE_DTO)));
 
         webTestClient.get()
                 .uri("/emd/payment/paymentAttempts/{tppId}/fiscalCode","tppId","fisclaCode")
