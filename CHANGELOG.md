@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1](https://github.com/pagopa/emd-payment-core/compare/v1.4.0...v1.4.1) (2026-03-17)
+
+
+### Bug Fixes
+
+* [MMC-382] Update paymentAttempt and attemptDetails ([#59](https://github.com/pagopa/emd-payment-core/issues/59)) ([4ea2130](https://github.com/pagopa/emd-payment-core/commit/4ea2130f8c4bb0bc6c23816e8a402e5c225b44c2))
+
 ## [1.4.0](https://github.com/pagopa/emd-payment-core/compare/v1.3.1...v1.4.0) (2025-12-10)
 
 
