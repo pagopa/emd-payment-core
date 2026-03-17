@@ -10,6 +10,8 @@ public class AttemptDetailsResponseDTOFaker {
         return AttemptDetailsResponseDTO.builder()
                 .noticeNumber("noticeNumber")
                 .paymentAttemptDate(new Date())
+                .fiscalCode("fiscalCode")
+                .amount("amount")
                 .build();
     }
 

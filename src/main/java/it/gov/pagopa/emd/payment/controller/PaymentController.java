@@ -64,14 +64,14 @@ public interface PaymentController {
   Mono<ResponseEntity<List<PaymentAttemptResponseDTO>>> getAllPaymentAttemptsByTppId(@Valid @PathVariable String tppId);
 
   /**
-   * Retrieves payment attempts filtered by TPP ID and fiscal code.
+   * Retrieves payment attempt filtered by TPP ID and origin ID.
    * 
    * @param tppId tppId the unique identifier of the Third Party Provider
-   * @param fiscalCode the fiscal code
-   * @return a {@link Mono} containing a {@link ResponseEntity} with a list of 
-   *         {@link PaymentAttemptResponseDTO} objects
+   * @param originId the origin identifier (IUN) of the notification
+   * @return a {@link Mono} containing a {@link ResponseEntity} with
+   *         {@link PaymentAttemptResponseDTO} object
    */
-  @GetMapping("/paymentAttempts/{tppId}/{fiscalCode}")
-  Mono<ResponseEntity<List<PaymentAttemptResponseDTO>>> getAllAttemptDetailsByTppIdAndFiscalCode(@Valid @PathVariable String tppId, @Valid @PathVariable String fiscalCode);
+  @GetMapping("/paymentAttempts/{tppId}/{originId}")
+  Mono<ResponseEntity<PaymentAttemptResponseDTO>> getPaymentAttemptByTppIdAndOriginId(@Valid @PathVariable String tppId, @Valid @PathVariable String originId);
 
 }

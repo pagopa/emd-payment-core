@@ -62,7 +62,7 @@ class PaymentServiceImplTest {
     @Test
     void testGetRedirect(){
         when(retrievalRepository.findByRetrievalId(any())).thenReturn(Mono.just(RETRIEVAL));
-        when(paymentAttemptRepository.findByTppIdAndOriginIdAndFiscalCode(RETRIEVAL.getTppId(),RETRIEVAL.getOriginId(),"fiscalCode")).thenReturn(Mono.just(PAYMENT_ATTEMPT));
+        when(paymentAttemptRepository.findByTppIdAndOriginId(RETRIEVAL.getTppId(),RETRIEVAL.getOriginId())).thenReturn(Mono.just(PAYMENT_ATTEMPT));
         when(paymentAttemptRepository.save(any())).thenReturn(Mono.just(PAYMENT_ATTEMPT));
 
         StepVerifier.create(paymentServiceImpl.getRedirect("retrievalId","fiscalCode","noticeNumber","amount"))
@@ -73,7 +73,7 @@ class PaymentServiceImplTest {
     @Test
     void testGetRedirectEmpty(){
         when(retrievalRepository.findByRetrievalId(any())).thenReturn(Mono.just(RETRIEVAL));
-        when(paymentAttemptRepository.findByTppIdAndOriginIdAndFiscalCode(RETRIEVAL.getTppId(),RETRIEVAL.getOriginId(),"fiscalCode")).thenReturn(Mono.empty());
+        when(paymentAttemptRepository.findByTppIdAndOriginId(RETRIEVAL.getTppId(),RETRIEVAL.getOriginId())).thenReturn(Mono.empty());
         when(paymentAttemptRepository.save(any())).thenReturn(Mono.just(new PaymentAttempt()));
 
         StepVerifier.create(paymentServiceImpl.getRedirect("retrievalId","fiscalCode","noticeNumber","amount"))
@@ -90,10 +90,10 @@ class PaymentServiceImplTest {
     }
 
     @Test
-    void testGetAllPaymentAttemptsByTppIdAndFiscalCode(){
-        when(paymentAttemptRepository.findByTppIdAndFiscalCode(anyString(),anyString())).thenReturn(Flux.just(PAYMENT_ATTEMPT));
+    void testGetPaymentAttemptByTppIdAndOriginId(){
+        when(paymentAttemptRepository.findByTppIdAndOriginId(anyString(),anyString())).thenReturn(Mono.just(PAYMENT_ATTEMPT));
 
-        StepVerifier.create(paymentServiceImpl.getAllPaymentAttemptsByTppIdAndFiscalCode("tppId","fiscalCode")).expectNextCount(1)
+        StepVerifier.create(paymentServiceImpl.getPaymentAttemptByTppIdAndOriginId("tppId","originId")).expectNextCount(1)
                 .verifyComplete();
     }
 

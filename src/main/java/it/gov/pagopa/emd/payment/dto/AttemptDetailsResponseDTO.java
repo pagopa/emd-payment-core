@@ -19,5 +19,7 @@ public class AttemptDetailsResponseDTO {
 
   private String noticeNumber;
   private Date paymentAttemptDate;
+  private String fiscalCode;
+  private String amount;
 
 }

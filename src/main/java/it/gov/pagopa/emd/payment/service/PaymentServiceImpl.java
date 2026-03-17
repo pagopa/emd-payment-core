@@ -74,18 +74,18 @@ public class PaymentServiceImpl implements PaymentService {
     /**
      * {@inheritDoc}
      * <p>
-     * Get the retrival from the db by retrievalId and the payment attempt by tppId, originId and fiscalCode.
-     * If the payment attempt is present update the attempt details with the new notice number and save, otherwise create a new payment attempt
-     * with the notice number and save it. Finally build the deep link with fiscal code and notice number and return it.
+     * Get the retrival from the db by retrievalId and the payment attempt by tppId and originId.
+     * If the payment attempt is present update the attempt details with the new notice number and the fiscal code and save, otherwise create a new payment attempt
+     * with the notice number and fiscal code and save it. Finally build the deep link with fiscal code and notice number and return it.
      */
     @Override
     public Mono<String> getRedirect(String retrievalId, String fiscalCode, String noticeNumber, String amount) {
         log.info("[EMD][PAYMENT][GET-REDIRECT] Get redirect for retrievalId: {}, fiscalCode: {}, noticeNumber: {} and amount:{}",inputSanify(retrievalId), Utils.createSHA256(fiscalCode),noticeNumber, amount);
         return getRetrievalByRetrievalId(retrievalId)
                 .flatMap(retrievalResponseDTO ->
-                        paymentAttemptRepository.findByTppIdAndOriginIdAndFiscalCode(retrievalResponseDTO.getTppId(), retrievalResponseDTO.getOriginId(), fiscalCode)
+                        paymentAttemptRepository.findByTppIdAndOriginId(retrievalResponseDTO.getTppId(), retrievalResponseDTO.getOriginId())
                                 .flatMap(paymentAttempt ->
-                                        paymentAttemptRepository.save(addNewAttemptDetails(paymentAttempt,noticeNumber))
+                                        paymentAttemptRepository.save(addNewAttemptDetails(paymentAttempt, noticeNumber, fiscalCode, amount))
                                 )
                                 .switchIfEmpty(Mono.defer(() ->
                                         paymentAttemptRepository.save(createNewPaymentAttempt(retrievalResponseDTO, fiscalCode, noticeNumber, amount))
@@ -113,13 +113,14 @@ public class PaymentServiceImpl implements PaymentService {
      * {@inheritDoc}
      */
     @Override
-    public Mono<List<PaymentAttemptResponseDTO>> getAllPaymentAttemptsByTppIdAndFiscalCode(String tppId, String fiscalCode){
-        log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID-AND-FISCAL-CODE] Get payments by tppId: {} and fiscalCode: {}",inputSanify(tppId),Utils.createSHA256(fiscalCode));
-        return paymentAttemptRepository.findByTppIdAndFiscalCode(tppId,fiscalCode)
-                .collectList()
-                .map(this::convertPaymentAttemptModelToDTO)
-                .doOnSuccess(paymentAttemptResponseDTOS -> log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID-AND-FISCAL-CODE] Got {} payments by tppId: {} and fiscalCode: {}",paymentAttemptResponseDTOS.size(),inputSanify(tppId),Utils.createSHA256(fiscalCode)))
-                .doOnError(error -> log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID-AND-FISCAL-CODE] Error {} to get Payment Attempts by tppId: {} and fiscalCode: {}",error.getMessage(),inputSanify(tppId),Utils.createSHA256(fiscalCode)));
+    public Mono<PaymentAttemptResponseDTO> getPaymentAttemptByTppIdAndOriginId(String tppId, String originId){
+        log.info("[EMD][PAYMENT][GET-PAYMENT-ATTEMPT-BY-TPP-ID-AND-ORIGIN-ID] Get payment attempt by tppId: {} and originId: {}",inputSanify(tppId),inputSanify(originId));
+        return paymentAttemptRepository.findByTppIdAndOriginId(tppId, originId)
+                .map(paymentAttempt -> {
+                    return convertPaymentAttemptModelToDTO(List.of(paymentAttempt)).get(0);
+                })
+                .doOnSuccess(paymentAttemptResponseDTOS -> log.info("[EMD][PAYMENT][GET-PAYMENT-ATTEMPT-BY-TPP-ID-AND-ORIGIN-ID] Got payment attempt by tppId: {} and originId: {}",paymentAttemptResponseDTOS,inputSanify(tppId),inputSanify(originId)))
+                .doOnError(error -> log.info("[EMD][PAYMENT][GET-ALL-PAYMENT-ATTEMPTS-BY-TPP-ID-AND-ORIGIN-ID] Error {} to get Payment Attempts by tppId: {} and originId: {}",error.getMessage(),inputSanify(tppId),inputSanify(originId)));
     }
 
     /**
@@ -134,7 +135,6 @@ public class PaymentServiceImpl implements PaymentService {
             PaymentAttemptResponseDTO paymentAttemptResponseDTO = new PaymentAttemptResponseDTO();
             paymentAttemptResponseDTO.setTppId(paymentAttempt.getTppId());
             paymentAttemptResponseDTO.setOriginId(paymentAttempt.getOriginId());
-            paymentAttemptResponseDTO.setFiscalCode(paymentAttempt.getFiscalCode());
             paymentAttemptResponseDTO.setAttemptDetails(convertAttemptDetailsModelToDTO(paymentAttempt.getAttemptDetails()));
             paymentAttemptResponseDTOList.add(paymentAttemptResponseDTO);
         }
@@ -153,6 +153,8 @@ public class PaymentServiceImpl implements PaymentService {
             AttemptDetailsResponseDTO attemptDetailsResponseDTO = new AttemptDetailsResponseDTO();
             attemptDetailsResponseDTO.setPaymentAttemptDate(attemptDetail.getPaymentAttemptDate());
             attemptDetailsResponseDTO.setNoticeNumber(attemptDetail.getNoticeNumber());
+            attemptDetailsResponseDTO.setFiscalCode(attemptDetail.getFiscalCode());
+            attemptDetailsResponseDTO.setAmount(attemptDetail.getAmount());
             attemptDetailsResponseDTOList.add(attemptDetailsResponseDTO);
         }
         return attemptDetailsResponseDTOList;
@@ -166,12 +168,16 @@ public class PaymentServiceImpl implements PaymentService {
      *
      * @param paymentAttempt the existing payment attempt to update
      * @param noticeNumber the notice number for the new attempt
+     * @param fiscalCode the fiscal code for the new attempt
+     * @param amount amount of the payment for the new attempt
      * @return the updated PaymentAttempt with new attempt details added
      */
-    private PaymentAttempt addNewAttemptDetails(PaymentAttempt paymentAttempt, String noticeNumber){
+    private PaymentAttempt addNewAttemptDetails(PaymentAttempt paymentAttempt, String noticeNumber, String fiscalCode, String amount){
         AttemptDetails attemptDetails = new AttemptDetails();
         attemptDetails.setPaymentAttemptDate(Calendar.getInstance().getTime());
         attemptDetails.setNoticeNumber(noticeNumber);
+        attemptDetails.setFiscalCode(fiscalCode);
+        attemptDetails.setAmount(amount);
         paymentAttempt.getAttemptDetails().add(attemptDetails);
         return paymentAttempt;
     }
@@ -187,12 +193,10 @@ public class PaymentServiceImpl implements PaymentService {
      */
     private PaymentAttempt createNewPaymentAttempt(RetrievalResponseDTO retrievalResponseDTO, String fiscalCode, String noticeNumber, String amount){
         PaymentAttempt paymentAttempt = new PaymentAttempt();
-        paymentAttempt.setFiscalCode(fiscalCode);
         paymentAttempt.setTppId(retrievalResponseDTO.getTppId());
         paymentAttempt.setOriginId(retrievalResponseDTO.getOriginId());
-        paymentAttempt.setAmount(amount);
         paymentAttempt.setAttemptDetails(new ArrayList<>());
-        addNewAttemptDetails(paymentAttempt, noticeNumber);
+        addNewAttemptDetails(paymentAttempt, noticeNumber, fiscalCode, amount);
         return paymentAttempt;
     }
 

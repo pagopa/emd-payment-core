@@ -14,7 +14,6 @@ public class PaymentAttemptResponseDTOFaker {
         return PaymentAttemptResponseDTO.builder()
                 .attemptDetails(attemptDetails)
                 .tppId("tppId")
-                .fiscalCode("fiscalCode")
                 .originId("originId")
                 .build();
 

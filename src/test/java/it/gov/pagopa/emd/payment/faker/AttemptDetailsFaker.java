@@ -10,6 +10,8 @@ public class AttemptDetailsFaker {
         return AttemptDetails.builder()
                 .noticeNumber("noticeNumber")
                 .paymentAttemptDate(new Date())
+                .fiscalCode("fiscalCode")
+                .amount("amount")
                 .build();
 
     }
