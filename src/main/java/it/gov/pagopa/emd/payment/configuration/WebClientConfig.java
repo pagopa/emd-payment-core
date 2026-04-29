@@ -43,7 +43,7 @@ public class WebClientConfig {
      * connector gets its own isolated bucket of up to {@value} connections —
      * there is no contention between them.
      */
-    private static final int MAX_CONNECTIONS = 50;
+    private static final int MAX_CONNECTIONS = 300;
 
     /**
      * Maximum number of requests that may queue waiting for a connection when the
@@ -55,11 +55,25 @@ public class WebClientConfig {
     /** TCP connect timeout in milliseconds. */
     private static final int CONNECT_TIMEOUT_MS = 5_000;
 
-    /** Read / write timeout in seconds applied via Netty pipeline handlers. */
-    private static final int IO_TIMEOUT_SECONDS = 10;
+    /**
+     * Read / write timeout in seconds applied via Netty pipeline handlers.
+     *
+     * <p>Set equal to {@link #RESPONSE_TIMEOUT} so that both the per-event inactivity
+     * guard and the end-to-end cap are consistent. Having IO_TIMEOUT > RESPONSE_TIMEOUT
+     * would make the Netty handlers dead-letter code.
+     */
+    private static final int IO_TIMEOUT_SECONDS = 8;
 
-    /** End-to-end response timeout (hard cap for the whole request). */
-    private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(15);
+    /**
+     * End-to-end response timeout (hard cap for the whole request).
+     *
+     * <p><strong>Graceful-shutdown budget constraint:</strong> This value must satisfy
+     * {@code N × RESPONSE_TIMEOUT + DB_overhead ≤ spring.lifecycle.timeout (20s)},
+     * where N is the maximum number of <em>sequential</em> WebClient calls in a single
+     * reactive pipeline. For this service N=1 (single GET to emd-tpp), so:
+     * {@code 1 × 8s + 2s DB = 10s ≤ 20s}.
+     */
+    private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(8);
 
     /** Fail-fast cap for waiting on a free connection when the pool is saturated. */
     private static final Duration PENDING_ACQUIRE_TIMEOUT = Duration.ofSeconds(5);
