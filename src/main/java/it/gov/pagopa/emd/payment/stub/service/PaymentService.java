@@ -1,18 +1,20 @@
 package it.gov.pagopa.emd.payment.stub.service;
 
+import it.gov.pagopa.emd.payment.configuration.WebClientRetrySpecs;
 import it.gov.pagopa.emd.payment.stub.model.PaymentInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
-import reactor.core.publisher.Mono;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.*;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Service class for handling payment operations through SOAP web services integration.
@@ -20,6 +22,7 @@ import java.nio.charset.StandardCharsets;
 @Service
 @Slf4j
 public class PaymentService {
+
 
     private final WebClient webClient;
 
@@ -61,7 +64,6 @@ public class PaymentService {
      * @param noticeNumber the payment notice number
      * @return Mono containing the SOAP response as a string
      */
-     
     public Mono<String> sendSoapRequest(String fiscalCode, String noticeNumber) {
         String body = createSoapRequest(fiscalCode, noticeNumber);
 
@@ -73,7 +75,11 @@ public class PaymentService {
                 .bodyValue(body)
                 .retrieve()
                 .bodyToMono(String.class)
-                .doOnNext(response -> log.info("[SOAP RESPONSE] SOAP response: {} ",response));
+                .retryWhen(WebClientRetrySpecs.connectFailureOnly())
+                .doOnError(ex -> log.error(
+                        "[PAYMENT-SERVICE] POST /nodo/node-for-psp/v1 failed: {}",
+                        ex.getMessage()))
+                .doOnNext(response -> log.info("[SOAP RESPONSE] SOAP response: {} ", response));
     }
 
     /**
