@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.2](https://github.com/pagopa/emd-payment-core/compare/v1.4.1...v1.4.2) (2026-05-05)
+
+
+### Bug Fixes
+
+* [MMC-525][MMC-539] WebClient stale connections pool config and graceful shutdown ([#62](https://github.com/pagopa/emd-payment-core/issues/62)) ([a886a72](https://github.com/pagopa/emd-payment-core/commit/a886a72ce953df1bd08ecef9b1f649bf61017811))
+
 ## [1.4.1](https://github.com/pagopa/emd-payment-core/compare/v1.4.0...v1.4.1) (2026-03-17)
 
 
