@@ -302,6 +302,76 @@
       "sha256": "avm_RqAjvT_9SNlVKG2ib5Aae6Vk1yCWRRfXRMJRylc="
     },
     {
+      "id": "org.springdoc:springdoc-openapi-starter-webflux-ui:jar:2.8.14",
+      "artifactId": "springdoc-openapi-starter-webflux-ui",
+      "groupId": "org.springdoc",
+      "version": "2.8.14",
+      "sha256": "8kxzB0hYH-QN6t7qJrH0sHg7ogtxKmnLEwUOl_msfiY="
+    },
+    {
+      "id": "org.springdoc:springdoc-openapi-starter-webflux-api:jar:2.8.14",
+      "artifactId": "springdoc-openapi-starter-webflux-api",
+      "groupId": "org.springdoc",
+      "version": "2.8.14",
+      "sha256": "NZR1vusr-ZktW9Q0A7rnqJZz4sGuD2djWRyOMRAoETc="
+    },
+    {
+      "id": "org.springdoc:springdoc-openapi-starter-common:jar:2.8.14",
+      "artifactId": "springdoc-openapi-starter-common",
+      "groupId": "org.springdoc",
+      "version": "2.8.14",
+      "sha256": "mw-_8krNSnXJU48ktpIkaR5bb_fpHXQSiFg-5ZGkXRE="
+    },
+    {
+      "id": "io.swagger.core.v3:swagger-core-jakarta:jar:2.2.38",
+      "artifactId": "swagger-core-jakarta",
+      "groupId": "io.swagger.core.v3",
+      "version": "2.2.38",
+      "sha256": "6ZyE9YTQiL8fMu7pgYxANUKey2Y_4axJ_JZ-5SFWTD4="
+    },
+    {
+      "id": "io.swagger.core.v3:swagger-annotations-jakarta:jar:2.2.38",
+      "artifactId": "swagger-annotations-jakarta",
+      "groupId": "io.swagger.core.v3",
+      "version": "2.2.38",
+      "sha256": "zxWqSrfox0fXs9l5ZgpJMg6lbA3Ii3Ah5IzJCcE7mXs="
+    },
+    {
+      "id": "io.swagger.core.v3:swagger-models-jakarta:jar:2.2.38",
+      "artifactId": "swagger-models-jakarta",
+      "groupId": "io.swagger.core.v3",
+      "version": "2.2.38",
+      "sha256": "dZ8Hpd5UayYmZDxiTg8TEEAvoAd4LhUbT1oyBaSkMl4="
+    },
+    {
+      "id": "com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:jar:2.17.2",
+      "artifactId": "jackson-dataformat-yaml",
+      "groupId": "com.fasterxml.jackson.dataformat",
+      "version": "2.17.2",
+      "sha256": "lBvNixOBuzsNcm-rQWJPqOzg7nts8oYK2V6BV85nM3Y="
+    },
+    {
+      "id": "org.webjars:swagger-ui:jar:5.30.1",
+      "artifactId": "swagger-ui",
+      "groupId": "org.webjars",
+      "version": "5.30.1",
+      "sha256": "E_J6naYFghsXeX7JbZ9kx79Pt7Hd99Gwr9c9n0-FaXA="
+    },
+    {
+      "id": "org.webjars:webjars-locator-lite:jar:1.1.2",
+      "artifactId": "webjars-locator-lite",
+      "groupId": "org.webjars",
+      "version": "1.1.2",
+      "sha256": "R1WEdYONZLJKZHgWSlS4BNsYp-e7GZqfYyuivw0w2uM="
+    },
+    {
+      "id": "org.jspecify:jspecify:jar:0.3.0",
+      "artifactId": "jspecify",
+      "groupId": "org.jspecify",
+      "version": "0.3.0",
+      "sha256": "4cfhgytglfz8vldIVwDHMw1T1OV-LFu_nHGBmwLpeL4="
+    },
+    {
       "id": "org.springframework.boot:spring-boot-starter-data-mongodb-reactive:jar:3.3.3",
       "artifactId": "spring-boot-starter-data-mongodb-reactive",
       "groupId": "org.springframework.boot",
