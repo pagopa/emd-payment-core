@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/pagopa/emd-payment-core/compare/v1.4.2...v1.5.0) (2026-05-28)
+
+
+### Features
+
+* [MMC-683] add originId to log ([#65](https://github.com/pagopa/emd-payment-core/issues/65)) ([49974bf](https://github.com/pagopa/emd-payment-core/commit/49974bffb50062199fb329390dacc2ecb5c92474))
+
 ## [1.4.2](https://github.com/pagopa/emd-payment-core/compare/v1.4.1...v1.4.2) (2026-05-05)
 
 
