@@ -69,7 +69,9 @@ public class PaymentServiceImpl implements PaymentService {
         return retrievalRepository.findByRetrievalId(retrievalId)
                 .switchIfEmpty(Mono.error(exceptionMap.throwException(PaymentConstants.ExceptionName.RETRIEVAL_NOT_FOUND,
                         PaymentConstants.ExceptionMessage.RETRIEVAL_NOT_FOUND)))
-                .map(this::createResponseByModel);
+                .map(this::createResponseByModel)
+                .doOnSuccess(retrievalResponseDTO ->log.info("[EMD][PAYMENT][GET-RETRIEVAL] Got retrieval for tpp:{} and originId:{} for retrievalId:{}",
+                    inputSanify(retrievalResponseDTO.getTppId()), inputSanify(retrievalResponseDTO.getOriginId()), inputSanify(retrievalId)));
     }
 
     /**
