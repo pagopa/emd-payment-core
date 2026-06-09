@@ -66,6 +66,7 @@ public class PaymentServiceImpl implements PaymentService {
     public Mono<RetrievalResponseDTO> getRetrievalByRetrievalId(String retrievalId) {
         log.info("[EMD][PAYMENT][GET-RETRIEVAL] Get retrieval by retrievalId: {}", inputSanify(retrievalId));
         return retrievalRepository.findByRetrievalId(retrievalId)
+                .onErrorMap(error -> exceptionMap.throwException(PaymentConstants.ExceptionName.GENERIC_ERROR, PaymentConstants.ExceptionMessage.GENERIC_ERROR))
                 .switchIfEmpty(Mono.error(exceptionMap.throwException(PaymentConstants.ExceptionName.RETRIEVAL_NOT_FOUND,
                         PaymentConstants.ExceptionMessage.RETRIEVAL_NOT_FOUND)))
                 .map(this::createResponseByModel)
