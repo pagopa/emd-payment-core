@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/pagopa/emd-payment-core/compare/v1.5.0...v1.5.1) (2026-06-09)
+
+
+### Bug Fixes
+
+* MMC-705 add log for check message finalized ([#68](https://github.com/pagopa/emd-payment-core/issues/68)) ([961ef20](https://github.com/pagopa/emd-payment-core/commit/961ef20bdd287c59bd6584c3f1533d42deec580d))
+
 ## [1.5.0](https://github.com/pagopa/emd-payment-core/compare/v1.4.2...v1.5.0) (2026-05-28)
 
 
