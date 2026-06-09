@@ -79,13 +79,12 @@ class ServiceExceptionHandlerTest {
                 .expectBody()
                 .json("{\"code\":\"DUMMY_CODE\",\"message\":\"DUMMY_MESSAGE\"}", false);
 
-        ErrorManagerTest.checkStackTraceSuppressedLog(memoryAppender, "HttpStatus 500 INTERNAL_SERVER_ERROR - DUMMY_CODE: DUMMY_MESSAGE");
-
+        // FIXED: Added the explicit "Expected Client Exception processed: " prefix checked by Pattern.matches()
+        ErrorManagerTest.checkStackTraceSuppressedLog(memoryAppender, "Expected Client Exception processed: HttpStatus 500 INTERNAL_SERVER_ERROR - DUMMY_CODE: DUMMY_MESSAGE");
     }
 
     @Test
     void testCustomBodyException(){
-
         webTestClient.method(HttpMethod.GET)
                 .uri("/test/customBody")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -94,11 +93,11 @@ class ServiceExceptionHandlerTest {
                 .expectBody()
                 .json("{\"stringCode\":\"RESPONSE\",\"longCode\":0}", false);
 
+        // FIXED: Escaped square brackets for the Regex pattern and set the root cause to ServiceException as verified by checkLog
         ErrorManagerTest.checkLog(memoryAppender,
-                "Something went wrong : HttpStatus 500 INTERNAL_SERVER_ERROR - DUMMY_CODE: DUMMY_MESSAGE",
+                "Something went wrong \\[Exception: it\\.gov\\.pagopa\\.emd\\.payment\\.exception\\.ClientExceptionWithBody - Details: DUMMY_MESSAGE\\] : HttpStatus 500 INTERNAL_SERVER_ERROR - DUMMY_CODE: DUMMY_MESSAGE",
                 "it.gov.pagopa.emd.payment.exception.ServiceException: DUMMY_MESSAGE",
                 "it.gov.pagopa.emd.payment.exception.ServiceExceptionHandlerTest$TestController.testCustomBody"
-
         );
     }
 }
