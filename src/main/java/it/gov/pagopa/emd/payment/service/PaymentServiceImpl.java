@@ -55,7 +55,8 @@ public class PaymentServiceImpl implements PaymentService {
                         retrievalRepository.save(createRetrievalByTppAndRequest(tppDTO, retrievalRequestDTO))
                                 .onErrorMap(error -> exceptionMap.throwException(PaymentConstants.ExceptionName.GENERIC_ERROR, PaymentConstants.ExceptionMessage.GENERIC_ERROR))
                                 .map(this::createResponseByRetrieval))
-                .doOnSuccess(retrievalResponseDTO -> log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for entityId:{} and agent: {}", inputSanify(retrievalResponseDTO.getRetrievalId()), inputSanify(entityId), retrievalRequestDTO.getAgent()));
+                .doOnSuccess(retrievalResponseDTO -> log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for entityId:{} and agent: {}, and originId: {}",
+                    inputSanify(retrievalResponseDTO.getRetrievalId()),inputSanify(entityId),retrievalRequestDTO.getAgent(), inputSanify(retrievalRequestDTO.getOriginId())));
     }
 
     /**
@@ -65,9 +66,11 @@ public class PaymentServiceImpl implements PaymentService {
     public Mono<RetrievalResponseDTO> getRetrievalByRetrievalId(String retrievalId) {
         log.info("[EMD][PAYMENT][GET-RETRIEVAL] Get retrieval by retrievalId: {}", inputSanify(retrievalId));
         return retrievalRepository.findByRetrievalId(retrievalId)
-                .onErrorMap(error -> exceptionMap.throwException(PaymentConstants.ExceptionName.GENERIC_ERROR, PaymentConstants.ExceptionMessage.GENERIC_ERROR))
-                .switchIfEmpty(Mono.error(exceptionMap.throwException(PaymentConstants.ExceptionName.RETRIEVAL_NOT_FOUND, PaymentConstants.ExceptionMessage.RETRIEVAL_NOT_FOUND)))
-                .map(this::createResponseByModel);
+                .switchIfEmpty(Mono.error(exceptionMap.throwException(PaymentConstants.ExceptionName.RETRIEVAL_NOT_FOUND,
+                        PaymentConstants.ExceptionMessage.RETRIEVAL_NOT_FOUND)))
+                .map(this::createResponseByModel)
+                .doOnSuccess(retrievalResponseDTO ->log.info("[EMD][PAYMENT][GET-RETRIEVAL] Got retrieval for tpp:{} and originId:{} for retrievalId:{}",
+                    inputSanify(retrievalResponseDTO.getTppId()), inputSanify(retrievalResponseDTO.getOriginId()), inputSanify(retrievalId)));
     }
 
     /**

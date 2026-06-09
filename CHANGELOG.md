@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.5.1](https://github.com/pagopa/emd-payment-core/compare/v1.5.0...v1.5.1) (2026-06-09)
+
+
+### Bug Fixes
+
+* MMC-705 add log for check message finalized ([#68](https://github.com/pagopa/emd-payment-core/issues/68)) ([961ef20](https://github.com/pagopa/emd-payment-core/commit/961ef20bdd287c59bd6584c3f1533d42deec580d))
+
+## [1.5.0](https://github.com/pagopa/emd-payment-core/compare/v1.4.2...v1.5.0) (2026-05-28)
+
+
+### Features
+
+* [MMC-683] add originId to log ([#65](https://github.com/pagopa/emd-payment-core/issues/65)) ([49974bf](https://github.com/pagopa/emd-payment-core/commit/49974bffb50062199fb329390dacc2ecb5c92474))
+
+## [1.4.2](https://github.com/pagopa/emd-payment-core/compare/v1.4.1...v1.4.2) (2026-05-05)
+
+
+### Bug Fixes
+
+* [MMC-525][MMC-539] WebClient stale connections pool config and graceful shutdown ([#62](https://github.com/pagopa/emd-payment-core/issues/62)) ([a886a72](https://github.com/pagopa/emd-payment-core/commit/a886a72ce953df1bd08ecef9b1f649bf61017811))
+
 ## [1.4.1](https://github.com/pagopa/emd-payment-core/compare/v1.4.0...v1.4.1) (2026-03-17)
 
 

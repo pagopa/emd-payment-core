@@ -1,6 +1,6 @@
 package it.gov.pagopa.emd.payment.connector;
 
-
+import it.gov.pagopa.emd.payment.configuration.WebClientRetrySpecs;
 import it.gov.pagopa.emd.payment.dto.TppDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,27 +14,29 @@ import reactor.core.publisher.Mono;
  */
 @Service
 @Slf4j
-public class TppConnectorImpl implements  TppConnector {
+public class TppConnectorImpl implements TppConnector {
+
     private final WebClient webClient;
 
-    /**
-     * Constructs a new TppConnectorImpl with the specified base URL.
-     * 
-     * @param baseUrl the base URL for the TPP service, injected from the configuration
-     */
-    public TppConnectorImpl(@Value("${rest-client.tpp.baseUrl}") String baseUrl) {
-        this.webClient = WebClient.builder().baseUrl(baseUrl).build();
+    public TppConnectorImpl(WebClient.Builder webClientBuilder,
+                            @Value("${rest-client.tpp.baseUrl}") String baseUrl) {
+        this.webClient = webClientBuilder.baseUrl(baseUrl).build();
     }
 
     /**
      * {@inheritDoc}
-     * <p>
-     * This implementation performs an HTTP GET request to the TPP service endpoint.
+     *
+     * <p>Idempotent GET → permissive retry on any transient network error.
      */
+    @Override
     public Mono<TppDTO> getTppByEntityId(String entityId) {
         return webClient.get()
-                .uri("/emd/tpp/entityId/{entityId}",entityId)
+                .uri("/emd/tpp/entityId/{entityId}", entityId)
                 .retrieve()
-                .bodyToMono(TppDTO.class);
+                .bodyToMono(TppDTO.class)
+                .retryWhen(WebClientRetrySpecs.transientNetwork())
+                .doOnError(ex -> log.error(
+                        "[TPP-CONNECTOR] GET /emd/tpp/entityId/{{entityId}} failed: {}",
+                        ex.getMessage()));
     }
 }
