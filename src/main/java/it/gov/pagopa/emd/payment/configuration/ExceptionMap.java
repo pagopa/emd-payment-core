@@ -1,6 +1,5 @@
 package it.gov.pagopa.emd.payment.configuration;
 
-
 import it.gov.pagopa.emd.payment.constant.PaymentConstants;
 import it.gov.pagopa.emd.payment.exception.ClientException;
 import it.gov.pagopa.emd.payment.exception.ClientExceptionWithBody;
@@ -22,8 +21,8 @@ public class ExceptionMap {
 
     /**
      * Internal map that stores the association between exception names and their corresponding
-     * exception factory functions
-     */    
+     * exception factory functions.
+     */
     private final Map<String, Function<String, ClientException>> exceptions = new HashMap<>();
 
     /**
@@ -61,13 +60,28 @@ public class ExceptionMap {
                         message
                 )
         );
+
+        exceptions.put(PaymentConstants.ExceptionName.PAYMENT_ATTEMPT_NOT_FOUND, message ->
+                new ClientExceptionWithBody(
+                        HttpStatus.NOT_FOUND,
+                        PaymentConstants.ExceptionCode.PAYMENT_ATTEMPT_NOT_FOUND,
+                        message
+                )
+        );
+
+        exceptions.put(PaymentConstants.ExceptionName.GENERIC_ERROR, message ->
+                new ClientExceptionWithBody(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        PaymentConstants.ExceptionCode.GENERIC_ERROR,
+                        message
+                )
+        );
     }
 
     /**
      * Creates and returns a RuntimeException based on the provided exception key and message.
-     * 
-     * @param exceptionKey the key identifying the type of exception to create.
-     * @param message message the error message to be included in the exception
+     * * @param exceptionKey the key identifying the type of exception to create.
+     * @param message the error message to be included in the exception
      * @return a {@link RuntimeException} instance
      */
     public RuntimeException throwException(String exceptionKey, String message) {
@@ -75,8 +89,7 @@ public class ExceptionMap {
             return exceptions.get(exceptionKey).apply(message);
         } else {
             log.error("[EMP-PAYMENT][EXCEPTION-MAP] Exception Name Not Found: {}", exceptionKey);
-            return new RuntimeException();
+            return new RuntimeException("Missing ExceptionMap registration for key: " + exceptionKey + ". Original context: " + message);
         }
     }
-
 }

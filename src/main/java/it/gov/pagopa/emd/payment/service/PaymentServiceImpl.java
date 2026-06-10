@@ -86,7 +86,15 @@ public class PaymentServiceImpl implements PaymentService {
                                         retrievalResponseDTO.getOriginId(),
                                         createNewAttemptDetails(noticeNumber, fiscalCode, amount)
                                 )
-                                .onErrorMap(error -> exceptionMap.throwException(PaymentConstants.ExceptionName.GENERIC_ERROR, PaymentConstants.ExceptionMessage.GENERIC_ERROR))
+                                .retryWhen(reactor.util.retry.Retry.max(2)
+                                        .filter(error -> error.getMessage() != null &&
+                                                (error.getMessage().contains("duplicate key") || error.getMessage().contains("WriteConflict"))))
+                                .onErrorMap(error -> {
+                                    log.error("[EMD][PAYMENT][GET-REDIRECT] Critical database failure during atomic upsert. Original DB cause: ", error);
+                                    return exceptionMap.throwException(
+                                            PaymentConstants.ExceptionName.GENERIC_ERROR,
+                                            PaymentConstants.ExceptionMessage.GENERIC_ERROR);
+                                })
                                 .then(Mono.fromCallable(() ->
                                         buildDeepLink(retrievalResponseDTO.getDeeplink(), fiscalCode, noticeNumber, amount)
                                 ))
