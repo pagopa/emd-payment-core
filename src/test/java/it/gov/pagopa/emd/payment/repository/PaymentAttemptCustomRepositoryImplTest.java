@@ -81,6 +81,7 @@ class PaymentAttemptCustomRepositoryImplTest {
         Document setOnInsertObj = (Document) updateObj.get("$setOnInsert");
         assertEquals(tppId, setOnInsertObj.get("tppId"));
         assertEquals(originId, setOnInsertObj.get("originId"));
+        assertEquals(PaymentAttempt.class.getName(), setOnInsertObj.get("_class"));
 
         // Assert atomic $push operator appending details to the nested array field
         assertTrue(updateObj.containsKey("$push"));

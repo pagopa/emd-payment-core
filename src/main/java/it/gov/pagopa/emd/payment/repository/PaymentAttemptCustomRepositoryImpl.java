@@ -32,6 +32,7 @@ public class PaymentAttemptCustomRepositoryImpl implements PaymentAttemptCustomR
         Update update = new Update()
                 .setOnInsert("tppId", tppId)
                 .setOnInsert("originId", originId)
+                .setOnInsert("_class", PaymentAttempt.class.getName())
                 .push("attemptDetails", attemptDetails);
 
         // Execute the native findAndModify/upsert operation on the single document reference
