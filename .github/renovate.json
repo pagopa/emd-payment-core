@@ -1,0 +1,22 @@
+{
+  "extends": ["config:best-practices"],
+  "username": "renovate-bot",
+  "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
+  "packageRules": [
+    {
+      "enabled": true,
+      "groupName": "everything",
+      "matchPackagePatterns": ["*"],
+      "separateMajorMinor": false
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["Security"]
+  },
+  "postUpgradeTasks": {
+    "commands": ["mvn depcheck:generate"],
+    "fileFilters": ["**/dep-sha256.json"],
+    "executionMode": "update"
+  }
+}
