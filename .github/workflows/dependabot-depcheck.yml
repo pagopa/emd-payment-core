@@ -18,9 +18,19 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: 'maven'
-          server-id: github
-          server-username: ${{ github.actor }}
-          server-password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Cache Maven packages
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae #v5.0.5
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Setup Maven Settings
+        run: |
+          mkdir -p ~/.m2
+          echo '<settings><servers><server><id>github</id><username></username><password>${{ secrets.GITHUB_TOKEN }}</password></server></servers></settings>' > ~/.m2/settings.xml
 
       - name: Run mvn depcheck:generate
         run: mvn depcheck:generate
