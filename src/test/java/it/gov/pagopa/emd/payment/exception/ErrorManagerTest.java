@@ -77,8 +77,9 @@ class ErrorManagerTest {
             .exchange()
             .expectStatus().isBadRequest();
 
+    // FIXED: Added wildcards (.*) to allow regex full-matching with the new logging prefix
     checkStackTraceSuppressedLog(memoryAppender,
-            "HttpStatus 400 BAD_REQUEST - NOTFOUND ClientExceptionNoBody");
+            ".*HttpStatus 400 BAD_REQUEST - NOTFOUND ClientExceptionNoBody.*");
   }
 
   @Test
@@ -124,13 +125,13 @@ class ErrorManagerTest {
             .json("{\"code\":\"Error\",\"message\":\"Error WebClientResponseException\"}");
 
     Mockito.doThrow(
-            new WebClientResponseException(
-                    HttpStatus.NOT_FOUND.value(),
-                    "Resource not found",
-                    new HttpHeaders(),
-                    null,
-                    StandardCharsets.UTF_8
-            ))
+                    new WebClientResponseException(
+                            HttpStatus.NOT_FOUND.value(),
+                            "Resource not found",
+                            new HttpHeaders(),
+                            null,
+                            StandardCharsets.UTF_8
+                    ))
             .when(testControllerSpy).testEndpoint();
 
     webTestClient.get()
@@ -141,7 +142,6 @@ class ErrorManagerTest {
             .expectBody()
             .json("{\"code\":\"404 NOT_FOUND\",\"message\":\"404 Resource not found\"}");
   }
-
 
   @Test
   void handleExceptionClientExceptionTest() {
@@ -156,7 +156,8 @@ class ErrorManagerTest {
             .expectBody()
             .json(EXPECTED_GENERIC_ERROR);
 
-    checkStackTraceSuppressedLog(memoryAppender, "HttpStatus null - null");
+    // FIXED: Added wildcards (.*) to match the info prefix
+    checkStackTraceSuppressedLog(memoryAppender, ".*HttpStatus null - null.*");
     memoryAppender.reset();
 
     Mockito.doThrow(
@@ -171,7 +172,8 @@ class ErrorManagerTest {
             .expectBody()
             .json(EXPECTED_GENERIC_ERROR);
 
-    checkStackTraceSuppressedLog(memoryAppender, "HttpStatus 400 BAD_REQUEST - ClientException with httpStatus and message");
+    // FIXED: Added wildcards (.*) to match the info prefix
+    checkStackTraceSuppressedLog(memoryAppender, ".*HttpStatus 400 BAD_REQUEST - ClientException with httpStatus and message.*");
     memoryAppender.reset();
 
     Mockito.doThrow(new ClientException(HttpStatus.BAD_REQUEST,
@@ -186,8 +188,9 @@ class ErrorManagerTest {
             .expectBody()
             .json(EXPECTED_GENERIC_ERROR);
 
+    // FIXED: Escaped special regex square brackets and handled structured formatting fields
     checkLog(memoryAppender,
-            "Something went wrong : HttpStatus 400 BAD_REQUEST - ClientException with httpStatus, message and throwable",
+            "Something went wrong \\[Exception: it\\.gov\\.pagopa\\.emd\\.payment\\.exception\\.ClientException - Details: ClientException with httpStatus, message and throwable\\] : HttpStatus 400 BAD_REQUEST - ClientException with httpStatus, message and throwable",
             "it.gov.pagopa.emd.payment.exception.ClientException: ClientException with httpStatus, message and throwable",
             "it.gov.pagopa.emd.payment.exception.ErrorManagerTest$TestController.testEndpoint"
     );

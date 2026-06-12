@@ -20,13 +20,7 @@ import java.util.Optional;
  * ensuring consistent error response formats and appropriate HTTP status codes. It handles
  * different types of exceptions and converts them into standardized JSON error responses
  * or status-only responses based on the exception type.
- * <p>
- * The error manager supports multiple exception types:
- * <ul>
- *   <li>{@link ClientExceptionNoBody} - Returns HTTP status only, without response body</li>
- *   <li>{@link ClientExceptionWithBody} - Returns structured error information in JSON format</li>
- *   <li>Generic {@link RuntimeException} - Returns default error response with HTTP 500</li>
- * </ul>
+ * </p>
  */
 @RestControllerAdvice
 @Slf4j
@@ -40,42 +34,32 @@ public class ErrorManager {
 
   /**
    * Handles all {@link RuntimeException} instances thrown by REST controllers.
-    * <p>
-    * This method provides differentiated handling based on the specific exception type:
-    * <ul>
-    *   <li>{@link ClientExceptionNoBody} - Returns only HTTP status code without response body</li>
-    *   <li>{@link ClientExceptionWithBody} - Returns structured JSON error with code and message</li>
-    *   <li>Other {@link RuntimeException} - Returns default error response with HTTP 500 status</li>
-    * </ul>
-    *
-    * @param error the runtime exception to handle
-    * @return a {@link ResponseEntity} containing either:
-    *         <ul>
-    *           <li>Empty body with appropriate HTTP status (for {@code ClientExceptionNoBody})</li>
-    *           <li>JSON error response with structured error information (for {@code ClientExceptionWithBody})</li>
-    *           <li>Default JSON error response with HTTP 500 status (for other exceptions)</li>
-    *         </ul>
-   */ 
+   * <p>
+   * This method differentiates handling and logging levels based on whether the exception
+   * is an expected business/client side-effect (4xx) or an unhandled server infrastructure error (5xx).
+   * </p>
+   *
+   * @param error the runtime exception to handle
+   * @return a {@link ResponseEntity} containing the structured error context
+   */
   @ExceptionHandler(RuntimeException.class)
   protected ResponseEntity<ErrorDTO> handleException(RuntimeException error) {
 
+    // Process intelligent and contextual logging based on exception properties
     logClientException(error);
 
-    log.error("Caught exception: {}", error.getClass().getName());
-    log.error("Exception details: {}", error.getMessage());
-
-    if(error instanceof ClientExceptionNoBody clientExceptionNoBody){
+    if (error instanceof ClientExceptionNoBody clientExceptionNoBody) {
       return ResponseEntity.status(clientExceptionNoBody.getHttpStatus()).build();
-    }
-    else {
+    } else {
       ErrorDTO errorDTO;
       HttpStatus httpStatus;
-      if (error instanceof ClientExceptionWithBody clientExceptionWithBody){
-        httpStatus=clientExceptionWithBody.getHttpStatus();
-        errorDTO = new ErrorDTO(clientExceptionWithBody.getCode(),  error.getMessage());
+
+      if (error instanceof ClientExceptionWithBody clientExceptionWithBody) {
+        httpStatus = clientExceptionWithBody.getHttpStatus();
+        errorDTO = new ErrorDTO(clientExceptionWithBody.getCode(), error.getMessage());
       }
-      else if(error instanceof WebClientResponseException webClientResponseException){
-        httpStatus=HttpStatus.valueOf(webClientResponseException.getStatusCode().value());
+      else if (error instanceof WebClientResponseException webClientResponseException) {
+        httpStatus = HttpStatus.valueOf(webClientResponseException.getStatusCode().value());
         String responseBody = webClientResponseException.getResponseBodyAsString();
 
         if (isValidErrorDTO(responseBody)) {
@@ -86,9 +70,11 @@ public class ErrorManager {
         }
       }
       else {
-        httpStatus=HttpStatus.INTERNAL_SERVER_ERROR;
+        // Severe unhandled server exception path
+        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         errorDTO = defaultErrorDTO;
       }
+
       return ResponseEntity.status(httpStatus)
               .contentType(MediaType.APPLICATION_JSON)
               .body(errorDTO);
@@ -96,30 +82,33 @@ public class ErrorManager {
   }
 
   /**
-   * Provides logging for runtime exceptions with the appropriate logging level and detail. 
+   * Provides logging for runtime exceptions with the appropriate logging level and detail.
    * It unwraps {@link ServiceException} causes when present and adjusts logging behavior based on:
    * <ul>
-   *   <li>Exception type</li>
-   *   <li>Stack trace printing preference</li>
-   *   <li>Presence of underlying causes</li>
+   * <li>Exception type</li>
+   * <li>Stack trace printing preference</li>
+   * <li>Presence of underlying causes</li>
    * </ul>
    * <p>
    * Logging levels:
    * <ul>
-   *   <li>ERROR level - For system exceptions, client exceptions with stack trace enabled,
-   *       or exceptions with underlying causes</li>
-   *   <li>INFO level - For simple client exceptions without stack trace requirements</li>
+   * <li>ERROR level - For system exceptions, client exceptions with stack trace enabled,
+   * or exceptions with underlying causes</li>
+   * <li>INFO level - For simple client exceptions without stack trace requirements</li>
    * </ul>
    *
    * @param error the runtime exception to log
-  */
+   */
   public static void logClientException(RuntimeException error) {
     Throwable unwrappedException = error.getCause() instanceof ServiceException
             ? error.getCause()
             : error;
 
     String clientExceptionMessage = "";
-    if(error instanceof ClientException clientException) {
+    boolean isClientException = error instanceof ClientException;
+
+    if (isClientException) {
+      ClientException clientException = (ClientException) error;
       clientExceptionMessage = "HttpStatus %s - %s%s".formatted(
               clientException.getHttpStatus(),
               (clientException instanceof ClientExceptionWithBody clientExceptionWithBody) ? clientExceptionWithBody.getCode() + ": " : "",
@@ -127,22 +116,22 @@ public class ErrorManager {
       );
     }
 
-    if(!(error instanceof ClientException clientException) || clientException.isPrintStackTrace() || unwrappedException.getCause() != null){
-      log.error("Something went wrong : {}", clientExceptionMessage, unwrappedException);
+    // Determine severity: if it's not a ClientException, or if stacktrace/nested causes are requested, log as ERROR
+    if (!isClientException || ((ClientException) error).isPrintStackTrace() || unwrappedException.getCause() != null) {
+      String exceptionName = error.getClass().getName();
+      log.error("Something went wrong [Exception: {} - Details: {}] : {}", exceptionName, error.getMessage(), clientExceptionMessage, unwrappedException);
     } else {
-      log.info("{}",clientExceptionMessage);
+      // Clean informational tracing for expected functional business results (e.g., 404 Retrieval Not Found)
+      log.info("Expected Client Exception processed: {}", clientExceptionMessage);
     }
   }
 
   /**
    * Validates if a response body string contains valid ErrorDTO structure.
-   * 
-   * @param responseBody the response body string to validate
+   * * @param responseBody the response body string to validate
    * @return true if the response body contains valid ErrorDTO structure, false otherwise
    */
   private boolean isValidErrorDTO(String responseBody) {
     return responseBody != null && responseBody.contains("\"code\"") && responseBody.contains("\"message\"");
   }
-
-
 }

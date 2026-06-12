@@ -8,16 +8,16 @@ import reactor.core.publisher.Mono;
 
 /**
  * Reactive MongoDB repository interface for managing {@link PaymentAttempt} entities.
+ * Combines standard Spring Data CRUD operations with custom atomic write behaviors.
  * <p>
  * Collection name: {@code payment_attempt}
  */
 @Repository
-public interface PaymentAttemptRepository extends ReactiveMongoRepository<PaymentAttempt,String> {
+public interface PaymentAttemptRepository extends ReactiveMongoRepository<PaymentAttempt, String>, PaymentAttemptCustomRepository {
 
     /**
-     * Finds a single payment attempt by TPP ID, origin ID.
-     * 
-     * @param tppId the TPP identifier
+     * Finds a single payment attempt by TPP ID and origin ID.
+     * * @param tppId the TPP identifier
      * @param originId the unique numeric identifier (IUN) of the notification
      * @return {@link Mono} containing the matching PaymentAttempt or empty if no match is found
      */
@@ -25,11 +25,9 @@ public interface PaymentAttemptRepository extends ReactiveMongoRepository<Paymen
 
     /**
      * Finds all payment attempts associated with a specific TPP.
-     * 
-     * @param tppId the TPP identifier
+     * * @param tppId the TPP identifier
      * @return {@link Flux} containing all PaymentAttempt entities for the specified TPP,
-     *         or empty Flux if no attempts are found
+     * or empty Flux if no attempts are found
      */
     Flux<PaymentAttempt> findByTppId(String tppId);
-
 }

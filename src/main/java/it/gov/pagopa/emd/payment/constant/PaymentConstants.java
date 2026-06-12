@@ -13,7 +13,8 @@ public class PaymentConstants {
         public static final String RETRIEVAL_NOT_FOUND = "RETRIEVAL_NOT_FOUND";
         public static final String AGENT_DEEP_LINKS_EMPTY = "AGENT_DEEP_LINKS_EMPTY";
         public static final String AGENT_NOT_FOUND_IN_DEEP_LINKS = "AGENT_NOT_FOUND_IN_DEEP_LINKS";
-
+        public static final String PAYMENT_ATTEMPT_NOT_FOUND = "PAYMENT_ATTEMPT_NOT_FOUND";
+        public static final String GENERIC_ERROR = "GENERIC_ERROR";
 
         private ExceptionCode() {}
     }
@@ -24,10 +25,10 @@ public class PaymentConstants {
     public static final class ExceptionMessage {
         public static final String TPP_NOT_FOUND = "TPP does not exist or is not active";
         public static final String RETRIEVAL_NOT_FOUND = "Retrieval does not exist or is not active";
-        public static final String GENERIC_ERROR = "GENERIC_ERROR";
+        public static final String GENERIC_ERROR = "An unexpected error occurred during processing";
         public static final String AGENT_DEEP_LINKS_EMPTY = "Agent deep links null or empty";
         public static final String AGENT_NOT_FOUND_IN_DEEP_LINKS = "Agent not found in deep links";
-
+        public static final String PAYMENT_ATTEMPT_NOT_FOUND = "Payment attempt does not exist for the given identifiers";
 
         private ExceptionMessage() {}
     }
@@ -41,10 +42,10 @@ public class PaymentConstants {
         public static final String AGENT_DEEP_LINKS_EMPTY = "AGENT_DEEP_LINKS_EMPTY";
         public static final String AGENT_NOT_FOUND_IN_DEEP_LINKS = "AGENT_NOT_FOUND_IN_DEEP_LINKS";
         public static final String GENERIC_ERROR = "GENERIC_ERROR";
+        public static final String PAYMENT_ATTEMPT_NOT_FOUND = "PAYMENT_ATTEMPT_NOT_FOUND";
 
         private ExceptionName() {}
     }
-
 
     private PaymentConstants() {}
 }

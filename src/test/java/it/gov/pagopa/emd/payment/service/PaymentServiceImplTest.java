@@ -47,55 +47,58 @@ class PaymentServiceImplTest {
         RetrievalResponseDTO retrievalResponseDTO = new RetrievalResponseDTO();
         retrievalResponseDTO.setRetrievalId("retrievalId");
 
-        StepVerifier.create(paymentServiceImpl.saveRetrieval("tppId",RETRIEVAL_REQUEST_DTO)).expectNext(retrievalResponseDTO)
+        StepVerifier.create(paymentServiceImpl.saveRetrieval("tppId", RETRIEVAL_REQUEST_DTO))
+                .expectNext(retrievalResponseDTO)
                 .verifyComplete();
     }
 
     @Test
-    void testGetRetrievalByRetrievalId(){
+    void testGetRetrievalByRetrievalId() {
         when(retrievalRepository.findByRetrievalId(any())).thenReturn(Mono.just(RETRIEVAL));
 
-        StepVerifier.create(paymentServiceImpl.getRetrievalByRetrievalId("tppId")).expectNext(RETRIEVAL_RESPONSE_DTO)
+        StepVerifier.create(paymentServiceImpl.getRetrievalByRetrievalId("tppId"))
+                .expectNext(RETRIEVAL_RESPONSE_DTO)
                 .verifyComplete();
     }
 
     @Test
-    void testGetRedirect(){
+    void testGetRedirect() {
+        // Stub del caricamento iniziale
         when(retrievalRepository.findByRetrievalId(any())).thenReturn(Mono.just(RETRIEVAL));
-        when(paymentAttemptRepository.findByTppIdAndOriginId(RETRIEVAL.getTppId(),RETRIEVAL.getOriginId())).thenReturn(Mono.just(PAYMENT_ATTEMPT));
-        when(paymentAttemptRepository.save(any())).thenReturn(Mono.just(PAYMENT_ATTEMPT));
+        when(paymentAttemptRepository.upsertAttemptDetails(any(), any(), any()))
+                .thenReturn(Mono.empty());
 
-        StepVerifier.create(paymentServiceImpl.getRedirect("retrievalId","fiscalCode","noticeNumber","amount"))
+        StepVerifier.create(paymentServiceImpl.getRedirect("retrievalId", "fiscalCode", "noticeNumber", "amount"))
                 .expectNext("deepLink?fiscalCode=fiscalCode&noticeNumber=noticeNumber&amount=amount")
                 .verifyComplete();
     }
 
     @Test
-    void testGetRedirectEmpty(){
+    void testGetRedirectEmpty() {
         when(retrievalRepository.findByRetrievalId(any())).thenReturn(Mono.just(RETRIEVAL));
-        when(paymentAttemptRepository.findByTppIdAndOriginId(RETRIEVAL.getTppId(),RETRIEVAL.getOriginId())).thenReturn(Mono.empty());
-        when(paymentAttemptRepository.save(any())).thenReturn(Mono.just(new PaymentAttempt()));
+        when(paymentAttemptRepository.upsertAttemptDetails(any(), any(), any()))
+                .thenReturn(Mono.empty());
 
-        StepVerifier.create(paymentServiceImpl.getRedirect("retrievalId","fiscalCode","noticeNumber","amount"))
+        StepVerifier.create(paymentServiceImpl.getRedirect("retrievalId", "fiscalCode", "noticeNumber", "amount"))
                 .expectNext("deepLink?fiscalCode=fiscalCode&noticeNumber=noticeNumber&amount=amount")
                 .verifyComplete();
     }
 
     @Test
-    void testGetAllPaymentAttemptsByTppId(){
+    void testGetAllPaymentAttemptsByTppId() {
         when(paymentAttemptRepository.findByTppId(anyString())).thenReturn(Flux.just(PAYMENT_ATTEMPT));
 
-        StepVerifier.create(paymentServiceImpl.getAllPaymentAttemptsByTppId("tppId")).expectNextCount(1)
+        StepVerifier.create(paymentServiceImpl.getAllPaymentAttemptsByTppId("tppId"))
+                .expectNextCount(1)
                 .verifyComplete();
     }
 
     @Test
-    void testGetPaymentAttemptByTppIdAndOriginId(){
-        when(paymentAttemptRepository.findByTppIdAndOriginId(anyString(),anyString())).thenReturn(Mono.just(PAYMENT_ATTEMPT));
+    void testGetPaymentAttemptByTppIdAndOriginId() {
+        when(paymentAttemptRepository.findByTppIdAndOriginId(anyString(), anyString())).thenReturn(Mono.just(PAYMENT_ATTEMPT));
 
-        StepVerifier.create(paymentServiceImpl.getPaymentAttemptByTppIdAndOriginId("tppId","originId")).expectNextCount(1)
+        StepVerifier.create(paymentServiceImpl.getPaymentAttemptByTppIdAndOriginId("tppId", "originId"))
+                .expectNextCount(1)
                 .verifyComplete();
     }
-
 }
-
