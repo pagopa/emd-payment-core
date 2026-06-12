@@ -39,8 +39,15 @@ jobs:
         with:
           ref: ${{ env.CURRENT_BRANCH }}
 
+      - name: Sanitize branch name for Docker tag
+        id: sanitize-branch
+        run: |
+          SAFE_BRANCH_NAME=$(echo "${{ github.ref_name }}" | tr '/' '-')
+          echo "safe_branch=$SAFE_BRANCH_NAME" >> $GITHUB_OUTPUT
+      # -----------------------------------------------------------
+
       - name: Run Snapshot Docker Build/Push
         # https://github.com/pagopa/github-actions-template/releases/tag/v2.1.1
         uses: pagopa/github-actions-template/payments-flow-docker-snapshot@e67e0ec4bb01d6cb5065e311ba0e1c92c49966a7
         with:
-          current_branch: ${{ github.ref_name }}
+          current_branch: ${{ steps.sanitize-branch.outputs.safe_branch }}
