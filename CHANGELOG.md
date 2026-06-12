@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.2](https://github.com/pagopa/emd-payment-core/compare/v1.5.1...v1.5.2) (2026-06-12)
+
+
+### Bug Fixes
+
+* [MMC-693] payment attempt race condition on concurrent requests ([#72](https://github.com/pagopa/emd-payment-core/issues/72)) ([122924b](https://github.com/pagopa/emd-payment-core/commit/122924b5257c67b9c73090a150dfac133d9178be))
+
 ## [1.5.1](https://github.com/pagopa/emd-payment-core/compare/v1.5.0...v1.5.1) (2026-06-09)
 
 
