@@ -1,11 +1,5 @@
 name: Snapshot docker build and push
 
-# Triggered exclusively as a downstream of "CI - Tests" via workflow_run.
-# Runs for ALL non-main branches (feature, release-*, dependabot/**).
-# The full chain for dependabot branches is:
-#   push → depcheck → ci-tests → snapshot-docker
-# Snapshot is never published if tests fail.
-
 on:
   workflow_run:
     workflows: ["CI - Tests"]
@@ -23,18 +17,15 @@ jobs:
   docker-build:
     name: 📦 Docker Build and Push
     runs-on: ubuntu-22.04
-
-    # Run only when tests passed and the triggering ci-tests was itself started by a
-    # `push` or by the depcheck `workflow_run` chain (not by a pull_request event,
-    # which would cause a duplicate Docker build alongside the push-originated one).
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch != 'main' &&
-      (github.event.workflow_run.event == 'push' || github.event.workflow_run.event == 'workflow_run')
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      (github.event.workflow_run.event == 'push' || 
+       github.event.workflow_run.event == 'workflow_run' || 
+       github.event.workflow_run.event == 'pull_request')
 
     steps:
-      # Use branch name ref (not head_sha) to get the latest commit on the branch,
-      # including any dep-sha256.json update from the depcheck bot.
       - name: Checkout code
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.2
         with:
@@ -47,7 +38,6 @@ jobs:
           echo "safe_branch=$SAFE_BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Run Snapshot Docker Build/Push
-        # https://github.com/pagopa/github-actions-template/releases/tag/v2.1.1
         uses: pagopa/github-actions-template/payments-flow-docker-snapshot@e67e0ec4bb01d6cb5065e311ba0e1c92c49966a7
         with:
           current_branch: ${{ steps.sanitize-branch.outputs.safe_branch }}
