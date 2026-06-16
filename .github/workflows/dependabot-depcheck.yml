@@ -9,6 +9,10 @@ on:
   push:
     branches:
       - 'dependabot/**'
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - 'dependabot/**'
 
 # Queue runs instead of cancelling — the second run (from the bot's own commit)
 # is skipped immediately by the `if` guard below.
@@ -22,7 +26,9 @@ jobs:
     runs-on: ubuntu-22.04
 
     # Prevents an infinite loop: skip if this workflow triggered itself.
-    if: "!contains(github.event.head_commit.message, 'chore: auto-update dep-sha256.json')"
+    if: >-
+      (github.event_name == 'push' && !contains(github.event.head_commit.message, 'chore: auto-update dep-sha256.json')) ||
+      (github.event_name == 'pull_request' && !contains(github.event.pull_request.head.repo.commits[0].message, 'chore: auto-update dep-sha256.json'))
 
     steps:
       - name: Checkout repository
