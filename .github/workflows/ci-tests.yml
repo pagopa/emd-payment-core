@@ -1,72 +1,24 @@
 name: CI - Tests
 
-# Runs on:
-#   - push to non-main, non-dependabot branches (feeds snapshot-docker via workflow_run)
-#   - pull_request for non-dependabot PRs (appears as a proper PR status check)
-#   - workflow_run of depcheck for dependabot/** branches (dep-sha256.json must be
-#     updated before tests run; snapshot-docker follows from here too)
+# Reusable workflow — invoked by pr-pipeline.yml after depcheck.
+# Always runs on every PR (orchestrator gates it with !failure() && !cancelled()).
 
 on:
-  push:
-    branches-ignore:
-      - 'main'
-      - 'dependabot/**'
-    paths-ignore:
-      - 'CODEOWNERS'
-      - '**.md'
-      - '.**'
+  workflow_call:
 
-  # PR check for regular (non-dependabot) PRs.
-  # No paths-ignore here — tests should always run as a PR gate.
-  pull_request:
-    types: [opened, synchronize, reopened]
-
-  # Dependabot branches: run after depcheck, not on the raw push.
-  workflow_run:
-    workflows: ["Auto-update depcheck for Dependabot"]
-    types: [completed]
-    branches:
-      - 'dependabot/**'
-
-# Separate concurrency groups for push vs PR so both can coexist:
-#   push  → group: ci-tests-refs/heads/feature/foo  (for snapshot-docker chain)
-#   PR    → group: ci-tests-pr-123                  (visible PR status check)
-#   depcheck chain → group: ci-tests-dependabot/maven/foo
-concurrency:
-  group: >-
-    ci-tests-${{
-      (github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number)) ||
-      github.event.workflow_run.head_branch ||
-      github.ref
-    }}
-  cancel-in-progress: true
+permissions:
+  contents: read
 
 jobs:
   test:
     name: 🧪 Build & Test
     runs-on: ubuntu-22.04
-
-    if: >-
-      github.event_name == 'push' ||
-      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
-      (github.event_name == 'pull_request' && github.actor != 'dependabot[bot]')
-
     steps:
-      - name: Resolve branch ref
-        id: ctx
-        run: |
-          if [ "${{ github.event_name }}" = "workflow_run" ]; then
-            # Use branch name (not head_sha) to get the latest commit,
-            # including any dep-sha256.json update pushed by the depcheck bot.
-            echo "ref=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_OUTPUT
-          else
-            echo "ref=${{ github.ref }}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Checkout code
+      - name: Checkout PR head
         uses: actions/checkout@v4.1.7
         with:
-          ref: ${{ steps.ctx.outputs.ref }}
+          # Latest branch tip — includes any dep-sha256.json commit from depcheck.
+          ref: ${{ github.head_ref }}
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4.2.1
@@ -82,4 +34,3 @@ jobs:
 
       - name: Run tests
         run: mvn verify -B
-

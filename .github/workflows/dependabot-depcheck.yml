@@ -1,40 +1,24 @@
-name: Auto-update depcheck for Dependabot
+name: Depcheck
 
-# Runs on every push to dependabot/** branches.
-# Regenerates dep-sha256.json to match the updated pom.xml and commits it back.
-# The bot push uses a PAT (MIL_BOT_TOKEN) so GitHub fires a PR `synchronize`
-# event, re-triggering code-review and security-scan with the correct file.
+# Reusable workflow — invoked by pr-pipeline.yml.
+# Regenerates dep-sha256.json to match pom.xml and commits it back to the PR branch.
+# Push is performed only for same-repo PRs (forks have a read-only token / no secrets).
 
 on:
-  push:
-    branches:
-      - 'dependabot/**'
-  pull_request:
-    types: [opened, synchronize]
-    branches:
-      - 'dependabot/**'
+  workflow_call:
 
-# Queue runs instead of cancelling — the second run (from the bot's own commit)
-# is skipped immediately by the `if` guard below.
-concurrency:
-  group: depcheck-${{ github.ref }}
-  cancel-in-progress: false
+permissions:
+  contents: write
 
 jobs:
-  update-depcheck:
+  depcheck:
     name: 🔄 Update dep-sha256.json
     runs-on: ubuntu-22.04
-
-    # Prevents an infinite loop: skip if this workflow triggered itself.
-    if: >-
-      (github.event_name == 'push' && !contains(github.event.head_commit.message, 'chore: auto-update dep-sha256.json')) ||
-      (github.event_name == 'pull_request' && !contains(github.event.pull_request.head.repo.commits[0].message, 'chore: auto-update dep-sha256.json'))
-
     steps:
-      - name: Checkout repository
+      - name: Checkout PR head
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v4.6.0
         with:
-          ref: ${{ github.ref_name }}
+          ref: ${{ github.head_ref }}
           # PAT required — GITHUB_TOKEN pushes don't trigger downstream workflow events.
           token: ${{ secrets.EMD_BOT_TOKEN }}
 
@@ -54,6 +38,7 @@ jobs:
         run: mvn depcheck:generate -U -B
 
       - name: Commit and push dep-sha256.json
+        if: github.event.pull_request.head.repo.full_name == github.repository
         run: |
           git config --global user.name  "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -61,9 +46,9 @@ jobs:
           git add dep-sha256.json
 
           if ! git diff --cached --quiet; then
-            echo "✅ Changes detected — committing dep-sha256.json."
+            echo "✅ Changes detected — committing dep-sha256.json (re-triggers the pipeline)."
             git commit -m "chore: auto-update dep-sha256.json"
-            git push origin HEAD:${{ github.ref_name }}
+            git push origin HEAD:${{ github.head_ref }}
           else
-            echo "ℹ️  No changes in dep-sha256.json — skipping commit."
+            echo "ℹ️  dep-sha256.json already aligned — nothing to commit."
           fi

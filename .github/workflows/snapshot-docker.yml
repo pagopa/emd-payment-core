@@ -1,24 +1,12 @@
 name: Snapshot docker build and push
 
-# ⚠️ workflow_run LIFECYCLE NOTE:
-#   This trigger is ONLY registered from the copy of this file on the DEFAULT branch
-#   (main). It will NOT fire while these changes live only on a feature/PR branch —
-#   that is why a downstream can appear "completely ignored" (no run, no skip).
-#   The downstream also always executes using the main-branch version of this file,
-#   in the context of main (not the PR head).
-#
-# Fires after "CI - Tests" completes. Runs for internal pushes and internal PRs only;
-# external forks are excluded for security (read-only token + untrusted code).
+# Reusable workflow — invoked by pr-pipeline.yml.
+# Runs only when ci-tests succeeded (enforced by the orchestrator via `needs`).
+# Pushing to GHCR requires a writable token: works for same-repo PRs; fork PRs
+# (read-only token) are filtered upstream by the orchestrator.
 
 on:
-  workflow_run:
-    # Must match the upstream workflow `name:` EXACTLY (case-sensitive).
-    workflows: ["CI - Tests"]
-    types: [completed]
-
-concurrency:
-  group: snapshot-docker-${{ github.event.workflow_run.head_branch }}
-  cancel-in-progress: true
+  workflow_call:
 
 permissions:
   packages: write
@@ -28,33 +16,17 @@ jobs:
   docker-build:
     name: 📦 Docker Build and Push
     runs-on: ubuntu-22.04
-
-    # Guard rails (a false here shows the job as "skipped", unlike the trigger
-    # itself silently not registering):
-    #   1. tests passed
-    #   2. not the default branch
-    #   3. SECURITY: head repo == base repo  → excludes fork PRs (untrusted code)
-    #   4. only chain from a push or a (same-repo) PR/PR-target run of CI - Tests
-    if: >-
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch != 'main' &&
-      github.event.workflow_run.head_repository.id == github.event.repository.id &&
-      (github.event.workflow_run.event == 'push' ||
-       github.event.workflow_run.event == 'pull_request' ||
-       github.event.workflow_run.event == 'pull_request_target' ||
-       github.event.workflow_run.event == 'workflow_run')
-
     steps:
-      - name: Checkout code
+      - name: Checkout PR head
         uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.2
         with:
-          ref: ${{ github.event.workflow_run.head_branch }}
+          ref: ${{ github.head_ref }}
 
       - name: Sanitize branch name for Docker tag
         id: sanitize-branch
         run: |
-          SAFE_BRANCH_NAME=$(echo "${{ github.event.workflow_run.head_branch }}" | tr '/' '-')
-          echo "safe_branch=$SAFE_BRANCH_NAME" >> $GITHUB_OUTPUT
+          SAFE_BRANCH_NAME=$(echo "${{ github.head_ref }}" | tr '/' '-')
+          echo "safe_branch=$SAFE_BRANCH_NAME" >> "$GITHUB_OUTPUT"
 
       - name: Run Snapshot Docker Build/Push
         uses: pagopa/github-actions-template/payments-flow-docker-snapshot@e67e0ec4bb01d6cb5065e311ba0e1c92c49966a7
