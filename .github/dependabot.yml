@@ -4,8 +4,8 @@ registries:
   github-pagopa:
     type: maven-repository
     url: https://maven.pkg.github.com/pagopa
-    username: "emd-gh-bot"
-    password: "${{ secrets.EMD_BOT_RO_TOKEN }}"
+    username: "mil-github-bot"
+    password: "${{ secrets.MIL_BOT_TOKEN }}"
 
 updates:
   - package-ecosystem: "maven"
