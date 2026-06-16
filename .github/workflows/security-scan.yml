@@ -1,11 +1,13 @@
 # Builds the Docker image and runs a Trivy vulnerability scan.
 # Results are uploaded to GitHub Advanced Security (SARIF).
-# Dependabot PRs: skip `opened` (dep-sha256.json stale); run on `synchronize` instead.
+# workflow_call: invoked by pr-pipeline.yml AFTER depcheck (dep-sha256.json aligned).
+# schedule/workflow_dispatch keep the standalone (main) behavior unchanged.
+# NOTE: the direct `pull_request` trigger was removed — PR scans now run through the
+# orchestrator to enforce the depcheck → security-scan ordering.
 name: Container Scan
 
 on:
-  pull_request:
-    branches: [ "release-dev", "release-uat", "main" ]
+  workflow_call:
   workflow_dispatch:
   schedule:
     - cron: '00 07 * * *'
@@ -27,10 +29,6 @@ jobs:
       actions: read         # upload-sarif on private repos
     runs-on: ubuntu-latest
 
-    # Skip the first `opened` event on Dependabot PRs (dep-sha256.json stale).
-    # schedule/workflow_dispatch are unaffected (github.event.action is empty).
-    if: >-
-      !(github.actor == 'dependabot[bot]' && github.event.action == 'opened')
 
     outputs:
       CVE_CRITICAL: ${{ env.CVE_CRITICAL }}
@@ -46,7 +44,7 @@ jobs:
 
       - name: Run Trivy vulnerability scan
         id: scan
-        uses: aquasecurity/trivy-action@915b19bbe73b92a6cf82a1bc12b087c9a19a5fe2 # 0.28.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # 0.36.0
         with:
           # Config lives under .github/workflows/config/, not at repo root.
           trivy-config: '.github/workflows/config/trivy.yaml'
