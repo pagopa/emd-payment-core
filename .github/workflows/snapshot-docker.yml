@@ -1,7 +1,18 @@
 name: Snapshot docker build and push
 
+# ⚠️ workflow_run LIFECYCLE NOTE:
+#   This trigger is ONLY registered from the copy of this file on the DEFAULT branch
+#   (main). It will NOT fire while these changes live only on a feature/PR branch —
+#   that is why a downstream can appear "completely ignored" (no run, no skip).
+#   The downstream also always executes using the main-branch version of this file,
+#   in the context of main (not the PR head).
+#
+# Fires after "CI - Tests" completes. Runs for internal pushes and internal PRs only;
+# external forks are excluded for security (read-only token + untrusted code).
+
 on:
   workflow_run:
+    # Must match the upstream workflow `name:` EXACTLY (case-sensitive).
     workflows: ["CI - Tests"]
     types: [completed]
 
@@ -17,12 +28,21 @@ jobs:
   docker-build:
     name: 📦 Docker Build and Push
     runs-on: ubuntu-22.04
+
+    # Guard rails (a false here shows the job as "skipped", unlike the trigger
+    # itself silently not registering):
+    #   1. tests passed
+    #   2. not the default branch
+    #   3. SECURITY: head repo == base repo  → excludes fork PRs (untrusted code)
+    #   4. only chain from a push or a (same-repo) PR/PR-target run of CI - Tests
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.head_branch != 'main' &&
       github.event.workflow_run.head_repository.id == github.event.repository.id &&
-      (github.event.workflow_run.event == 'push' || 
-       github.event.workflow_run.event == 'pull_request')
+      (github.event.workflow_run.event == 'push' ||
+       github.event.workflow_run.event == 'pull_request' ||
+       github.event.workflow_run.event == 'pull_request_target' ||
+       github.event.workflow_run.event == 'workflow_run')
 
     steps:
       - name: Checkout code
