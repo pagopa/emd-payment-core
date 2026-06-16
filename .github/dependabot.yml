@@ -5,7 +5,7 @@ registries:
     type: maven-repository
     url: https://maven.pkg.github.com/pagopa
     username: "emd-gh-bot"
-    password: "${{ EMD_BOT_RO_TOKEN }}"
+    password: "${{ secrets.EMD_BOT_RO_TOKEN }}"
 
 updates:
   - package-ecosystem: "maven"
