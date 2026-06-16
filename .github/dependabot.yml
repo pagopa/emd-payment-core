@@ -5,11 +5,13 @@ registries:
     type: maven-repository
     url: https://maven.pkg.github.com/pagopa
     username: "emd-gh-bot"
-    password: ${{secrets.EMD_BOT_TOKEN}}
+    password: "${{ env.EMD_BOT_TOKEN }}"
 
 updates:
   - package-ecosystem: "maven"
     directory: "/"
+    registries:
+      - github-pagopa
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
