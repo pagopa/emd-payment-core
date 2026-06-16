@@ -1,16 +1,20 @@
 name: PR Pipeline
 
 # Single orchestrator for the PR chain:
-#   detect-changes → depcheck (pom.xml only) → ci-tests (always) → snapshot-docker
+#   detect-changes → depcheck (pom.xml only) → ┬─ ci-tests (always) → snapshot-docker
+#                                              ├─ code-review (SonarCloud)
+#                                              └─ security-scan (Trivy)
 #
 # Rules:
 #   - depcheck runs ONLY if pom.xml changed, otherwise it is SKIPPED.
-#   - ci-tests runs on EVERY PR creation/push, as long as depcheck did NOT fail
-#     (i.e. it runs whether depcheck succeeded OR was skipped).
+#   - ci-tests, code-review and security-scan run on EVERY PR push, as long as
+#     depcheck did NOT fail (they run whether depcheck succeeded OR was skipped).
 #   - snapshot-docker runs ONLY if ci-tests did NOT fail (success).
 #
-# All three steps are reusable workflows (on: workflow_call) and appear as native
-# PR status checks, running against the PR head commit.
+# All steps are reusable workflows (on: workflow_call), appear as native PR status
+# checks, and run against the PR head commit (post-depcheck).
+# On main/release-* and on schedule, code-review and security-scan keep their own
+# standalone triggers (push / schedule / workflow_dispatch).
 
 on:
   pull_request:
@@ -22,9 +26,11 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write   # depcheck may commit dep-sha256.json
-  packages: write   # snapshot-docker pushes to GHCR
+  contents: write        # depcheck may commit dep-sha256.json
+  packages: write        # snapshot-docker pushes to GHCR
   pull-requests: read
+  security-events: write # security-scan uploads Trivy SARIF
+  actions: read          # security-scan SARIF upload on private repos
 
 jobs:
   # 1) Decide whether pom.xml changed in this PR.
@@ -66,6 +72,23 @@ jobs:
     if: ${{ !failure() && !cancelled() }}
     uses: ./.github/workflows/ci-tests.yml
     secrets: inherit
+
+  # 3b) SonarCloud — runs after depcheck (success or skipped), in parallel with tests.
+  code-review:
+    name: 🔍 SonarCloud Analysis
+    needs: [detect-changes, depcheck]
+    if: ${{ !failure() && !cancelled() }}
+    uses: ./.github/workflows/code-review.yml
+    secrets: inherit
+
+  # 3c) Container scan — runs after depcheck (success or skipped), in parallel with tests.
+  # disabled for security reasons
+#  security-scan:
+#    name: 🛡️ Container Scan
+#    needs: [detect-changes, depcheck]
+#    if: ${{ !failure() && !cancelled() }}
+#    uses: ./.github/workflows/security-scan.yml
+#    secrets: inherit
 
   # 4) Snapshot — only if ci-tests succeeded. Skipped on fork PRs (no push token).
   snapshot-docker:

@@ -1,20 +1,17 @@
 name: SonarCloud Analysis
 
 # push to main/release-*: full branch analysis (SonarCloud quality gate baseline).
-# pull_request: inline PR decoration.
-# Dependabot PRs: the `opened` event is skipped (dep-sha256.json is stale at that point).
-# After depcheck commits the updated file, the resulting `synchronize` event re-runs this.
+# workflow_call: invoked by pr-pipeline.yml AFTER depcheck, so dep-sha256.json is
+# already aligned with pom.xml before the analysis runs.
+# NOTE: the direct `pull_request` trigger was removed on purpose — PR analysis is
+# now driven by the orchestrator to enforce the depcheck → code-review ordering.
 
 on:
   push:
     branches:
       - main
       - release-*
-  pull_request:
-    types:
-      - opened
-      - edited
-      - synchronize
+  workflow_call:
 
 # Cancel previous runs for the same PR or branch when a new commit is pushed.
 concurrency:
@@ -25,11 +22,6 @@ jobs:
   sonarcloud:
     name: SonarCloud Analysis
     runs-on: ubuntu-latest
-
-    # Skip the first `opened` event on Dependabot PRs; run on `synchronize` instead
-    # (fired after depcheck commits the updated dep-sha256.json).
-    if: >-
-      !(github.actor == 'dependabot[bot]' && github.event.action == 'opened')
 
     steps:
       - name: Checkout code
