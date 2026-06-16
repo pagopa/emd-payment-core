@@ -5,7 +5,7 @@ registries:
     type: maven-repository
     url: https://maven.pkg.github.com/pagopa
     username: "emd-gh-bot"
-    password: "${{ env.EMD_BOT_TOKEN }}"
+    password: "${{ env.EMD_BOT_RO_TOKEN }}"
 
 updates:
   - package-ecosystem: "maven"
@@ -15,7 +15,9 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
-
+    commit-message:
+      prefix: "fix"
+      include: "scope"
     groups:
       non-major-updates:
         patterns:
