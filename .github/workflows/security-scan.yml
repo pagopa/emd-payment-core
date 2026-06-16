@@ -1,20 +1,20 @@
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
-
-# This workflow checks out code, builds an image, performs a container image
-# vulnerability scan with Trivy tool, and integrates the results with GitHub Advanced Security
-# code scanning feature.
+# Builds the Docker image and runs a Trivy vulnerability scan.
+# Results are uploaded to GitHub Advanced Security (SARIF).
+# Dependabot PRs: skip `opened` (dep-sha256.json stale); run on `synchronize` instead.
 name: Container Scan
 
 on:
   pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ "release-dev", "release-uat" ,"main" ]
+    branches: [ "release-dev", "release-uat", "main" ]
   workflow_dispatch:
   schedule:
     - cron: '00 07 * * *'
+
+# Cancel in-progress scans for the same PR when a new commit arrives.
+# For schedule/dispatch, each run gets its own group via github.run_id.
+concurrency:
+  group: security-scan-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -22,49 +22,61 @@ permissions:
 jobs:
   BuildAndScan:
     permissions:
-      contents: read # for actions/checkout to fetch code
-      security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-      actions: read # only required for a private repository by github/codeql-action/upload-sarif to get the Action run status
+      contents: read        # checkout
+      security-events: write # upload-sarif
+      actions: read         # upload-sarif on private repos
     runs-on: ubuntu-latest
+
+    # Skip the first `opened` event on Dependabot PRs (dep-sha256.json stale).
+    # schedule/workflow_dispatch are unaffected (github.event.action is empty).
+    if: >-
+      !(github.actor == 'dependabot[bot]' && github.event.action == 'opened')
+
     outputs:
-      CVE_CRITICAL: ${{env.CVE_CRITICAL}}
-      CVE_HIGH: ${{env.CVE_HIGH}}
-      CVE_MEDIUM: ${{env.CVE_MEDIUM}}
+      CVE_CRITICAL: ${{ env.CVE_CRITICAL }}
+      CVE_HIGH: ${{ env.CVE_HIGH }}
+      CVE_MEDIUM: ${{ env.CVE_MEDIUM }}
+
     steps:
       - name: Checkout the code
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 #v4.1.1
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+
       - name: Build the Docker image
-        run: docker build . --file Dockerfile --tag localbuild/testimage:latest  --build-arg GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
-      - name: Run the Trivy scan action itself with GitHub Advanced Security code scanning integration enabled
+        run: docker build . --file Dockerfile --tag localbuild/testimage:latest --build-arg GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run Trivy vulnerability scan
         id: scan
         uses: aquasecurity/trivy-action@915b19bbe73b92a6cf82a1bc12b087c9a19a5fe2 # 0.28.0
         with:
-          trivy-config: 'config/trivy.yaml'
+          # Config lives under .github/workflows/config/, not at repo root.
+          trivy-config: '.github/workflows/config/trivy.yaml'
           image-ref: "localbuild/testimage:latest"
           format: 'sarif'
           output: 'results.sarif'
-      - name: Upload Anchore Scan Report
-        uses: github/codeql-action/upload-sarif@99c9897648dded3fe63d6f328c46089dd57735ca #codeql bundle v2.17.0
+
+      - name: Upload Trivy SARIF report
+        uses: github/codeql-action/upload-sarif@99c9897648dded3fe63d6f328c46089dd57735ca # codeql bundle v2.17.0
         with:
           sarif_file: 'results.sarif'
-      - name: CVE Description escaped extraction and print
+
+      - name: Extract CVE counts
         run: |
           SCAN_RESULTS=$(jq -r 'try .runs[0].tool.driver.rules | try map(.shortDescription.text) | join("\\n")' results.sarif)
           echo "CVE_CRITICAL=$(echo $SCAN_RESULTS | grep -o CRITICAL | wc -l)" >> $GITHUB_ENV
           echo "CVE_HIGH=$(echo $SCAN_RESULTS | grep -o HIGH | wc -l)" >> $GITHUB_ENV
           echo "CVE_MEDIUM=$(echo $SCAN_RESULTS | grep -o MEDIUM | wc -l)" >> $GITHUB_ENV
+          echo "$SCAN_RESULTS"
 
-          echo $SCAN_RESULTS
-      - name: Fails if CVE HIGH or CRITICAL are detected
-        id: cve-threshold
+      - name: Fail if CVE HIGH or CRITICAL are detected
         if: env.CVE_HIGH > 0 || env.CVE_CRITICAL > 0
         run: exit 1
+
   SendSlackNotification:
     needs: BuildAndScan
     uses: ./.github/workflows/send-notification.yml
     if: always() && (needs.BuildAndScan.outputs.CVE_HIGH > 0 || needs.BuildAndScan.outputs.CVE_CRITICAL > 0)
     with:
-      CVE_CRITICAL: ${{needs.BuildAndScan.outputs.CVE_CRITICAL}}
-      CVE_HIGH: ${{needs.BuildAndScan.outputs.CVE_HIGH}}
-      CVE_MEDIUM: ${{needs.BuildAndScan.outputs.CVE_MEDIUM}}
+      CVE_CRITICAL: ${{ needs.BuildAndScan.outputs.CVE_CRITICAL }}
+      CVE_HIGH: ${{ needs.BuildAndScan.outputs.CVE_HIGH }}
+      CVE_MEDIUM: ${{ needs.BuildAndScan.outputs.CVE_MEDIUM }}
     secrets: inherit

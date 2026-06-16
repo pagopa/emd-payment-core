@@ -5,6 +5,13 @@ on:
     branches:
       - main
 
+# Do NOT use cancel-in-progress for releases: if two commits land on main in
+# rapid succession, both release-please runs should complete so no release is
+# silently skipped.
+concurrency:
+  group: release-build-${{ github.ref }}
+  cancel-in-progress: false
+
 # Cumulative permissions for both jobs
 permissions:
   contents: write
@@ -36,7 +43,7 @@ jobs:
   # --- JOB 2: BUILD AND PUSH DOCKER ---
   build-and-push:
     name: 🐳 Build and Push
-    needs: release-please 
+    needs: release-please
     if: needs.release-please.outputs.release_created == 'true'
     runs-on: ubuntu-22.04
     steps:
@@ -52,7 +59,6 @@ jobs:
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
-            # Use directly the created tag
             type=raw,value=${{ needs.release-please.outputs.tag_name }}
 
       - name: 🛃 Log in to Github Container registry

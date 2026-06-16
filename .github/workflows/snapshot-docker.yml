@@ -1,50 +1,50 @@
 name: Snapshot docker build and push
 
-on:
-  push:
-    # Sequence of patterns matched against refs/heads
-    branches-ignore:
-      - 'main'
-    paths-ignore:
-      - 'CODEOWNERS'
-      - '**.md'
-      - '.**'
+# Triggered exclusively as a downstream of "CI - Tests" via workflow_run.
+# Runs for ALL non-main branches (feature, release-*, dependabot/**).
+# The full chain for dependabot branches is:
+#   push → depcheck → ci-tests → snapshot-docker
+# Snapshot is never published if tests fail.
 
-env:
-  # branch choosed by workflow_dispatch or by push event
-  CURRENT_BRANCH: ${{ github.event.inputs.branch || github.ref_name }}
+on:
+  workflow_run:
+    workflows: ["CI - Tests"]
+    types: [completed]
+
+concurrency:
+  group: snapshot-docker-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: true
 
 permissions:
   packages: write
   contents: read
 
 jobs:
-  checkout:
-    name: 🔖 Checkout Repository
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
-        with:
-          ref: ${{ env.CURRENT_BRANCH }}
-
   docker-build:
     name: 📦 Docker Build and Push
-    needs: checkout
     runs-on: ubuntu-22.04
-    if: ${{ github.event_name == 'push' || github.event.inputs.docker_build_enabled == 'true' }}
+
+    # Run only when tests passed and the triggering ci-tests was itself started by a
+    # `push` or by the depcheck `workflow_run` chain (not by a pull_request event,
+    # which would cause a duplicate Docker build alongside the push-originated one).
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch != 'main' &&
+      (github.event.workflow_run.event == 'push' || github.event.workflow_run.event == 'workflow_run')
+
     steps:
+      # Use branch name ref (not head_sha) to get the latest commit on the branch,
+      # including any dep-sha256.json update from the depcheck bot.
       - name: Checkout code
-        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
+        uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4.2.2
         with:
-          ref: ${{ env.CURRENT_BRANCH }}
+          ref: ${{ github.event.workflow_run.head_branch }}
 
       - name: Sanitize branch name for Docker tag
         id: sanitize-branch
         run: |
-          SAFE_BRANCH_NAME=$(echo "${{ github.ref_name }}" | tr '/' '-')
+          SAFE_BRANCH_NAME=$(echo "${{ github.event.workflow_run.head_branch }}" | tr '/' '-')
           echo "safe_branch=$SAFE_BRANCH_NAME" >> $GITHUB_OUTPUT
-      # -----------------------------------------------------------
 
       - name: Run Snapshot Docker Build/Push
         # https://github.com/pagopa/github-actions-template/releases/tag/v2.1.1

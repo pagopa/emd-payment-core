@@ -1,5 +1,10 @@
 name: SonarCloud Analysis
 
+# push to main/release-*: full branch analysis (SonarCloud quality gate baseline).
+# pull_request: inline PR decoration.
+# Dependabot PRs: the `opened` event is skipped (dep-sha256.json is stale at that point).
+# After depcheck commits the updated file, the resulting `synchronize` event re-runs this.
+
 on:
   push:
     branches:
@@ -11,16 +16,26 @@ on:
       - edited
       - synchronize
 
+# Cancel previous runs for the same PR or branch when a new commit is pushed.
+concurrency:
+  group: sonar-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   sonarcloud:
     name: SonarCloud Analysis
     runs-on: ubuntu-latest
 
+    # Skip the first `opened` event on Dependabot PRs; run on `synchronize` instead
+    # (fired after depcheck commits the updated dep-sha256.json).
+    if: >-
+      !(github.actor == 'dependabot[bot]' && github.event.action == 'opened')
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.1.7
         with:
-          fetch-depth: 0  # Fetch all history for all branches and tags
+          fetch-depth: 0  # Full history required by SonarCloud
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4.2.1
@@ -39,7 +54,7 @@ jobs:
       - name: Setup Maven Settings
         run: |
           mkdir -p ~/.m2
-          echo '<settings><servers><server><id>github</id><username></username><password>${{ secrets.GITHUB_TOKEN }}</password></server></servers></settings>' > ~/.m2/settings.xml            
+          echo '<settings><servers><server><id>github</id><username></username><password>${{ secrets.GITHUB_TOKEN }}</password></server></servers></settings>' > ~/.m2/settings.xml
 
       - name: Build and test with Maven
         run: mvn clean org.jacoco:jacoco-maven-plugin:0.8.11:prepare-agent verify org.jacoco:jacoco-maven-plugin:0.8.11:report org.jacoco:jacoco-maven-plugin:0.8.11:report-aggregate -B
@@ -61,6 +76,3 @@ jobs:
             -Dsonar.junit.reportPaths=target/surefire-reports \
             -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
             -Dsonar.exclusions=**/configuration/**,**/enums/**,**/model/**,**/stub/**,**/dto/**,**/*Constant*,**/*Config.java,**/*Scheduler.java,**/*Application.java,**/src/test/**,**/Dummy*.java
-
-      - name: Fetch all branches
-        run: git fetch --all
