@@ -95,12 +95,12 @@ public class PaymentServiceImpl implements PaymentService {
                                             PaymentConstants.ExceptionName.GENERIC_ERROR,
                                             PaymentConstants.ExceptionMessage.GENERIC_ERROR);
                                 })
-                                .then(Mono.fromCallable(() -> {
-                                    String deeplink = buildDeepLink(retrievalResponseDTO.getDeeplink(), fiscalCode, noticeNumber, amount);
-                                    log.info("[EMD][PAYMENT][GET-REDIRECT] Got redirect for retrievalId: {}", retrievalId);
-
-                                    return deeplink;
-                                }))
+                                .then(Mono.fromCallable(() ->
+                                        buildDeepLink(retrievalResponseDTO.getDeeplink(), fiscalCode, noticeNumber, amount)
+                                ))
+                                .doOnNext(deeplink ->
+                                        log.info("[EMD] [PAYMENT] [GET-REDIRECT] Got redirect for retrievalId: {}", retrievalId)
+                                )
                 );
     }
 
