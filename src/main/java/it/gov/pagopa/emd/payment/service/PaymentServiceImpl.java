@@ -99,7 +99,7 @@ public class PaymentServiceImpl implements PaymentService {
                                         buildDeepLink(retrievalResponseDTO.getDeeplink(), fiscalCode, noticeNumber, amount)
                                 ))
                                 .doOnNext(deeplink ->
-                                        log.info("[EMD] [PAYMENT] [GET-REDIRECT] Got redirect for retrievalId: {}", retrievalId)
+                                        log.info("[EMD][PAYMENT][GET-REDIRECT] Got redirect for retrievalId: {}", retrievalId)
                                 )
                 );
     }
