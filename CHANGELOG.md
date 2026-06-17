@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.3](https://github.com/pagopa/emd-payment-core/compare/v1.5.2...v1.5.3) (2026-06-17)
+
+
+### Bug Fixes
+
+* add log for redirect success ([#84](https://github.com/pagopa/emd-payment-core/issues/84)) ([926c570](https://github.com/pagopa/emd-payment-core/commit/926c5702978631014babf6364d2616c7f8512be4))
+
 ## [1.5.2](https://github.com/pagopa/emd-payment-core/compare/v1.5.1...v1.5.2) (2026-06-12)
 
 
