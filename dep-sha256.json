@@ -155,116 +155,109 @@
       "sha256": "Va6vxJe1qI7tPGyIJlwte493_AXV2ljaSFekNXKsHa4="
     },
     {
-      "id": "io.netty:netty-codec-http:jar:4.2.15.Final",
+      "id": "io.netty:netty-codec-http:jar:4.1.112.Final",
       "artifactId": "netty-codec-http",
       "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "dq5X6HrzezxBBxQPULkkSxRWFjpqIlUQg498WkRY7CI="
+      "version": "4.1.112.Final",
+      "sha256": "IbUC0TdNaZJyjQBODByVVE1G2XH1XqeNy4VM4awMg7w="
     },
     {
-      "id": "io.netty:netty-common:jar:4.2.15.Final",
+      "id": "io.netty:netty-common:jar:4.1.112.Final",
       "artifactId": "netty-common",
       "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "eCBqp_bRl8qpJikUCMAYiba5EMoPdAF9P8vazPlWKVk="
+      "version": "4.1.112.Final",
+      "sha256": "sDln8yxl3l7TObl3KRcOAomyL_pXKef0X2i_a0MftWc="
     },
     {
-      "id": "io.netty:netty-buffer:jar:4.2.15.Final",
+      "id": "io.netty:netty-buffer:jar:4.1.112.Final",
       "artifactId": "netty-buffer",
       "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "E2H9nJuoW5gxz1ShsuRd3DzjSnaJMXJsCZ0_XvDv5KM="
+      "version": "4.1.112.Final",
+      "sha256": "vBgsSPU2nUjNg3DSqwxbjZndj_pKD4rHAWUtV704Dv8="
     },
     {
-      "id": "io.netty:netty-transport:jar:4.2.15.Final",
+      "id": "io.netty:netty-transport:jar:4.1.112.Final",
       "artifactId": "netty-transport",
       "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "n7Zx6WZRBmzxoo2tPxOCx8md9bgybUohTZo3WzEfjcE="
+      "version": "4.1.112.Final",
+      "sha256": "044xYk0lynkO5BPVKcFSFwIX6-283PYRZPpikfOlbJI="
     },
     {
-      "id": "io.netty:netty-codec-base:jar:4.2.15.Final",
-      "artifactId": "netty-codec-base",
+      "id": "io.netty:netty-codec:jar:4.1.112.Final",
+      "artifactId": "netty-codec",
       "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "LG051ycGKLjPwxZvvXqT1ZWVjlnEYbwy3bODyMkb-BE="
+      "version": "4.1.112.Final",
+      "sha256": "cttPk2KffqUg0pmMCOKx1p-cakeStT2l6aAB0kx4sVE="
     },
     {
-      "id": "io.netty:netty-codec-compression:jar:4.2.15.Final",
-      "artifactId": "netty-codec-compression",
-      "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "StqlzdTS6bULI-TD7_Quc95utAhIcYs6qEzVtFTabOg="
-    },
-    {
-      "id": "io.netty:netty-handler:jar:4.2.15.Final",
+      "id": "io.netty:netty-handler:jar:4.1.112.Final",
       "artifactId": "netty-handler",
       "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "mbWeS-pyIg0q7VLfi6832XQxsGreCxNSJs33MWiXXqs="
+      "version": "4.1.112.Final",
+      "sha256": "6k1gYqX7EKbiNk2LvevBz6gU8fyfkQ71flyvAvsVxYg="
     },
     {
-      "id": "io.netty:netty-codec-http2:jar:4.2.15.Final",
+      "id": "io.netty:netty-codec-http2:jar:4.1.112.Final",
       "artifactId": "netty-codec-http2",
       "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "SpsFK9gVx2XZwF4nsyq70yosfD4zZMy5ks5x2homvA0="
+      "version": "4.1.112.Final",
+      "sha256": "f3PvyEXogY1x2iOyHcZdaRMt0OEu0OgMyTe9eat9V0k="
     },
     {
-      "id": "io.netty:netty-resolver-dns:jar:4.2.15.Final",
+      "id": "io.netty:netty-resolver-dns:jar:4.1.112.Final",
       "artifactId": "netty-resolver-dns",
       "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "Lo3S2GF3VIPWiTKaslRgRWR8j4v1rj7S3Uju-7dIlS0="
+      "version": "4.1.112.Final",
+      "sha256": "rZGN8CC6bhCu7MC0cTN1TQwmFqpE1BS8uHbWG9cE5W0="
     },
     {
-      "id": "io.netty:netty-resolver:jar:4.2.15.Final",
+      "id": "io.netty:netty-resolver:jar:4.1.112.Final",
       "artifactId": "netty-resolver",
       "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "JDGEl_KjpkWWT-1Bj0iHm6ETZcq44fjWbEf6faFe8Zo="
+      "version": "4.1.112.Final",
+      "sha256": "a0rJ87Z_Vi8HcNV8OJJ5_5xwjrQB4aNjX1Ipfw-Jftw="
     },
     {
-      "id": "io.netty:netty-codec-dns:jar:4.2.15.Final",
+      "id": "io.netty:netty-codec-dns:jar:4.1.112.Final",
       "artifactId": "netty-codec-dns",
       "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "xeLAW0-uujzzdMxq8p1vSn6WnXyiIr6VjggAx5oC7k4="
+      "version": "4.1.112.Final",
+      "sha256": "iTnlmJDborcvcggRwVA0F4RJ8s4P89r3lC8PtIjX7ms="
     },
     {
-      "id": "io.netty:netty-resolver-dns-native-macos:jar:osx-x86_64:4.2.15.Final",
+      "id": "io.netty:netty-resolver-dns-native-macos:jar:osx-x86_64:4.1.112.Final",
       "artifactId": "netty-resolver-dns-native-macos",
       "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "oRFfsP2I_lAgn71kXL_gnkH-LSZLsYVNxUX0ShvQIM8="
+      "version": "4.1.112.Final",
+      "sha256": "-ADd0u0SG2EBCissfz_Gl-4CB6msXx9xmngBLEt0SaY="
     },
     {
-      "id": "io.netty:netty-resolver-dns-classes-macos:jar:4.2.15.Final",
+      "id": "io.netty:netty-resolver-dns-classes-macos:jar:4.1.112.Final",
       "artifactId": "netty-resolver-dns-classes-macos",
       "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "3JHYHg9siYftNPbKAFtLl8xgMvkzpJ91AJQOhGrefEM="
+      "version": "4.1.112.Final",
+      "sha256": "EtQxKGqxQuW7OV8VWctF9wPWXvjXzh2V_UAe97nVRgU="
     },
     {
-      "id": "io.netty:netty-transport-native-epoll:jar:linux-x86_64:4.2.15.Final",
+      "id": "io.netty:netty-transport-native-epoll:jar:linux-x86_64:4.1.112.Final",
       "artifactId": "netty-transport-native-epoll",
       "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "VEDjj1yihY_ujXiY5lKR4FtmVzbJ6KFMgy5wdRH126Y="
+      "version": "4.1.112.Final",
+      "sha256": "TmvJ_scGqpis1pZedwfjhces_fUjb5VhwFUfIdGkD4s="
     },
     {
-      "id": "io.netty:netty-transport-native-unix-common:jar:4.2.15.Final",
+      "id": "io.netty:netty-transport-native-unix-common:jar:4.1.112.Final",
       "artifactId": "netty-transport-native-unix-common",
       "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "ueqfxa1eugTpmv3_dbLrl7Xd-yrXcuLy712PJ388vXY="
+      "version": "4.1.112.Final",
+      "sha256": "55zOobh6Y0jU69Pfs3oszNm3y2XDN19szawIbHtc5Ic="
     },
     {
-      "id": "io.netty:netty-transport-classes-epoll:jar:4.2.15.Final",
+      "id": "io.netty:netty-transport-classes-epoll:jar:4.1.112.Final",
       "artifactId": "netty-transport-classes-epoll",
       "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "vlCUB_1xpLgzeFZ8YTQg21RNZZu1It97JTodvoyil_4="
+      "version": "4.1.112.Final",
+      "sha256": "ls8uZiLqcOK8Z67Tc2B98yhj-GPQ17jJyU1Gjv0dBjg="
     },
     {
       "id": "io.projectreactor.netty:reactor-netty-core:jar:1.1.22",
@@ -274,18 +267,18 @@
       "sha256": "ndDFrIIWWGo8xBp8T_axSC4_Xt5heYwtm2oTw0wZmZQ="
     },
     {
-      "id": "io.netty:netty-handler-proxy:jar:4.2.15.Final",
+      "id": "io.netty:netty-handler-proxy:jar:4.1.112.Final",
       "artifactId": "netty-handler-proxy",
       "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "oGqqqhoubrJoJOU1Zr_QILqTCpOQ1XofC79XMW41c3M="
+      "version": "4.1.112.Final",
+      "sha256": "kffJPf5LehMZjUCvOe2sCtsMM_CNl1kkKZe4kXYTDIw="
     },
     {
-      "id": "io.netty:netty-codec-socks:jar:4.2.15.Final",
+      "id": "io.netty:netty-codec-socks:jar:4.1.112.Final",
       "artifactId": "netty-codec-socks",
       "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "QjDUNIEkHkk4KoPaL6nVmAxXAmaPxapamANGzgPTCCg="
+      "version": "4.1.112.Final",
+      "sha256": "Bp8UUHZ2KCqMS4cbJzMqpEkcFjOewOhvTYbUWpU7UfU="
     },
     {
       "id": "org.springframework:spring-web:jar:6.1.12",
@@ -659,88 +652,67 @@
       "sha256": "GOmTLAqj9CzugPzO4ZB4Sfqdtb5AuM_6IdGn_B10V-U="
     },
     {
-      "id": "io.netty:netty-codec:jar:4.2.15.Final",
-      "artifactId": "netty-codec",
-      "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "FTsRoWZFlzOvefsNRmfzC_o5eSiW9omyHJOkpAkTh-o="
-    },
-    {
-      "id": "io.netty:netty-codec-protobuf:jar:4.2.15.Final",
-      "artifactId": "netty-codec-protobuf",
-      "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "7POiRpU3SzVEcA2U21aHXakMHfvh5Dx0TcwV4eiZigE="
-    },
-    {
-      "id": "io.netty:netty-codec-marshalling:jar:4.2.15.Final",
-      "artifactId": "netty-codec-marshalling",
-      "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "u8ZVtSUzh_Vmsl1BhRUpUfASH7Ov7yw1LnqlK5-5ZdM="
-    },
-    {
-      "id": "io.netty:netty-transport-native-kqueue:jar:osx-x86_64:4.2.15.Final",
+      "id": "io.netty:netty-transport-native-kqueue:jar:osx-x86_64:4.1.112.Final",
       "artifactId": "netty-transport-native-kqueue",
       "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "YJXClmGr4fL7wsecVKlN5P2t3W6ZxwKSf9PADmaHJXQ="
+      "version": "4.1.112.Final",
+      "sha256": "plZoq1npEITzzrOpE0S6JakN827vXGEGBwqpJkm2aKg="
     },
     {
-      "id": "io.netty:netty-transport-classes-kqueue:jar:4.2.15.Final",
+      "id": "io.netty:netty-transport-classes-kqueue:jar:4.1.112.Final",
       "artifactId": "netty-transport-classes-kqueue",
       "groupId": "io.netty",
-      "version": "4.2.15.Final",
-      "sha256": "KhXiITof5J5ztLs5vHRucZbbqMGxgrwNIacZpNG-LAA="
+      "version": "4.1.112.Final",
+      "sha256": "BtPpVzJZOIVbMZ7zJ9TE7vd3UiwsubYEniSc7UUzliQ="
     },
     {
-      "id": "io.netty:netty-tcnative-boringssl-static:jar:2.0.77.Final",
+      "id": "io.netty:netty-tcnative-boringssl-static:jar:2.0.65.Final",
       "artifactId": "netty-tcnative-boringssl-static",
       "groupId": "io.netty",
-      "version": "2.0.77.Final",
-      "sha256": "c6InJlbhdIP2X87HjA6T7RTV9YS9pafVHqWmNtXPYO8="
+      "version": "2.0.65.Final",
+      "sha256": "u4NJvaO6BDwJ9ccyxbLUfxisTa_OJIy4UM-9BZnlugE="
     },
     {
-      "id": "io.netty:netty-tcnative-classes:jar:2.0.77.Final",
+      "id": "io.netty:netty-tcnative-classes:jar:2.0.65.Final",
       "artifactId": "netty-tcnative-classes",
       "groupId": "io.netty",
-      "version": "2.0.77.Final",
-      "sha256": "1JImkwgzYAG3p-ygJwMoLD10yMO0_gjFB4z-_u2n408="
+      "version": "2.0.65.Final",
+      "sha256": "hO8CQa2htO2SeF4QwW7b6wYzSJWaOw73QHErrdCfoSg="
     },
     {
-      "id": "io.netty:netty-tcnative-boringssl-static:jar:linux-x86_64:2.0.77.Final",
+      "id": "io.netty:netty-tcnative-boringssl-static:jar:linux-x86_64:2.0.65.Final",
       "artifactId": "netty-tcnative-boringssl-static",
       "groupId": "io.netty",
-      "version": "2.0.77.Final",
-      "sha256": "fJf0DKREGqLIeN1KWrPHPE6xQNMad9B6ALI5a2KI-CY="
+      "version": "2.0.65.Final",
+      "sha256": "Rc5VtJ9MFt5lJ42fRgip8GRg8pDx47T8PyRShmUZ1hg="
     },
     {
-      "id": "io.netty:netty-tcnative-boringssl-static:jar:linux-aarch_64:2.0.77.Final",
+      "id": "io.netty:netty-tcnative-boringssl-static:jar:linux-aarch_64:2.0.65.Final",
       "artifactId": "netty-tcnative-boringssl-static",
       "groupId": "io.netty",
-      "version": "2.0.77.Final",
-      "sha256": "Mvc9142K8UOgsidM3qns20Bs_NU2ziACh1d70J75pNw="
+      "version": "2.0.65.Final",
+      "sha256": "n9b5BbzoRyyp4k-HKJYrkbkxnIT8u2GKuH9rl3TAY-0="
     },
     {
-      "id": "io.netty:netty-tcnative-boringssl-static:jar:osx-x86_64:2.0.77.Final",
+      "id": "io.netty:netty-tcnative-boringssl-static:jar:osx-x86_64:2.0.65.Final",
       "artifactId": "netty-tcnative-boringssl-static",
       "groupId": "io.netty",
-      "version": "2.0.77.Final",
-      "sha256": "Be28ZdF6XSG9XPi9B7WtIKinpkXx5W4f5BlHiK0wHkY="
+      "version": "2.0.65.Final",
+      "sha256": "Oha3yk6JH5rVHprp6xZ8XoHX9VoAAe3yRxtpP0-MEuE="
     },
     {
-      "id": "io.netty:netty-tcnative-boringssl-static:jar:osx-aarch_64:2.0.77.Final",
+      "id": "io.netty:netty-tcnative-boringssl-static:jar:osx-aarch_64:2.0.65.Final",
       "artifactId": "netty-tcnative-boringssl-static",
       "groupId": "io.netty",
-      "version": "2.0.77.Final",
-      "sha256": "fS_zolJ63ilJzMXwD0jb6Egjp5l9k41HwMJYes3yP5Y="
+      "version": "2.0.65.Final",
+      "sha256": "g0098vnrOqCNSTJkCcRU4vnHWknD8EVLfKtkYZsWFNw="
     },
     {
-      "id": "io.netty:netty-tcnative-boringssl-static:jar:windows-x86_64:2.0.77.Final",
+      "id": "io.netty:netty-tcnative-boringssl-static:jar:windows-x86_64:2.0.65.Final",
       "artifactId": "netty-tcnative-boringssl-static",
       "groupId": "io.netty",
-      "version": "2.0.77.Final",
-      "sha256": "-2gHRMswWlk3PxKv3V1J-qqgVEgfwS4MWHfnHuBzKMM="
+      "version": "2.0.65.Final",
+      "sha256": "hV2TA2b66b7DhyVpl1lZ4eMd11Lf_J-SXq6ENvkz4Ro="
     },
     {
       "id": "io.dropwizard.metrics:metrics-core:jar:4.1.0",
