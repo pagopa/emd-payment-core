@@ -4,13 +4,12 @@ import it.gov.pagopa.emd.payment.configuration.ExceptionMap;
 import it.gov.pagopa.emd.payment.connector.TppConnectorImpl;
 import it.gov.pagopa.emd.payment.dto.RetrievalRequestDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
-import it.gov.pagopa.emd.payment.model.PaymentAttempt;
 import it.gov.pagopa.emd.payment.repository.PaymentAttemptRepository;
 import it.gov.pagopa.emd.payment.repository.RetrievalRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Flux;
@@ -28,13 +27,13 @@ class PaymentServiceImplTest {
     @Autowired
     private PaymentServiceImpl paymentServiceImpl;
 
-    @MockBean
+    @MockitoBean
     private RetrievalRepository retrievalRepository;
 
-    @MockBean
+    @MockitoBean
     private PaymentAttemptRepository paymentAttemptRepository;
 
-    @MockBean
+    @MockitoBean
     private TppConnectorImpl tppConnectorImpl;
 
     /**
