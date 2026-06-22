@@ -190,11 +190,11 @@
       "sha256": "cttPk2KffqUg0pmMCOKx1p-cakeStT2l6aAB0kx4sVE="
     },
     {
-      "id": "io.netty:netty-handler:jar:4.1.112.Final",
+      "id": "io.netty:netty-handler:jar:4.1.135.Final",
       "artifactId": "netty-handler",
       "groupId": "io.netty",
-      "version": "4.1.112.Final",
-      "sha256": "6k1gYqX7EKbiNk2LvevBz6gU8fyfkQ71flyvAvsVxYg="
+      "version": "4.1.135.Final",
+      "sha256": "JF504EtvTo75iFMVJBLjvxSZzm_PFTKbeYyM42w1N-I="
     },
     {
       "id": "io.netty:netty-codec-http2:jar:4.1.112.Final",
