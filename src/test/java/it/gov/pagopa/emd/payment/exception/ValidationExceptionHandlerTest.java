@@ -9,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration;
 import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
@@ -21,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@WebFluxTest(value = {ValidationExceptionHandlerTest.TestController.class}, excludeAutoConfiguration = SecurityAutoConfiguration.class)
+@WebFluxTest(value = {ValidationExceptionHandlerTest.TestController.class})
 @ContextConfiguration(classes = {
         ValidationExceptionHandlerTest.TestController.class,
         ValidationExceptionHandler.class})

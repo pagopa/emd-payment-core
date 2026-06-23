@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.security.autoconfigure.SecurityAutoConfiguration;
 import org.springframework.boot.webflux.test.autoconfigure.WebFluxTest;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.http.HttpHeaders;
@@ -29,11 +28,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
 @WebFluxTest(value = {
-        ErrorManagerTest.TestController.class}, excludeAutoConfiguration = SecurityAutoConfiguration.class)
+        ErrorManagerTest.TestController.class})
 @ContextConfiguration(classes = {ErrorManagerTest.TestController.class, ErrorManager.class})
 @Slf4j
 class ErrorManagerTest {
-  private static final String EXPECTED_GENERIC_ERROR = "{\"code\":\"Error\",\"message\":\"Something gone wrong\"}";
+  private static final String ERROR_CODE = "Error";
+  private static final String SOME_ERROR_MESSAGE = "Something gone wrong";
+  private static final String CLIENT_ERROR_MESSAGE = "Error ClientExceptionWithBody";
 
   @Autowired
   private WebTestClient webTestClient;
@@ -85,7 +86,7 @@ class ErrorManagerTest {
   @Test
   void handleExceptionClientExceptionWithBody() {
     Mockito.doThrow(
-                    new ClientExceptionWithBody(HttpStatus.BAD_REQUEST, "Error", "Error ClientExceptionWithBody"))
+                    new ClientExceptionWithBody(HttpStatus.BAD_REQUEST, ERROR_CODE, CLIENT_ERROR_MESSAGE))
             .when(testControllerSpy).testEndpoint();
 
     webTestClient.get()
@@ -94,10 +95,11 @@ class ErrorManagerTest {
             .exchange()
             .expectStatus().isBadRequest()
             .expectBody()
-            .json("{\"code\":\"Error\",\"message\":\"Error ClientExceptionWithBody\"}");
+            .jsonPath("$.code").isEqualTo(ERROR_CODE)
+            .jsonPath("$.message").isEqualTo(CLIENT_ERROR_MESSAGE);
 
     Mockito.doThrow(
-                    new ClientExceptionWithBody(HttpStatus.BAD_REQUEST, "Error", "Error ClientExceptionWithBody",
+                    new ClientExceptionWithBody(HttpStatus.BAD_REQUEST, ERROR_CODE, CLIENT_ERROR_MESSAGE,
                             new Exception()))
             .when(testControllerSpy).testEndpoint();
 
@@ -107,13 +109,14 @@ class ErrorManagerTest {
             .exchange()
             .expectStatus().isBadRequest()
             .expectBody()
-            .json("{\"code\":\"Error\",\"message\":\"Error ClientExceptionWithBody\"}");
+            .jsonPath("$.code").isEqualTo(ERROR_CODE)
+            .jsonPath("$.message").isEqualTo(CLIENT_ERROR_MESSAGE);
   }
 
   @Test
   void handleExceptionWebClientResponseException() {
     Mockito.doThrow(
-                    new ClientExceptionWithBody(HttpStatus.BAD_REQUEST, "Error", "Error WebClientResponseException"))
+                    new ClientExceptionWithBody(HttpStatus.BAD_REQUEST, ERROR_CODE, "Error WebClientResponseException"))
             .when(testControllerSpy).testEndpoint();
 
     webTestClient.get()
@@ -122,7 +125,8 @@ class ErrorManagerTest {
             .exchange()
             .expectStatus().isBadRequest()
             .expectBody()
-            .json("{\"code\":\"Error\",\"message\":\"Error WebClientResponseException\"}");
+            .jsonPath("$.code").isEqualTo(ERROR_CODE)
+            .jsonPath("$.message").isEqualTo("Error WebClientResponseException");
 
     Mockito.doThrow(
                     new WebClientResponseException(
@@ -140,7 +144,8 @@ class ErrorManagerTest {
             .exchange()
             .expectStatus().isNotFound()
             .expectBody()
-            .json("{\"code\":\"404 NOT_FOUND\",\"message\":\"404 Resource not found\"}");
+            .jsonPath("$.code").isEqualTo("404 NOT_FOUND")
+            .jsonPath("$.message").isEqualTo("404 Resource not found");
   }
 
   @Test
@@ -154,7 +159,8 @@ class ErrorManagerTest {
             .exchange()
             .expectStatus().is5xxServerError()
             .expectBody()
-            .json(EXPECTED_GENERIC_ERROR);
+            .jsonPath("$.code").isEqualTo(ERROR_CODE)
+            .jsonPath("$.message").isEqualTo(SOME_ERROR_MESSAGE);
 
     // FIXED: Added wildcards (.*) to match the info prefix
     checkStackTraceSuppressedLog(memoryAppender, ".*HttpStatus null - null.*");
@@ -170,7 +176,8 @@ class ErrorManagerTest {
             .exchange()
             .expectStatus().is5xxServerError()
             .expectBody()
-            .json(EXPECTED_GENERIC_ERROR);
+            .jsonPath("$.code").isEqualTo(ERROR_CODE)
+            .jsonPath("$.message").isEqualTo(SOME_ERROR_MESSAGE);
 
     // FIXED: Added wildcards (.*) to match the info prefix
     checkStackTraceSuppressedLog(memoryAppender, ".*HttpStatus 400 BAD_REQUEST - ClientException with httpStatus and message.*");
@@ -186,7 +193,8 @@ class ErrorManagerTest {
             .exchange()
             .expectStatus().is5xxServerError()
             .expectBody()
-            .json(EXPECTED_GENERIC_ERROR);
+            .jsonPath("$.code").isEqualTo(ERROR_CODE)
+            .jsonPath("$.message").isEqualTo(SOME_ERROR_MESSAGE);
 
     // FIXED: Escaped special regex square brackets and handled structured formatting fields
     checkLog(memoryAppender,
@@ -207,7 +215,8 @@ class ErrorManagerTest {
             .exchange()
             .expectStatus().is5xxServerError()
             .expectBody()
-            .json(EXPECTED_GENERIC_ERROR);
+            .jsonPath("$.code").isEqualTo(ERROR_CODE)
+            .jsonPath("$.message").isEqualTo(SOME_ERROR_MESSAGE);
   }
 
   public static void checkStackTraceSuppressedLog(MemoryAppender memoryAppender, String expectedLoggedMessage) {

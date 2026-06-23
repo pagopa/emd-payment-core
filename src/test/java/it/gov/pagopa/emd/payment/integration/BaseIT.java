@@ -46,6 +46,6 @@ abstract class BaseIT {
         log.info("Configuring Spring properties using Mongo replica set {}",
                 mongo.getReplicaSetUrl());
 
-        registry.add("spring.data.mongodb.uri", mongo::getReplicaSetUrl);
+        registry.add("spring.mongodb.uri", mongo::getReplicaSetUrl);
     }
 }
