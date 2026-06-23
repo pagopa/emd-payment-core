@@ -11,7 +11,7 @@ import it.gov.pagopa.emd.payment.service.PaymentServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Mono;
@@ -27,13 +27,13 @@ class StubPaymentServiceImplTest {
     @Autowired
     private StubPaymentServiceImpl stubPaymentService;
 
-    @MockBean
+    @MockitoBean
     private RetrievalRepository retrievalRepository;
 
-    @MockBean
+    @MockitoBean
     private PaymentAttemptRepository paymentAttemptRepository;
 
-    @MockBean
+    @MockitoBean
     private TppConnectorImpl tppConnectorImpl;
 
     /**
