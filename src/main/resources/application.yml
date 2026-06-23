@@ -9,8 +9,7 @@ spring:
   config:
     activate:
       on-profile: default
-  data:
-    mongodb:
+  mongodb:
       database: ${MONGODB_DBNAME:mil}
       uri: ${MONGODB_URI:mongodb://localhost:27017}
       config:
