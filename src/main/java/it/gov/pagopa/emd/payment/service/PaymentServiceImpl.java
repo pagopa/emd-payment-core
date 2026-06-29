@@ -98,9 +98,13 @@ public class PaymentServiceImpl implements PaymentService {
                                 .then(Mono.fromCallable(() ->
                                         buildDeepLink(retrievalResponseDTO.getDeeplink(), fiscalCode, noticeNumber, amount)
                                 ))
-                                .doOnNext(deeplink ->
-                                        log.info("[EMD][PAYMENT][GET-REDIRECT] Got redirect for retrievalId: {}", retrievalId)
-                                )
+                                .doOnNext(deeplink -> {
+                                    log.info("[EMD][PAYMENT][GET-REDIRECT] Got redirect for retrievalId: {}", retrievalId);
+                                    log.info("[EMD][PAYMENT][GET-REDIRECT] New payment attempt for tpp:{}, originId:{}, noticeNumber:{}",
+                                        retrievalResponseDTO.getTppId(),
+                                        retrievalResponseDTO.getOriginId(),
+                                        noticeNumber);
+                                })
                 );
     }
 
