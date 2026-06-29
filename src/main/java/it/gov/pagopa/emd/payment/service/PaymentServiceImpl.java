@@ -101,9 +101,9 @@ public class PaymentServiceImpl implements PaymentService {
                                 .doOnNext(deeplink -> {
                                     log.info("[EMD][PAYMENT][GET-REDIRECT] Got redirect for retrievalId: {}", retrievalId);
                                     log.info("[EMD][PAYMENT][GET-REDIRECT] New payment attempt for tpp:{}, originId:{}, noticeNumber:{}",
-                                        retrievalResponseDTO.getTppId(),
-                                        retrievalResponseDTO.getOriginId(),
-                                        noticeNumber);
+                                        inputSanify(retrievalResponseDTO.getTppId()),
+                                        inputSanify(retrievalResponseDTO.getOriginId()),
+                                        inputSanify(noticeNumber));
                                 })
                 );
     }
