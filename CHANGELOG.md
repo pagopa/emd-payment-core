@@ -1,5 +1,15 @@
 # Changelog
 
+## [1.5.4](https://github.com/pagopa/emd-payment-core/compare/v1.5.3...v1.5.4) (2026-07-02)
+
+
+### Bug Fixes
+
+* **deps:** bump com.azure.spring:spring-cloud-azure-dependencies from 5.16.0 to 7.3.0 ([#76](https://github.com/pagopa/emd-payment-core/issues/76)) ([30c6bcf](https://github.com/pagopa/emd-payment-core/commit/30c6bcf74b5fb00004856736510a94f3eb8671a2))
+* **deps:** bump org.springframework.cloud:spring-cloud-dependencies from 2023.0.2 to 2025.1.2 ([#77](https://github.com/pagopa/emd-payment-core/issues/77)) ([c3c58c7](https://github.com/pagopa/emd-payment-core/commit/c3c58c7fb781e7f424621cc0d27734eeeba2711f))
+* **deps:** bump org.springframework.security:spring-security-crypto from 6.3.8 to 7.1.0 ([#89](https://github.com/pagopa/emd-payment-core/issues/89)) ([b58f911](https://github.com/pagopa/emd-payment-core/commit/b58f911b7f7d57b319dce2770fe99a607b12017a))
+* **deps:** bump the non-major-updates group across 1 directory with 7 updates ([#80](https://github.com/pagopa/emd-payment-core/issues/80)) ([e8d169f](https://github.com/pagopa/emd-payment-core/commit/e8d169fb33030ece2dd733208e39c6eeefbc5162))
+
 ## [1.5.3](https://github.com/pagopa/emd-payment-core/compare/v1.5.2...v1.5.3) (2026-06-17)
 
 
