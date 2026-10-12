@@ -125,7 +125,7 @@ class PaymentControllerImplTest {
     @Test
     void testPaymentSearchWithoutFiltersReturnsBadRequest() {
         webTestClient.get()
-                .uri("/emd/payment/paymentAttempts/search")
+                .uri("/emd/payment/attempts/search")
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody()
@@ -145,7 +145,7 @@ class PaymentControllerImplTest {
                         .build()));
 
         webTestClient.get()
-                .uri("/emd/payment/paymentAttempts/search?psp=psp-1&limit=10")
+                .uri("/emd/payment/attempts/search?psp=psp-1&limit=10")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -156,17 +156,17 @@ class PaymentControllerImplTest {
     @Test
     void testPaymentSearchRejectsInvalidCursorAndLimits() {
         webTestClient.get()
-                .uri("/emd/payment/paymentAttempts/search?iun=IUN-1&cursor=not-an-object-id")
+                .uri("/emd/payment/attempts/search?iun=IUN-1&cursor=not-an-object-id")
                 .exchange()
                 .expectStatus().isBadRequest();
 
         webTestClient.get()
-                .uri("/emd/payment/paymentAttempts/search?psp=psp-1&limit=0")
+                .uri("/emd/payment/attempts/search?psp=psp-1&limit=0")
                 .exchange()
                 .expectStatus().isBadRequest();
 
         webTestClient.get()
-                .uri("/emd/payment/paymentAttempts/search?psp=psp-1&limit=101")
+                .uri("/emd/payment/attempts/search?psp=psp-1&limit=101")
                 .exchange()
                 .expectStatus().isBadRequest();
     }
@@ -183,7 +183,7 @@ class PaymentControllerImplTest {
                         .build()));
 
         webTestClient.get()
-                .uri("/emd/payment/paymentAttempts/search?iun=IUN-1&psp=psp-1&cursor={cursor}&limit=7", cursor)
+                .uri("/emd/payment/attempts/search?iun=IUN-1&psp=psp-1&cursor={cursor}&limit=7", cursor)
                 .exchange()
                 .expectStatus().isOk();
 
