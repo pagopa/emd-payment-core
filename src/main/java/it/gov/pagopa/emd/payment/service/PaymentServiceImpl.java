@@ -154,7 +154,7 @@ public class PaymentServiceImpl implements PaymentService {
                     List<PaymentAttempt> page = hasMore ? rows.subList(0, limit) : rows;
 
                     return Flux.fromIterable(page)
-                            .flatMapSequential(this::toPaymentSearchItem, 8)
+                            .map(this::toPaymentSearchItem)
                             .collectList()
                             .map(items -> PaymentSearchResponseDTO.builder()
                                     .payments(items)
@@ -167,33 +167,16 @@ public class PaymentServiceImpl implements PaymentService {
                 .doOnError(error -> log.error("[EMD][PAYMENT][SEARCH] Error searching payments", error));
     }
 
-    private Mono<PaymentSearchItemDTO> toPaymentSearchItem(PaymentAttempt paymentAttempt) {
+    private PaymentSearchItemDTO toPaymentSearchItem(PaymentAttempt paymentAttempt) {
         long attemptsCount = paymentAttempt.getAttemptDetails() == null ? 0 : paymentAttempt.getAttemptDetails().size();
-        return retrievalRepository.findFirstByTppIdAndOriginIdOrderByCreatedAtDesc(
-                        paymentAttempt.getTppId(), paymentAttempt.getOriginId())
-                .flatMap(retrieval -> {
-                    if (retrieval.getEntityId() == null || retrieval.getEntityId().isBlank()) {
-                        return Mono.just(buildPaymentSearchItem(paymentAttempt, paymentAttempt.getTppId(),
-                                retrieval.getPspDenomination(), attemptsCount));
-                    }
-                    return tppControllerImpl.getTppByEntityId(retrieval.getEntityId())
-                            .map(tpp -> buildPaymentSearchItem(paymentAttempt, tpp.getIdPsp(),
-                                    tpp.getPspDenomination(), attemptsCount))
-                            .switchIfEmpty(Mono.just(buildPaymentSearchItem(paymentAttempt, paymentAttempt.getTppId(),
-                                    retrieval.getPspDenomination(), attemptsCount)));
-                })
-                .switchIfEmpty(Mono.just(buildPaymentSearchItem(paymentAttempt, paymentAttempt.getTppId(), null,
-                        attemptsCount)))
-                .onErrorMap(error -> exceptionMap.throwException(PaymentConstants.ExceptionName.GENERIC_ERROR,
-                        PaymentConstants.ExceptionMessage.GENERIC_ERROR));
+        return buildPaymentSearchItem(paymentAttempt, paymentAttempt.getTppId(), attemptsCount);
     }
 
     private PaymentSearchItemDTO buildPaymentSearchItem(PaymentAttempt paymentAttempt, String pspId,
-                                                         String pspName, long attemptsCount) {
+                                                         long attemptsCount) {
         return PaymentSearchItemDTO.builder()
                 .iun(paymentAttempt.getOriginId())
                 .pspId(pspId)
-                .pspName(pspName)
                 .attemptsCount(attemptsCount)
                 .build();
     }
@@ -263,7 +246,6 @@ public class PaymentServiceImpl implements PaymentService {
         HashMap<String, AgentLink> agentLinkMap = tppDTO.getAgentLinks();
         retrieval.setRetrievalId(String.format("%s-%d", UUID.randomUUID(), System.currentTimeMillis()));
         retrieval.setTppId(tppDTO.getTppId());
-        retrieval.setEntityId(tppDTO.getEntityId());
 
         if(ObjectUtils.isEmpty(agentLinkMap)){
             throw exceptionMap.throwException(PaymentConstants.ExceptionName.AGENT_DEEP_LINKS_EMPTY, PaymentConstants.ExceptionMessage.AGENT_DEEP_LINKS_EMPTY);

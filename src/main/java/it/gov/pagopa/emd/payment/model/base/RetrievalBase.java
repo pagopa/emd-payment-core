@@ -13,8 +13,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @SuperBuilder
 @NoArgsConstructor
-@Document(collection = "retrieval")
-@CompoundIndex(name = "retrieval_tpp_origin_idx", def = "{'tppId': 1, 'originId': 1}")
 public class RetrievalBase {
 
   private String retrievalId;

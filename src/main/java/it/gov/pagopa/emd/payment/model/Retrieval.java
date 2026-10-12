@@ -18,7 +18,6 @@ import java.util.Date;
 @SuperBuilder
 public class Retrieval extends RetrievalBase {
 
-  private String entityId;
 
   @CreatedDate
   private Date createdAt;

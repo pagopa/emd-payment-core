@@ -31,6 +31,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 
 @ContextConfiguration(classes = {PaymentServiceImpl.class, ExceptionMap.class})
 @ExtendWith(SpringExtension.class)
@@ -122,14 +123,6 @@ class PaymentServiceImplTest {
                 .thenReturn(Flux.just(first, second));
         when(paymentAttemptRepository.searchPayments(eq("IUN-1"), isNull(), eq(firstId), eq(1)))
                 .thenReturn(Flux.just(second));
-        Retrieval retrieval = new Retrieval();
-        retrieval.setEntityId("entity-1");
-        retrieval.setPspDenomination("PSP Example");
-        when(retrievalRepository.findFirstByTppIdAndOriginIdOrderByCreatedAtDesc("psp-1", "IUN-1"))
-                .thenReturn(Mono.just(retrieval));
-        when(retrievalRepository.findFirstByTppIdAndOriginIdOrderByCreatedAtDesc("psp-2", "IUN-1"))
-                .thenReturn(Mono.just(retrieval));
-        when(tppConnectorImpl.getTppByEntityId("entity-1")).thenReturn(Mono.just(TPP_DTO));
 
         PaymentSearchRequestDTO firstRequest = new PaymentSearchRequestDTO();
         firstRequest.setIun("IUN-1");
@@ -140,7 +133,7 @@ class PaymentServiceImplTest {
                     org.junit.jupiter.api.Assertions.assertEquals(firstId.toHexString(), response.getNextCursor());
                     org.junit.jupiter.api.Assertions.assertEquals(1, response.getReturnedCount());
                     org.junit.jupiter.api.Assertions.assertEquals(2, response.getAttemptsCount());
-                    org.junit.jupiter.api.Assertions.assertEquals(TPP_DTO.getPspDenomination(), response.getPayments().getFirst().getPspName());
+                    org.junit.jupiter.api.Assertions.assertEquals("psp-1", response.getPayments().getFirst().getPspId());
                 })
                 .verifyComplete();
 
@@ -186,8 +179,6 @@ class PaymentServiceImplTest {
                 .build();
         when(paymentAttemptRepository.searchPayments("IUN-2", "psp-2", null, 2))
                 .thenReturn(Flux.just(first, second));
-        when(retrievalRepository.findFirstByTppIdAndOriginIdOrderByCreatedAtDesc(anyString(), anyString()))
-                .thenReturn(Mono.empty());
 
         PaymentSearchRequestDTO request = new PaymentSearchRequestDTO();
         request.setIun(" IUN-2 ");
@@ -201,29 +192,25 @@ class PaymentServiceImplTest {
                     org.junit.jupiter.api.Assertions.assertEquals(2, response.getReturnedCount());
                     org.junit.jupiter.api.Assertions.assertEquals(1, response.getAttemptsCount());
                     org.junit.jupiter.api.Assertions.assertEquals("psp-2", response.getPayments().get(0).getPspId());
-                    org.junit.jupiter.api.Assertions.assertNull(response.getPayments().get(1).getPspName());
                     org.junit.jupiter.api.Assertions.assertEquals(0, response.getPayments().get(1).getAttemptsCount());
                 })
                 .verifyComplete();
 
         verify(paymentAttemptRepository).searchPayments("IUN-2", "psp-2", null, 2);
+        verify(retrievalRepository, never())
+                .findFirstByTppIdAndOriginIdOrderByCreatedAtDesc(anyString(), anyString());
     }
 
     @Test
-    void testPaymentSearchUsesRetrievalPspWhenEntityIdIsBlank() {
+    void testPaymentSearchMapsFieldsDirectlyFromPaymentAttempt() {
         PaymentAttempt payment = PaymentAttempt.builder()
                 .id(new ObjectId("507f1f77bcf86cd799439031"))
                 .originId("IUN-4")
                 .tppId("psp-4")
                 .attemptDetails(null)
                 .build();
-        Retrieval retrieval = new Retrieval();
-        retrieval.setEntityId(" ");
-        retrieval.setPspDenomination("PSP stored in retrieval");
         when(paymentAttemptRepository.searchPayments("IUN-4", null, null, 20))
                 .thenReturn(Flux.just(payment));
-        when(retrievalRepository.findFirstByTppIdAndOriginIdOrderByCreatedAtDesc("psp-4", "IUN-4"))
-                .thenReturn(Mono.just(retrieval));
 
         PaymentSearchRequestDTO request = new PaymentSearchRequestDTO();
         request.setIun("IUN-4");
@@ -232,23 +219,21 @@ class PaymentServiceImplTest {
                 .assertNext(response -> {
                     PaymentSearchItemDTO item = response.getPayments().getFirst();
                     org.junit.jupiter.api.Assertions.assertEquals("psp-4", item.getPspId());
-                    org.junit.jupiter.api.Assertions.assertEquals("PSP stored in retrieval", item.getPspName());
+                    org.junit.jupiter.api.Assertions.assertEquals("IUN-4", item.getIun());
                     org.junit.jupiter.api.Assertions.assertEquals(0, item.getAttemptsCount());
                 })
                 .verifyComplete();
+
+        verify(retrievalRepository, never())
+                .findFirstByTppIdAndOriginIdOrderByCreatedAtDesc(anyString(), anyString());
+        verify(tppConnectorImpl, never()).getTppByEntityId(anyString());
     }
 
     @Test
-    void testPaymentSearchFallsBackWhenTppLookupIsEmpty() {
+    void testPaymentSearchDoesNotRequireTppLookup() {
         PaymentAttempt payment = paymentAttempt(new ObjectId("507f1f77bcf86cd799439041"), "IUN-5", "psp-5", 1);
-        Retrieval retrieval = new Retrieval();
-        retrieval.setEntityId("entity-5");
-        retrieval.setPspDenomination("PSP from retrieval");
         when(paymentAttemptRepository.searchPayments("IUN-5", null, null, 20))
                 .thenReturn(Flux.just(payment));
-        when(retrievalRepository.findFirstByTppIdAndOriginIdOrderByCreatedAtDesc("psp-5", "IUN-5"))
-                .thenReturn(Mono.just(retrieval));
-        when(tppConnectorImpl.getTppByEntityId("entity-5")).thenReturn(Mono.empty());
 
         PaymentSearchRequestDTO request = new PaymentSearchRequestDTO();
         request.setIun("IUN-5");
@@ -256,9 +241,12 @@ class PaymentServiceImplTest {
         StepVerifier.create(paymentServiceImpl.searchPayments(request))
                 .assertNext(response -> {
                     org.junit.jupiter.api.Assertions.assertEquals("psp-5", response.getPayments().getFirst().getPspId());
-                    org.junit.jupiter.api.Assertions.assertEquals("PSP from retrieval", response.getPayments().getFirst().getPspName());
                 })
                 .verifyComplete();
+
+        verify(retrievalRepository, never())
+                .findFirstByTppIdAndOriginIdOrderByCreatedAtDesc(anyString(), anyString());
+        verify(tppConnectorImpl, never()).getTppByEntityId(anyString());
     }
 
     @Test
