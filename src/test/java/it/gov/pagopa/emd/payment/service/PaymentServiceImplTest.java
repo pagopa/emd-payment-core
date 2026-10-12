@@ -5,6 +5,7 @@ import it.gov.pagopa.emd.payment.connector.TppConnectorImpl;
 import it.gov.pagopa.emd.payment.dto.RetrievalRequestDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
 import it.gov.pagopa.emd.payment.dto.PaymentSearchRequestDTO;
+import it.gov.pagopa.emd.payment.dto.PaymentSearchItemDTO;
 import it.gov.pagopa.emd.payment.model.PaymentAttempt;
 import it.gov.pagopa.emd.payment.model.AttemptDetails;
 import it.gov.pagopa.emd.payment.model.Retrieval;
@@ -29,6 +30,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
 
 @ContextConfiguration(classes = {PaymentServiceImpl.class, ExceptionMap.class})
 @ExtendWith(SpringExtension.class)
@@ -171,6 +173,104 @@ class PaymentServiceImplTest {
                     org.junit.jupiter.api.Assertions.assertNull(response.getNextCursor());
                 })
                 .verifyComplete();
+    }
+
+    @Test
+    void testPaymentSearchNormalizesFiltersAndHandlesExactLimitWithoutNextPage() {
+        PaymentAttempt first = paymentAttempt(new ObjectId("507f1f77bcf86cd799439021"), "IUN-2", "psp-2", 1);
+        PaymentAttempt second = PaymentAttempt.builder()
+                .id(new ObjectId("507f1f77bcf86cd799439022"))
+                .originId("IUN-3")
+                .tppId("psp-3")
+                .attemptDetails(null)
+                .build();
+        when(paymentAttemptRepository.searchPayments("IUN-2", "psp-2", null, 2))
+                .thenReturn(Flux.just(first, second));
+        when(retrievalRepository.findFirstByTppIdAndOriginIdOrderByCreatedAtDesc(anyString(), anyString()))
+                .thenReturn(Mono.empty());
+
+        PaymentSearchRequestDTO request = new PaymentSearchRequestDTO();
+        request.setIun(" IUN-2 ");
+        request.setPsp(" psp-2 ");
+        request.setLimit(2);
+
+        StepVerifier.create(paymentServiceImpl.searchPayments(request))
+                .assertNext(response -> {
+                    org.junit.jupiter.api.Assertions.assertFalse(response.isHasMore());
+                    org.junit.jupiter.api.Assertions.assertNull(response.getNextCursor());
+                    org.junit.jupiter.api.Assertions.assertEquals(2, response.getReturnedCount());
+                    org.junit.jupiter.api.Assertions.assertEquals(1, response.getAttemptsCount());
+                    org.junit.jupiter.api.Assertions.assertEquals("psp-2", response.getPayments().get(0).getPspId());
+                    org.junit.jupiter.api.Assertions.assertNull(response.getPayments().get(1).getPspName());
+                    org.junit.jupiter.api.Assertions.assertEquals(0, response.getPayments().get(1).getAttemptsCount());
+                })
+                .verifyComplete();
+
+        verify(paymentAttemptRepository).searchPayments("IUN-2", "psp-2", null, 2);
+    }
+
+    @Test
+    void testPaymentSearchUsesRetrievalPspWhenEntityIdIsBlank() {
+        PaymentAttempt payment = PaymentAttempt.builder()
+                .id(new ObjectId("507f1f77bcf86cd799439031"))
+                .originId("IUN-4")
+                .tppId("psp-4")
+                .attemptDetails(null)
+                .build();
+        Retrieval retrieval = new Retrieval();
+        retrieval.setEntityId(" ");
+        retrieval.setPspDenomination("PSP stored in retrieval");
+        when(paymentAttemptRepository.searchPayments("IUN-4", null, null, 20))
+                .thenReturn(Flux.just(payment));
+        when(retrievalRepository.findFirstByTppIdAndOriginIdOrderByCreatedAtDesc("psp-4", "IUN-4"))
+                .thenReturn(Mono.just(retrieval));
+
+        PaymentSearchRequestDTO request = new PaymentSearchRequestDTO();
+        request.setIun("IUN-4");
+
+        StepVerifier.create(paymentServiceImpl.searchPayments(request))
+                .assertNext(response -> {
+                    PaymentSearchItemDTO item = response.getPayments().getFirst();
+                    org.junit.jupiter.api.Assertions.assertEquals("psp-4", item.getPspId());
+                    org.junit.jupiter.api.Assertions.assertEquals("PSP stored in retrieval", item.getPspName());
+                    org.junit.jupiter.api.Assertions.assertEquals(0, item.getAttemptsCount());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void testPaymentSearchFallsBackWhenTppLookupIsEmpty() {
+        PaymentAttempt payment = paymentAttempt(new ObjectId("507f1f77bcf86cd799439041"), "IUN-5", "psp-5", 1);
+        Retrieval retrieval = new Retrieval();
+        retrieval.setEntityId("entity-5");
+        retrieval.setPspDenomination("PSP from retrieval");
+        when(paymentAttemptRepository.searchPayments("IUN-5", null, null, 20))
+                .thenReturn(Flux.just(payment));
+        when(retrievalRepository.findFirstByTppIdAndOriginIdOrderByCreatedAtDesc("psp-5", "IUN-5"))
+                .thenReturn(Mono.just(retrieval));
+        when(tppConnectorImpl.getTppByEntityId("entity-5")).thenReturn(Mono.empty());
+
+        PaymentSearchRequestDTO request = new PaymentSearchRequestDTO();
+        request.setIun("IUN-5");
+
+        StepVerifier.create(paymentServiceImpl.searchPayments(request))
+                .assertNext(response -> {
+                    org.junit.jupiter.api.Assertions.assertEquals("psp-5", response.getPayments().getFirst().getPspId());
+                    org.junit.jupiter.api.Assertions.assertEquals("PSP from retrieval", response.getPayments().getFirst().getPspName());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void testPaymentSearchMapsRepositoryFailureToGenericError() {
+        when(paymentAttemptRepository.searchPayments("IUN-error", null, null, 20))
+                .thenReturn(Flux.error(new IllegalStateException("database unavailable")));
+        PaymentSearchRequestDTO request = new PaymentSearchRequestDTO();
+        request.setIun("IUN-error");
+
+        StepVerifier.create(paymentServiceImpl.searchPayments(request))
+                .expectErrorMatches(error -> error instanceof it.gov.pagopa.emd.payment.exception.ClientExceptionWithBody)
+                .verify();
     }
 
     private PaymentAttempt paymentAttempt(ObjectId id, String iun, String tppId, int attemptsCount) {
