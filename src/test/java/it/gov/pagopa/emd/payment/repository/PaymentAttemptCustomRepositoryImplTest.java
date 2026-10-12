@@ -119,7 +119,7 @@ class PaymentAttemptCustomRepositoryImplTest {
         when(mongoTemplate.find(any(Query.class), eq(PaymentAttempt.class))).thenReturn(reactor.core.publisher.Flux.empty());
         ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
 
-        StepVerifier.create(customRepository.searchPayments("IUN-1", "psp-1", cursor, 10))
+        StepVerifier.create(customRepository.searchPayments("IUN-1", "tpp-1", cursor, 10))
                 .verifyComplete();
 
         verify(mongoTemplate).find(queryCaptor.capture(), eq(PaymentAttempt.class));
@@ -127,7 +127,7 @@ class PaymentAttemptCustomRepositoryImplTest {
         Document queryObject = query.getQueryObject();
         java.util.List<Document> clauses = queryObject.getList("$and", Document.class);
         assertEquals("IUN-1", clauses.get(0).get("originId"));
-        assertEquals("psp-1", clauses.get(1).get("tppId"));
+        assertEquals("tpp-1", clauses.get(1).get("tppId"));
         assertEquals(cursor, ((Document) clauses.get(2).get("_id")).get("$gt"));
         assertEquals(1, query.getSortObject().get("_id"));
         assertEquals(11, query.getLimit());
@@ -150,18 +150,18 @@ class PaymentAttemptCustomRepositoryImplTest {
     }
 
     @Test
-    void testSearchPaymentsSupportsPspOnlyWithCursor() {
+    void testSearchPaymentsSupportsTppIdOnlyWithCursor() {
         ObjectId cursor = new ObjectId("507f1f77bcf86cd799439012");
         when(mongoTemplate.find(any(Query.class), eq(PaymentAttempt.class))).thenReturn(reactor.core.publisher.Flux.empty());
         ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
 
-        StepVerifier.create(customRepository.searchPayments(null, "psp-2", cursor, 1))
+        StepVerifier.create(customRepository.searchPayments(null, "tpp-2", cursor, 1))
                 .verifyComplete();
 
         verify(mongoTemplate).find(queryCaptor.capture(), eq(PaymentAttempt.class));
         Query query = queryCaptor.getValue();
         java.util.List<Document> clauses = query.getQueryObject().getList("$and", Document.class);
-        assertEquals("psp-2", clauses.get(0).get("tppId"));
+        assertEquals("tpp-2", clauses.get(0).get("tppId"));
         assertEquals(cursor, ((Document) clauses.get(1).get("_id")).get("$gt"));
         assertEquals(2, query.getLimit());
     }

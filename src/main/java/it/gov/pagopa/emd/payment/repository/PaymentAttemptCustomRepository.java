@@ -22,5 +22,5 @@ public interface PaymentAttemptCustomRepository {
      */
     Mono<Void> upsertAttemptDetails(String tppId, String originId, AttemptDetails attemptDetails);
 
-    Flux<PaymentAttempt> searchPayments(String iun, String psp, ObjectId cursor, int limit);
+    Flux<PaymentAttempt> searchPayments(String iun, String tppId, ObjectId cursor, int limit);
 }

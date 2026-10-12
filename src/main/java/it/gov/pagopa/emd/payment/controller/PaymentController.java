@@ -76,7 +76,7 @@ public interface PaymentController {
   @GetMapping("/paymentAttempts/{tppId}/{originId}")
   Mono<ResponseEntity<PaymentAttemptResponseDTO>> getPaymentAttemptByTppIdAndOriginId(@Valid @PathVariable String tppId, @Valid @PathVariable String originId);
 
-  /** Searches payments by IUN and/or PSP using cursor-based pagination. */
+  /** Searches payments by IUN and/or TPP ID using cursor-based pagination. */
   @GetMapping("/attempts/search")
   Mono<ResponseEntity<PaymentSearchResponseDTO>> searchPayments(@Valid @ModelAttribute PaymentSearchRequestDTO request);
 

@@ -117,8 +117,8 @@ class PaymentServiceImplTest {
     void testPaymentSearchUsesNextCursorForFollowingPage() {
         ObjectId firstId = new ObjectId("507f1f77bcf86cd799439011");
         ObjectId secondId = new ObjectId("507f1f77bcf86cd799439012");
-        PaymentAttempt first = paymentAttempt(firstId, "IUN-1", "psp-1", 2);
-        PaymentAttempt second = paymentAttempt(secondId, "IUN-1", "psp-2", 1);
+        PaymentAttempt first = paymentAttempt(firstId, "IUN-1", "tpp-1", 2);
+        PaymentAttempt second = paymentAttempt(secondId, "IUN-1", "tpp-2", 1);
         when(paymentAttemptRepository.searchPayments(eq("IUN-1"), isNull(), isNull(), eq(1)))
                 .thenReturn(Flux.just(first, second));
         when(paymentAttemptRepository.searchPayments(eq("IUN-1"), isNull(), eq(firstId), eq(1)))
@@ -133,7 +133,7 @@ class PaymentServiceImplTest {
                     org.junit.jupiter.api.Assertions.assertEquals(firstId.toHexString(), response.getNextCursor());
                     org.junit.jupiter.api.Assertions.assertEquals(1, response.getReturnedCount());
                     org.junit.jupiter.api.Assertions.assertEquals(2, response.getAttemptsCount());
-                    org.junit.jupiter.api.Assertions.assertEquals("psp-1", response.getPayments().getFirst().getPspId());
+                    org.junit.jupiter.api.Assertions.assertEquals("tpp-1", response.getPayments().getFirst().getTppId());
                 })
                 .verifyComplete();
 
@@ -152,10 +152,10 @@ class PaymentServiceImplTest {
 
     @Test
     void testPaymentSearchReturnsEmptyPage() {
-        when(paymentAttemptRepository.searchPayments(eq(null), eq("psp-1"), isNull(), eq(20)))
+        when(paymentAttemptRepository.searchPayments(eq(null), eq("tpp-1"), isNull(), eq(20)))
                 .thenReturn(Flux.empty());
         PaymentSearchRequestDTO request = new PaymentSearchRequestDTO();
-        request.setPsp("psp-1");
+        request.setTppId("tpp-1");
 
         StepVerifier.create(paymentServiceImpl.searchPayments(request))
                 .assertNext(response -> {
@@ -170,19 +170,19 @@ class PaymentServiceImplTest {
 
     @Test
     void testPaymentSearchNormalizesFiltersAndHandlesExactLimitWithoutNextPage() {
-        PaymentAttempt first = paymentAttempt(new ObjectId("507f1f77bcf86cd799439021"), "IUN-2", "psp-2", 1);
+        PaymentAttempt first = paymentAttempt(new ObjectId("507f1f77bcf86cd799439021"), "IUN-2", "tpp-2", 1);
         PaymentAttempt second = PaymentAttempt.builder()
                 .id(new ObjectId("507f1f77bcf86cd799439022"))
                 .originId("IUN-3")
-                .tppId("psp-3")
+                .tppId("tpp-3")
                 .attemptDetails(null)
                 .build();
-        when(paymentAttemptRepository.searchPayments("IUN-2", "psp-2", null, 2))
+        when(paymentAttemptRepository.searchPayments("IUN-2", "tpp-2", null, 2))
                 .thenReturn(Flux.just(first, second));
 
         PaymentSearchRequestDTO request = new PaymentSearchRequestDTO();
         request.setIun(" IUN-2 ");
-        request.setPsp(" psp-2 ");
+        request.setTppId(" tpp-2 ");
         request.setLimit(2);
 
         StepVerifier.create(paymentServiceImpl.searchPayments(request))
@@ -191,12 +191,12 @@ class PaymentServiceImplTest {
                     org.junit.jupiter.api.Assertions.assertNull(response.getNextCursor());
                     org.junit.jupiter.api.Assertions.assertEquals(2, response.getReturnedCount());
                     org.junit.jupiter.api.Assertions.assertEquals(1, response.getAttemptsCount());
-                    org.junit.jupiter.api.Assertions.assertEquals("psp-2", response.getPayments().get(0).getPspId());
+                    org.junit.jupiter.api.Assertions.assertEquals("tpp-2", response.getPayments().get(0).getTppId());
                     org.junit.jupiter.api.Assertions.assertEquals(0, response.getPayments().get(1).getAttemptsCount());
                 })
                 .verifyComplete();
 
-        verify(paymentAttemptRepository).searchPayments("IUN-2", "psp-2", null, 2);
+        verify(paymentAttemptRepository).searchPayments("IUN-2", "tpp-2", null, 2);
         verify(retrievalRepository, never())
                 .findFirstByTppIdAndOriginIdOrderByCreatedAtDesc(anyString(), anyString());
     }
@@ -206,7 +206,7 @@ class PaymentServiceImplTest {
         PaymentAttempt payment = PaymentAttempt.builder()
                 .id(new ObjectId("507f1f77bcf86cd799439031"))
                 .originId("IUN-4")
-                .tppId("psp-4")
+                .tppId("tpp-4")
                 .attemptDetails(null)
                 .build();
         when(paymentAttemptRepository.searchPayments("IUN-4", null, null, 20))
@@ -218,7 +218,7 @@ class PaymentServiceImplTest {
         StepVerifier.create(paymentServiceImpl.searchPayments(request))
                 .assertNext(response -> {
                     PaymentSearchItemDTO item = response.getPayments().getFirst();
-                    org.junit.jupiter.api.Assertions.assertEquals("psp-4", item.getPspId());
+                    org.junit.jupiter.api.Assertions.assertEquals("tpp-4", item.getTppId());
                     org.junit.jupiter.api.Assertions.assertEquals("IUN-4", item.getIun());
                     org.junit.jupiter.api.Assertions.assertEquals(0, item.getAttemptsCount());
                 })
@@ -231,7 +231,7 @@ class PaymentServiceImplTest {
 
     @Test
     void testPaymentSearchDoesNotRequireTppLookup() {
-        PaymentAttempt payment = paymentAttempt(new ObjectId("507f1f77bcf86cd799439041"), "IUN-5", "psp-5", 1);
+        PaymentAttempt payment = paymentAttempt(new ObjectId("507f1f77bcf86cd799439041"), "IUN-5", "tpp-5", 1);
         when(paymentAttemptRepository.searchPayments("IUN-5", null, null, 20))
                 .thenReturn(Flux.just(payment));
 
@@ -240,7 +240,7 @@ class PaymentServiceImplTest {
 
         StepVerifier.create(paymentServiceImpl.searchPayments(request))
                 .assertNext(response -> {
-                    org.junit.jupiter.api.Assertions.assertEquals("psp-5", response.getPayments().getFirst().getPspId());
+                    org.junit.jupiter.api.Assertions.assertEquals("tpp-5", response.getPayments().getFirst().getTppId());
                 })
                 .verifyComplete();
 

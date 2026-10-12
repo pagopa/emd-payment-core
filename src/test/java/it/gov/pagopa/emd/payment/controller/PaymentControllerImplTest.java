@@ -3,6 +3,7 @@ package it.gov.pagopa.emd.payment.controller;
 import it.gov.pagopa.emd.payment.dto.PaymentAttemptResponseDTO;
 import it.gov.pagopa.emd.payment.dto.PaymentSearchResponseDTO;
 import it.gov.pagopa.emd.payment.dto.PaymentSearchRequestDTO;
+import it.gov.pagopa.emd.payment.dto.PaymentSearchItemDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
 import it.gov.pagopa.emd.payment.service.PaymentServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -137,20 +138,26 @@ class PaymentControllerImplTest {
     void testPaymentSearchReturnsCursorPage() {
         Mockito.when(paymentServiceImpl.searchPayments(org.mockito.ArgumentMatchers.any()))
                 .thenReturn(Mono.just(PaymentSearchResponseDTO.builder()
-                        .payments(List.of())
-                        .returnedCount(0)
-                        .attemptsCount(0)
+                        .payments(List.of(PaymentSearchItemDTO.builder()
+                                .iun("IUN-1")
+                                .tppId("tpp-1")
+                                .attemptsCount(2)
+                                .build()))
+                        .returnedCount(1)
+                        .attemptsCount(2)
                         .hasMore(true)
                         .nextCursor("507f1f77bcf86cd799439011")
                         .build()));
 
         webTestClient.get()
-                .uri("/emd/payment/attempts/search?psp=psp-1&limit=10")
+                .uri("/emd/payment/attempts/search?tppId=tpp-1&limit=10")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.hasMore").isEqualTo(true)
-                .jsonPath("$.nextCursor").isEqualTo("507f1f77bcf86cd799439011");
+                .jsonPath("$.nextCursor").isEqualTo("507f1f77bcf86cd799439011")
+                .jsonPath("$.payments[0].tppId").isEqualTo("tpp-1")
+                .jsonPath("$.payments[0].pspId").doesNotExist();
     }
 
     @Test
@@ -161,12 +168,12 @@ class PaymentControllerImplTest {
                 .expectStatus().isBadRequest();
 
         webTestClient.get()
-                .uri("/emd/payment/attempts/search?psp=psp-1&limit=0")
+                .uri("/emd/payment/attempts/search?tppId=tpp-1&limit=0")
                 .exchange()
                 .expectStatus().isBadRequest();
 
         webTestClient.get()
-                .uri("/emd/payment/attempts/search?psp=psp-1&limit=101")
+                .uri("/emd/payment/attempts/search?tppId=tpp-1&limit=101")
                 .exchange()
                 .expectStatus().isBadRequest();
     }
@@ -183,7 +190,7 @@ class PaymentControllerImplTest {
                         .build()));
 
         webTestClient.get()
-                .uri("/emd/payment/attempts/search?iun=IUN-1&psp=psp-1&cursor={cursor}&limit=7", cursor)
+                .uri("/emd/payment/attempts/search?iun=IUN-1&tppId=tpp-1&cursor={cursor}&limit=7", cursor)
                 .exchange()
                 .expectStatus().isOk();
 
@@ -191,7 +198,7 @@ class PaymentControllerImplTest {
                 org.mockito.ArgumentCaptor.forClass(PaymentSearchRequestDTO.class);
         verify(paymentServiceImpl).searchPayments(requestCaptor.capture());
         Assertions.assertEquals("IUN-1", requestCaptor.getValue().getIun());
-        Assertions.assertEquals("psp-1", requestCaptor.getValue().getPsp());
+        Assertions.assertEquals("tpp-1", requestCaptor.getValue().getTppId());
         Assertions.assertEquals(cursor, requestCaptor.getValue().getCursor());
         Assertions.assertEquals(7, requestCaptor.getValue().getLimit());
     }

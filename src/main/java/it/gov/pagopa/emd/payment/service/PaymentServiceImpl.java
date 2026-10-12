@@ -141,11 +141,11 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public Mono<PaymentSearchResponseDTO> searchPayments(PaymentSearchRequestDTO request) {
         String iun = normalizeSearchFilter(request.getIun());
-        String psp = normalizeSearchFilter(request.getPsp());
+        String tppId = normalizeSearchFilter(request.getTppId());
         ObjectId cursor = request.getCursor() == null ? null : new ObjectId(request.getCursor());
         int limit = request.getLimit();
 
-        return paymentAttemptRepository.searchPayments(iun, psp, cursor, limit)
+        return paymentAttemptRepository.searchPayments(iun, tppId, cursor, limit)
                 .onErrorMap(error -> exceptionMap.throwException(PaymentConstants.ExceptionName.GENERIC_ERROR,
                         PaymentConstants.ExceptionMessage.GENERIC_ERROR))
                 .collectList()
@@ -172,11 +172,11 @@ public class PaymentServiceImpl implements PaymentService {
         return buildPaymentSearchItem(paymentAttempt, paymentAttempt.getTppId(), attemptsCount);
     }
 
-    private PaymentSearchItemDTO buildPaymentSearchItem(PaymentAttempt paymentAttempt, String pspId,
+    private PaymentSearchItemDTO buildPaymentSearchItem(PaymentAttempt paymentAttempt, String tppId,
                                                          long attemptsCount) {
         return PaymentSearchItemDTO.builder()
                 .iun(paymentAttempt.getOriginId())
-                .pspId(pspId)
+                .tppId(tppId)
                 .attemptsCount(attemptsCount)
                 .build();
     }

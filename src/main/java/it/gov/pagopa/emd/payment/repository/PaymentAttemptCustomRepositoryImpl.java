@@ -46,13 +46,13 @@ public class PaymentAttemptCustomRepositoryImpl implements PaymentAttemptCustomR
     }
 
     @Override
-    public Flux<PaymentAttempt> searchPayments(String iun, String psp, ObjectId cursor, int limit) {
+    public Flux<PaymentAttempt> searchPayments(String iun, String tppId, ObjectId cursor, int limit) {
         List<Criteria> filters = new ArrayList<>();
         if (iun != null) {
             filters.add(Criteria.where("originId").is(iun));
         }
-        if (psp != null) {
-            filters.add(Criteria.where("tppId").is(psp));
+        if (tppId != null) {
+            filters.add(Criteria.where("tppId").is(tppId));
         }
         if (cursor != null) {
             filters.add(Criteria.where("_id").gt(cursor));

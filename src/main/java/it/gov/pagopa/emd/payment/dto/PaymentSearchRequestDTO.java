@@ -11,7 +11,7 @@ import lombok.Data;
 public class PaymentSearchRequestDTO {
 
     private String iun;
-    private String psp;
+    private String tppId;
 
     @Pattern(regexp = "(?i)^[0-9a-f]{24}$", message = "Il cursore deve essere un ObjectId MongoDB valido")
     private String cursor;
@@ -20,9 +20,9 @@ public class PaymentSearchRequestDTO {
     @Max(value = 100, message = "Il limite massimo è 100")
     private int limit = 20;
 
-    @AssertTrue(message = "Specificare almeno un criterio di ricerca: IUN oppure PSP")
+    @AssertTrue(message = "Specificare almeno un criterio di ricerca: IUN oppure TPP ID")
     public boolean isSearchCriteriaPresent() {
-        return (iun != null && !iun.isBlank()) || (psp != null && !psp.isBlank());
+        return (iun != null && !iun.isBlank()) || (tppId != null && !tppId.isBlank());
     }
 }
 

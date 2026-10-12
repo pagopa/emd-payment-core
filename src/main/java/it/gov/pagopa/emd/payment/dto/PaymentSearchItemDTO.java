@@ -14,7 +14,7 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PaymentSearchItemDTO {
     private String iun;
-    private String pspId;
+    private String tppId;
     private long attemptsCount;
 }
 
