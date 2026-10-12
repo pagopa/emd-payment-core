@@ -1,6 +1,9 @@
 package it.gov.pagopa.emd.payment.repository;
 
 import it.gov.pagopa.emd.payment.model.AttemptDetails;
+import it.gov.pagopa.emd.payment.model.PaymentAttempt;
+import org.bson.types.ObjectId;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -18,4 +21,6 @@ public interface PaymentAttemptCustomRepository {
      * @return a {@link Mono} signaling completion when the database operation succeeds
      */
     Mono<Void> upsertAttemptDetails(String tppId, String originId, AttemptDetails attemptDetails);
+
+    Flux<PaymentAttempt> searchPayments(String iun, String psp, ObjectId cursor, int limit);
 }

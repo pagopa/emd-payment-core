@@ -1,6 +1,7 @@
 package it.gov.pagopa.emd.payment.controller;
 
 import it.gov.pagopa.emd.payment.dto.PaymentAttemptResponseDTO;
+import it.gov.pagopa.emd.payment.dto.PaymentSearchResponseDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
 import it.gov.pagopa.emd.payment.service.PaymentServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -116,6 +117,37 @@ class PaymentControllerImplTest {
                     List<PaymentAttemptResponseDTO> resultResponse = response.getResponseBody();
                     Assertions.assertNotNull(resultResponse);
                 });
+    }
+
+    @Test
+    void testPaymentSearchWithoutFiltersReturnsBadRequest() {
+        webTestClient.get()
+                .uri("/emd/payment/paymentAttempts/search")
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").value(message -> Assertions.assertTrue(
+                        message.toString().contains("Specificare almeno un criterio")));
+    }
+
+    @Test
+    void testPaymentSearchReturnsCursorPage() {
+        Mockito.when(paymentServiceImpl.searchPayments(org.mockito.ArgumentMatchers.any()))
+                .thenReturn(Mono.just(PaymentSearchResponseDTO.builder()
+                        .payments(List.of())
+                        .returnedCount(0)
+                        .attemptsCount(0)
+                        .hasMore(true)
+                        .nextCursor("507f1f77bcf86cd799439011")
+                        .build()));
+
+        webTestClient.get()
+                .uri("/emd/payment/paymentAttempts/search?psp=psp-1&limit=10")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.hasMore").isEqualTo(true)
+                .jsonPath("$.nextCursor").isEqualTo("507f1f77bcf86cd799439011");
     }
 
 }

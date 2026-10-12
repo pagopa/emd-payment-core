@@ -1,6 +1,8 @@
 package it.gov.pagopa.emd.payment.controller;
 
 import it.gov.pagopa.emd.payment.dto.PaymentAttemptResponseDTO;
+import it.gov.pagopa.emd.payment.dto.PaymentSearchRequestDTO;
+import it.gov.pagopa.emd.payment.dto.PaymentSearchResponseDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalRequestDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
 import jakarta.validation.Valid;
@@ -73,5 +75,9 @@ public interface PaymentController {
    */
   @GetMapping("/paymentAttempts/{tppId}/{originId}")
   Mono<ResponseEntity<PaymentAttemptResponseDTO>> getPaymentAttemptByTppIdAndOriginId(@Valid @PathVariable String tppId, @Valid @PathVariable String originId);
+
+  /** Searches payments by IUN and/or PSP using cursor-based pagination. */
+  @GetMapping("/paymentAttempts/search")
+  Mono<ResponseEntity<PaymentSearchResponseDTO>> searchPayments(@Valid @ModelAttribute PaymentSearchRequestDTO request);
 
 }

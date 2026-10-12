@@ -2,11 +2,17 @@ package it.gov.pagopa.emd.payment.repository;
 
 import it.gov.pagopa.emd.payment.model.AttemptDetails;
 import it.gov.pagopa.emd.payment.model.PaymentAttempt;
+import org.bson.types.ObjectId;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Implementation of the custom repository fragment utilizing {@link ReactiveMongoTemplate}
@@ -37,5 +43,24 @@ public class PaymentAttemptCustomRepositoryImpl implements PaymentAttemptCustomR
 
         // Execute the native findAndModify/upsert operation on the single document reference
         return mongoTemplate.upsert(query, update, PaymentAttempt.class).then();
+    }
+
+    @Override
+    public Flux<PaymentAttempt> searchPayments(String iun, String psp, ObjectId cursor, int limit) {
+        List<Criteria> filters = new ArrayList<>();
+        if (iun != null) {
+            filters.add(Criteria.where("originId").is(iun));
+        }
+        if (psp != null) {
+            filters.add(Criteria.where("tppId").is(psp));
+        }
+        if (cursor != null) {
+            filters.add(Criteria.where("_id").gt(cursor));
+        }
+
+        Query query = new Query(new Criteria().andOperator(filters.toArray(Criteria[]::new)))
+                .with(Sort.by(Sort.Direction.ASC, "_id"))
+                .limit(limit + 1);
+        return mongoTemplate.find(query, PaymentAttempt.class);
     }
 }
