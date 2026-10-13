@@ -21,4 +21,6 @@ public interface RetrievalRepository extends ReactiveMongoRepository<Retrieval,S
      */
     Mono<Retrieval> findByRetrievalId(String retrievalId);
 
+    Mono<Retrieval> findFirstByTppIdAndOriginIdOrderByCreatedAtDesc(String tppId, String originId);
+
 }

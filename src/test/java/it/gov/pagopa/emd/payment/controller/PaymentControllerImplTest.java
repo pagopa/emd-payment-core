@@ -1,6 +1,9 @@
 package it.gov.pagopa.emd.payment.controller;
 
 import it.gov.pagopa.emd.payment.dto.PaymentAttemptResponseDTO;
+import it.gov.pagopa.emd.payment.dto.PaymentSearchResponseDTO;
+import it.gov.pagopa.emd.payment.dto.PaymentSearchRequestDTO;
+import it.gov.pagopa.emd.payment.dto.PaymentSearchItemDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
 import it.gov.pagopa.emd.payment.service.PaymentServiceImpl;
 import org.junit.jupiter.api.Assertions;
@@ -14,6 +17,8 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+
+import static org.mockito.Mockito.verify;
 
 import static it.gov.pagopa.emd.payment.faker.TestUtils.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -116,6 +121,94 @@ class PaymentControllerImplTest {
                     List<PaymentAttemptResponseDTO> resultResponse = response.getResponseBody();
                     Assertions.assertNotNull(resultResponse);
                 });
+    }
+
+    @Test
+    void testPaymentSearchWithoutFiltersReturnsBadRequest() {
+        webTestClient.get()
+                .uri("/emd/payment/attempts/search")
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message").value(message -> Assertions.assertTrue(
+                        message.toString().contains("Specificare almeno un criterio")));
+    }
+
+    @Test
+    void testPaymentSearchReturnsCursorPage() {
+        Mockito.when(paymentServiceImpl.searchPayments(org.mockito.ArgumentMatchers.any()))
+                .thenReturn(Mono.just(PaymentSearchResponseDTO.builder()
+                        .content(List.of(PaymentSearchItemDTO.builder()
+                                .iun("IUN-1")
+                                .tppId("tpp-1")
+                                .attemptsCount(2)
+                                .build()))
+                        .pageSize(10)
+                        .totalElements(1)
+                        .totalPages(1)
+                        .hasNext(true)
+                        .nextCursor("507f1f77bcf86cd799439011")
+                        .build()));
+
+        webTestClient.get()
+                .uri("/emd/payment/attempts/search?tppId=tpp-1&limit=10")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.hasNext").isEqualTo(true)
+                .jsonPath("$.nextCursor").isEqualTo("507f1f77bcf86cd799439011")
+                .jsonPath("$.pageSize").isEqualTo(10)
+                .jsonPath("$.totalElements").isEqualTo(1)
+                .jsonPath("$.totalPages").isEqualTo(1)
+                .jsonPath("$.content[0].tppId").isEqualTo("tpp-1")
+                .jsonPath("$.content[0].pspId").doesNotExist()
+                .jsonPath("$.payments").doesNotExist()
+                .jsonPath("$.returnedCount").doesNotExist()
+                .jsonPath("$.attemptsCount").doesNotExist();
+    }
+
+    @Test
+    void testPaymentSearchRejectsInvalidCursorAndLimits() {
+        webTestClient.get()
+                .uri("/emd/payment/attempts/search?iun=IUN-1&cursor=not-an-object-id")
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        webTestClient.get()
+                .uri("/emd/payment/attempts/search?tppId=tpp-1&limit=0")
+                .exchange()
+                .expectStatus().isBadRequest();
+
+        webTestClient.get()
+                .uri("/emd/payment/attempts/search?tppId=tpp-1&limit=101")
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void testPaymentSearchBindsCursorAndFiltersToRequest() {
+        String cursor = "507f1f77bcf86cd799439011";
+        Mockito.when(paymentServiceImpl.searchPayments(org.mockito.ArgumentMatchers.any()))
+                .thenReturn(Mono.just(PaymentSearchResponseDTO.builder()
+                        .content(List.of())
+                        .pageSize(7)
+                        .totalElements(0)
+                        .totalPages(0)
+                        .hasNext(false)
+                        .build()));
+
+        webTestClient.get()
+                .uri("/emd/payment/attempts/search?iun=IUN-1&tppId=tpp-1&cursor={cursor}&limit=7", cursor)
+                .exchange()
+                .expectStatus().isOk();
+
+        org.mockito.ArgumentCaptor<PaymentSearchRequestDTO> requestCaptor =
+                org.mockito.ArgumentCaptor.forClass(PaymentSearchRequestDTO.class);
+        verify(paymentServiceImpl).searchPayments(requestCaptor.capture());
+        Assertions.assertEquals("IUN-1", requestCaptor.getValue().getIun());
+        Assertions.assertEquals("tpp-1", requestCaptor.getValue().getTppId());
+        Assertions.assertEquals(cursor, requestCaptor.getValue().getCursor());
+        Assertions.assertEquals(7, requestCaptor.getValue().getLimit());
     }
 
 }
