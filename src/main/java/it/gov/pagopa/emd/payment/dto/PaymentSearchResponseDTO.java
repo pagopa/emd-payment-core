@@ -7,16 +7,17 @@ import lombok.NoArgsConstructor;
 
 import java.util.List;
 
-/** Cursor-based page of payment summaries. */
+/** Cursor-based page of payment summaries; totalElements counts matching payment_attempt documents. */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PaymentSearchResponseDTO {
-    private List<PaymentSearchItemDTO> payments;
-    private long returnedCount;
-    private long attemptsCount;
+    private List<PaymentSearchItemDTO> content;
+    private int pageSize;
+    private long totalElements;
+    private long totalPages;
     private String nextCursor;
-    private boolean hasMore;
+    private boolean hasNext;
 }
 

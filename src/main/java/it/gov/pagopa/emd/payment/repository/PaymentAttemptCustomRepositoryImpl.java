@@ -47,13 +47,7 @@ public class PaymentAttemptCustomRepositoryImpl implements PaymentAttemptCustomR
 
     @Override
     public Flux<PaymentAttempt> searchPayments(String iun, String tppId, ObjectId cursor, int limit) {
-        List<Criteria> filters = new ArrayList<>();
-        if (iun != null) {
-            filters.add(Criteria.where("originId").is(iun));
-        }
-        if (tppId != null) {
-            filters.add(Criteria.where("tppId").is(tppId));
-        }
+        List<Criteria> filters = buildSearchFilters(iun, tppId);
         if (cursor != null) {
             filters.add(Criteria.where("_id").gt(cursor));
         }
@@ -62,5 +56,25 @@ public class PaymentAttemptCustomRepositoryImpl implements PaymentAttemptCustomR
                 .with(Sort.by(Sort.Direction.ASC, "_id"))
                 .limit(limit + 1);
         return mongoTemplate.find(query, PaymentAttempt.class);
+    }
+
+    @Override
+    public Mono<Long> countSearchPayments(String iun, String tppId) {
+        List<Criteria> filters = buildSearchFilters(iun, tppId);
+        Query query = filters.isEmpty()
+                ? new Query()
+                : new Query(new Criteria().andOperator(filters.toArray(Criteria[]::new)));
+        return mongoTemplate.count(query, PaymentAttempt.class);
+    }
+
+    private List<Criteria> buildSearchFilters(String iun, String tppId) {
+        List<Criteria> filters = new ArrayList<>();
+        if (iun != null) {
+            filters.add(Criteria.where("originId").is(iun));
+        }
+        if (tppId != null) {
+            filters.add(Criteria.where("tppId").is(tppId));
+        }
+        return filters;
     }
 }

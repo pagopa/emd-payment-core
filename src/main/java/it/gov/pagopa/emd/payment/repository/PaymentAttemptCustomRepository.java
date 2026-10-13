@@ -23,4 +23,7 @@ public interface PaymentAttemptCustomRepository {
     Mono<Void> upsertAttemptDetails(String tppId, String originId, AttemptDetails attemptDetails);
 
     Flux<PaymentAttempt> searchPayments(String iun, String tppId, ObjectId cursor, int limit);
+
+    /** Counts matching payment_attempt documents, independently of the page cursor. */
+    Mono<Long> countSearchPayments(String iun, String tppId);
 }

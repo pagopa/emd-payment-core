@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
-import reactor.core.publisher.Flux;
 
 import java.util.*;
 
@@ -145,25 +144,30 @@ public class PaymentServiceImpl implements PaymentService {
         ObjectId cursor = request.getCursor() == null ? null : new ObjectId(request.getCursor());
         int limit = request.getLimit();
 
-        return paymentAttemptRepository.searchPayments(iun, tppId, cursor, limit)
+        return Mono.zip(
+                        paymentAttemptRepository.searchPayments(iun, tppId, cursor, limit).collectList(),
+                        paymentAttemptRepository.countSearchPayments(iun, tppId))
+                .map(result -> {
+                    List<PaymentAttempt> rows = result.getT1();
+                    long totalElements = result.getT2();
+                    boolean hasNext = rows.size() > limit;
+                    List<PaymentAttempt> page = hasNext ? rows.subList(0, limit) : rows;
+                    List<PaymentSearchItemDTO> content = page.stream()
+                            .map(this::toPaymentSearchItem)
+                            .toList();
+                    long totalPages = totalElements / limit + (totalElements % limit == 0 ? 0 : 1);
+
+                    return PaymentSearchResponseDTO.builder()
+                            .content(content)
+                            .pageSize(limit)
+                            .totalElements(totalElements)
+                            .totalPages(totalPages)
+                            .hasNext(hasNext)
+                            .nextCursor(hasNext ? page.get(page.size() - 1).getId().toHexString() : null)
+                            .build();
+                })
                 .onErrorMap(error -> exceptionMap.throwException(PaymentConstants.ExceptionName.GENERIC_ERROR,
                         PaymentConstants.ExceptionMessage.GENERIC_ERROR))
-                .collectList()
-                .flatMap(rows -> {
-                    boolean hasMore = rows.size() > limit;
-                    List<PaymentAttempt> page = hasMore ? rows.subList(0, limit) : rows;
-
-                    return Flux.fromIterable(page)
-                            .map(this::toPaymentSearchItem)
-                            .collectList()
-                            .map(items -> PaymentSearchResponseDTO.builder()
-                                    .payments(items)
-                                    .returnedCount(items.size())
-                                    .attemptsCount(items.stream().mapToLong(PaymentSearchItemDTO::getAttemptsCount).sum())
-                                    .hasMore(hasMore)
-                                    .nextCursor(hasMore ? page.get(page.size() - 1).getId().toHexString() : null)
-                                    .build());
-                })
                 .doOnError(error -> log.error("[EMD][PAYMENT][SEARCH] Error searching payments", error));
     }
 

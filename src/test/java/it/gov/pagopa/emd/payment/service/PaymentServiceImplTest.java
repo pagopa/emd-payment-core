@@ -123,17 +123,19 @@ class PaymentServiceImplTest {
                 .thenReturn(Flux.just(first, second));
         when(paymentAttemptRepository.searchPayments(eq("IUN-1"), isNull(), eq(firstId), eq(1)))
                 .thenReturn(Flux.just(second));
+        when(paymentAttemptRepository.countSearchPayments("IUN-1", null)).thenReturn(Mono.just(2L));
 
         PaymentSearchRequestDTO firstRequest = new PaymentSearchRequestDTO();
         firstRequest.setIun("IUN-1");
         firstRequest.setLimit(1);
         StepVerifier.create(paymentServiceImpl.searchPayments(firstRequest))
                 .assertNext(response -> {
-                    org.junit.jupiter.api.Assertions.assertTrue(response.isHasMore());
+                    org.junit.jupiter.api.Assertions.assertTrue(response.isHasNext());
                     org.junit.jupiter.api.Assertions.assertEquals(firstId.toHexString(), response.getNextCursor());
-                    org.junit.jupiter.api.Assertions.assertEquals(1, response.getReturnedCount());
-                    org.junit.jupiter.api.Assertions.assertEquals(2, response.getAttemptsCount());
-                    org.junit.jupiter.api.Assertions.assertEquals("tpp-1", response.getPayments().getFirst().getTppId());
+                    org.junit.jupiter.api.Assertions.assertEquals(2, response.getTotalElements());
+                    org.junit.jupiter.api.Assertions.assertEquals(2, response.getTotalPages());
+                    org.junit.jupiter.api.Assertions.assertEquals(1, response.getPageSize());
+                    org.junit.jupiter.api.Assertions.assertEquals("tpp-1", response.getContent().getFirst().getTppId());
                 })
                 .verifyComplete();
 
@@ -143,9 +145,10 @@ class PaymentServiceImplTest {
         secondRequest.setCursor(firstId.toHexString());
         StepVerifier.create(paymentServiceImpl.searchPayments(secondRequest))
                 .assertNext(response -> {
-                    org.junit.jupiter.api.Assertions.assertFalse(response.isHasMore());
+                    org.junit.jupiter.api.Assertions.assertFalse(response.isHasNext());
                     org.junit.jupiter.api.Assertions.assertNull(response.getNextCursor());
-                    org.junit.jupiter.api.Assertions.assertEquals("IUN-1", response.getPayments().getFirst().getIun());
+                    org.junit.jupiter.api.Assertions.assertEquals(2, response.getTotalElements());
+                    org.junit.jupiter.api.Assertions.assertEquals("IUN-1", response.getContent().getFirst().getIun());
                 })
                 .verifyComplete();
     }
@@ -154,15 +157,17 @@ class PaymentServiceImplTest {
     void testPaymentSearchReturnsEmptyPage() {
         when(paymentAttemptRepository.searchPayments(eq(null), eq("tpp-1"), isNull(), eq(20)))
                 .thenReturn(Flux.empty());
+        when(paymentAttemptRepository.countSearchPayments(null, "tpp-1")).thenReturn(Mono.just(0L));
         PaymentSearchRequestDTO request = new PaymentSearchRequestDTO();
         request.setTppId("tpp-1");
 
         StepVerifier.create(paymentServiceImpl.searchPayments(request))
                 .assertNext(response -> {
-                    org.junit.jupiter.api.Assertions.assertTrue(response.getPayments().isEmpty());
-                    org.junit.jupiter.api.Assertions.assertEquals(0, response.getReturnedCount());
-                    org.junit.jupiter.api.Assertions.assertEquals(0, response.getAttemptsCount());
-                    org.junit.jupiter.api.Assertions.assertFalse(response.isHasMore());
+                    org.junit.jupiter.api.Assertions.assertTrue(response.getContent().isEmpty());
+                    org.junit.jupiter.api.Assertions.assertEquals(0, response.getTotalElements());
+                    org.junit.jupiter.api.Assertions.assertEquals(0, response.getTotalPages());
+                    org.junit.jupiter.api.Assertions.assertEquals(20, response.getPageSize());
+                    org.junit.jupiter.api.Assertions.assertFalse(response.isHasNext());
                     org.junit.jupiter.api.Assertions.assertNull(response.getNextCursor());
                 })
                 .verifyComplete();
@@ -179,6 +184,7 @@ class PaymentServiceImplTest {
                 .build();
         when(paymentAttemptRepository.searchPayments("IUN-2", "tpp-2", null, 2))
                 .thenReturn(Flux.just(first, second));
+        when(paymentAttemptRepository.countSearchPayments("IUN-2", "tpp-2")).thenReturn(Mono.just(2L));
 
         PaymentSearchRequestDTO request = new PaymentSearchRequestDTO();
         request.setIun(" IUN-2 ");
@@ -187,12 +193,12 @@ class PaymentServiceImplTest {
 
         StepVerifier.create(paymentServiceImpl.searchPayments(request))
                 .assertNext(response -> {
-                    org.junit.jupiter.api.Assertions.assertFalse(response.isHasMore());
+                    org.junit.jupiter.api.Assertions.assertFalse(response.isHasNext());
                     org.junit.jupiter.api.Assertions.assertNull(response.getNextCursor());
-                    org.junit.jupiter.api.Assertions.assertEquals(2, response.getReturnedCount());
-                    org.junit.jupiter.api.Assertions.assertEquals(1, response.getAttemptsCount());
-                    org.junit.jupiter.api.Assertions.assertEquals("tpp-2", response.getPayments().get(0).getTppId());
-                    org.junit.jupiter.api.Assertions.assertEquals(0, response.getPayments().get(1).getAttemptsCount());
+                    org.junit.jupiter.api.Assertions.assertEquals(2, response.getTotalElements());
+                    org.junit.jupiter.api.Assertions.assertEquals(1, response.getTotalPages());
+                    org.junit.jupiter.api.Assertions.assertEquals("tpp-2", response.getContent().get(0).getTppId());
+                    org.junit.jupiter.api.Assertions.assertEquals(0, response.getContent().get(1).getAttemptsCount());
                 })
                 .verifyComplete();
 
@@ -203,24 +209,23 @@ class PaymentServiceImplTest {
 
     @Test
     void testPaymentSearchMapsFieldsDirectlyFromPaymentAttempt() {
-        PaymentAttempt payment = PaymentAttempt.builder()
-                .id(new ObjectId("507f1f77bcf86cd799439031"))
-                .originId("IUN-4")
-                .tppId("tpp-4")
-                .attemptDetails(null)
-                .build();
+        PaymentAttempt payment = paymentAttempt(
+                new ObjectId("507f1f77bcf86cd799439031"), "IUN-4", "tpp-4", 3);
         when(paymentAttemptRepository.searchPayments("IUN-4", null, null, 20))
                 .thenReturn(Flux.just(payment));
+        when(paymentAttemptRepository.countSearchPayments("IUN-4", null)).thenReturn(Mono.just(1L));
 
         PaymentSearchRequestDTO request = new PaymentSearchRequestDTO();
         request.setIun("IUN-4");
 
         StepVerifier.create(paymentServiceImpl.searchPayments(request))
                 .assertNext(response -> {
-                    PaymentSearchItemDTO item = response.getPayments().getFirst();
+                    PaymentSearchItemDTO item = response.getContent().getFirst();
                     org.junit.jupiter.api.Assertions.assertEquals("tpp-4", item.getTppId());
                     org.junit.jupiter.api.Assertions.assertEquals("IUN-4", item.getIun());
-                    org.junit.jupiter.api.Assertions.assertEquals(0, item.getAttemptsCount());
+                    org.junit.jupiter.api.Assertions.assertEquals(3, item.getAttemptsCount());
+                    org.junit.jupiter.api.Assertions.assertEquals(1, response.getTotalElements());
+                    org.junit.jupiter.api.Assertions.assertEquals(1, response.getTotalPages());
                 })
                 .verifyComplete();
 
@@ -234,13 +239,14 @@ class PaymentServiceImplTest {
         PaymentAttempt payment = paymentAttempt(new ObjectId("507f1f77bcf86cd799439041"), "IUN-5", "tpp-5", 1);
         when(paymentAttemptRepository.searchPayments("IUN-5", null, null, 20))
                 .thenReturn(Flux.just(payment));
+        when(paymentAttemptRepository.countSearchPayments("IUN-5", null)).thenReturn(Mono.just(1L));
 
         PaymentSearchRequestDTO request = new PaymentSearchRequestDTO();
         request.setIun("IUN-5");
 
         StepVerifier.create(paymentServiceImpl.searchPayments(request))
                 .assertNext(response -> {
-                    org.junit.jupiter.api.Assertions.assertEquals("tpp-5", response.getPayments().getFirst().getTppId());
+                    org.junit.jupiter.api.Assertions.assertEquals("tpp-5", response.getContent().getFirst().getTppId());
                 })
                 .verifyComplete();
 
@@ -253,6 +259,7 @@ class PaymentServiceImplTest {
     void testPaymentSearchMapsRepositoryFailureToGenericError() {
         when(paymentAttemptRepository.searchPayments("IUN-error", null, null, 20))
                 .thenReturn(Flux.error(new IllegalStateException("database unavailable")));
+        when(paymentAttemptRepository.countSearchPayments("IUN-error", null)).thenReturn(Mono.just(0L));
         PaymentSearchRequestDTO request = new PaymentSearchRequestDTO();
         request.setIun("IUN-error");
 

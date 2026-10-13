@@ -138,14 +138,15 @@ class PaymentControllerImplTest {
     void testPaymentSearchReturnsCursorPage() {
         Mockito.when(paymentServiceImpl.searchPayments(org.mockito.ArgumentMatchers.any()))
                 .thenReturn(Mono.just(PaymentSearchResponseDTO.builder()
-                        .payments(List.of(PaymentSearchItemDTO.builder()
+                        .content(List.of(PaymentSearchItemDTO.builder()
                                 .iun("IUN-1")
                                 .tppId("tpp-1")
                                 .attemptsCount(2)
                                 .build()))
-                        .returnedCount(1)
-                        .attemptsCount(2)
-                        .hasMore(true)
+                        .pageSize(10)
+                        .totalElements(1)
+                        .totalPages(1)
+                        .hasNext(true)
                         .nextCursor("507f1f77bcf86cd799439011")
                         .build()));
 
@@ -154,10 +155,16 @@ class PaymentControllerImplTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.hasMore").isEqualTo(true)
+                .jsonPath("$.hasNext").isEqualTo(true)
                 .jsonPath("$.nextCursor").isEqualTo("507f1f77bcf86cd799439011")
-                .jsonPath("$.payments[0].tppId").isEqualTo("tpp-1")
-                .jsonPath("$.payments[0].pspId").doesNotExist();
+                .jsonPath("$.pageSize").isEqualTo(10)
+                .jsonPath("$.totalElements").isEqualTo(1)
+                .jsonPath("$.totalPages").isEqualTo(1)
+                .jsonPath("$.content[0].tppId").isEqualTo("tpp-1")
+                .jsonPath("$.content[0].pspId").doesNotExist()
+                .jsonPath("$.payments").doesNotExist()
+                .jsonPath("$.returnedCount").doesNotExist()
+                .jsonPath("$.attemptsCount").doesNotExist();
     }
 
     @Test
@@ -183,10 +190,11 @@ class PaymentControllerImplTest {
         String cursor = "507f1f77bcf86cd799439011";
         Mockito.when(paymentServiceImpl.searchPayments(org.mockito.ArgumentMatchers.any()))
                 .thenReturn(Mono.just(PaymentSearchResponseDTO.builder()
-                        .payments(List.of())
-                        .returnedCount(0)
-                        .attemptsCount(0)
-                        .hasMore(false)
+                        .content(List.of())
+                        .pageSize(7)
+                        .totalElements(0)
+                        .totalPages(0)
+                        .hasNext(false)
                         .build()));
 
         webTestClient.get()

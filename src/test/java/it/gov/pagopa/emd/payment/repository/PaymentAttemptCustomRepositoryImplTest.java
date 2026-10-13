@@ -165,4 +165,21 @@ class PaymentAttemptCustomRepositoryImplTest {
         assertEquals(cursor, ((Document) clauses.get(1).get("_id")).get("$gt"));
         assertEquals(2, query.getLimit());
     }
+
+    @Test
+    void testCountSearchPaymentsCountsFilteredDocumentsWithoutApplyingCursor() {
+        when(mongoTemplate.count(any(Query.class), eq(PaymentAttempt.class))).thenReturn(Mono.just(42L));
+        ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
+
+        StepVerifier.create(customRepository.countSearchPayments("IUN-3", "tpp-3"))
+                .expectNext(42L)
+                .verifyComplete();
+
+        verify(mongoTemplate).count(queryCaptor.capture(), eq(PaymentAttempt.class));
+        Document queryObject = queryCaptor.getValue().getQueryObject();
+        java.util.List<Document> clauses = queryObject.getList("$and", Document.class);
+        assertEquals("IUN-3", clauses.get(0).get("originId"));
+        assertEquals("tpp-3", clauses.get(1).get("tppId"));
+        assertTrue(clauses.stream().noneMatch(clause -> clause.containsKey("_id")));
+    }
 }
