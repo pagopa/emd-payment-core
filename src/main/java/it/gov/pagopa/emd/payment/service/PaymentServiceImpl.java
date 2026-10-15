@@ -1,7 +1,7 @@
 package it.gov.pagopa.emd.payment.service;
 
 import it.gov.pagopa.emd.payment.configuration.ExceptionMap;
-import it.gov.pagopa.emd.payment.connector.TppConnectorImpl;
+import it.gov.pagopa.emd.payment.connector.TppConnector;
 import it.gov.pagopa.emd.payment.constant.PaymentConstants;
 import it.gov.pagopa.emd.payment.dto.*;
 import it.gov.pagopa.emd.payment.model.AttemptDetails;
@@ -30,17 +30,17 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final RetrievalRepository retrievalRepository;
     private final PaymentAttemptRepository paymentAttemptRepository;
-    private final TppConnectorImpl tppControllerImpl;
+    private final TppConnector tppConnector;
     private final ExceptionMap exceptionMap;
     private static final int TTL = 1;
 
     public PaymentServiceImpl(RetrievalRepository retrievalRepository,
                               PaymentAttemptRepository paymentAttemptRepository,
-                              TppConnectorImpl tppControllerImpl,
+                              TppConnector tppConnector,
                               ExceptionMap exceptionMap){
         this.retrievalRepository = retrievalRepository;
         this.paymentAttemptRepository = paymentAttemptRepository;
-        this.tppControllerImpl = tppControllerImpl;
+        this.tppConnector = tppConnector;
         this.exceptionMap = exceptionMap;
     }
 
@@ -50,7 +50,7 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public Mono<RetrievalResponseDTO> saveRetrieval(String entityId, RetrievalRequestDTO retrievalRequestDTO) {
         log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Save retrieval for entityId:{} and agent: {}, and linkVersion: {}", inputSanify(entityId), retrievalRequestDTO.getAgent(), retrievalRequestDTO.getLinkVersion());
-        return tppControllerImpl.getTppByEntityId(entityId)
+        return tppConnector.getTppByEntityId(entityId)
                 .switchIfEmpty(Mono.error(exceptionMap.throwException(PaymentConstants.ExceptionName.TPP_NOT_FOUND, PaymentConstants.ExceptionMessage.TPP_NOT_FOUND)))
                 .flatMap(tppDTO ->
                         retrievalRepository.save(createRetrievalByTppAndRequest(tppDTO, retrievalRequestDTO))
@@ -166,9 +166,42 @@ public class PaymentServiceImpl implements PaymentService {
                             .nextCursor(hasNext ? page.get(page.size() - 1).getId().toHexString() : null)
                             .build();
                 })
+                .flatMap(this::enrichPaymentSearch)
                 .onErrorMap(error -> exceptionMap.throwException(PaymentConstants.ExceptionName.GENERIC_ERROR,
                         PaymentConstants.ExceptionMessage.GENERIC_ERROR))
                 .doOnError(error -> log.error("[EMD][PAYMENT][SEARCH] Error searching payments", error));
+    }
+
+    private Mono<PaymentSearchResponseDTO> enrichPaymentSearch(PaymentSearchResponseDTO response) {
+        List<String> tppIds = response.getContent().stream()
+                .map(PaymentSearchItemDTO::getTppId)
+                .filter(Objects::nonNull)
+                .filter(tppId -> !tppId.isBlank())
+                .distinct()
+                .toList();
+        if (tppIds.isEmpty()) {
+            return Mono.just(response);
+        }
+
+        return tppConnector.getTppsByIds(new TppBatchRequestDTO(tppIds))
+                .map(batchResponse -> {
+                    Map<String, TppBatchResultDTO> tppsById = Optional.ofNullable(batchResponse.getResults())
+                            .orElseGet(List::of)
+                            .stream()
+                            .filter(Objects::nonNull)
+                            .collect(java.util.stream.Collectors.toMap(
+                                    TppBatchResultDTO::getTppId,
+                                    tpp -> tpp,
+                                    (first, duplicate) -> first));
+                    response.getContent().forEach(item -> {
+                        TppBatchResultDTO tpp = tppsById.get(item.getTppId());
+                        if (tpp != null) {
+                            item.setBusinessName(tpp.getBusinessName());
+                            item.setEntityId(tpp.getEntityId());
+                        }
+                    });
+                    return response;
+                });
     }
 
     private PaymentSearchItemDTO toPaymentSearchItem(PaymentAttempt paymentAttempt) {

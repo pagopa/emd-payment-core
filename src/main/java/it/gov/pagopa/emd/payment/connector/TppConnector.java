@@ -2,6 +2,8 @@ package it.gov.pagopa.emd.payment.connector;
 
 
 import it.gov.pagopa.emd.payment.dto.TppDTO;
+import it.gov.pagopa.emd.payment.dto.TppBatchRequestDTO;
+import it.gov.pagopa.emd.payment.dto.TppBatchResponseDTO;
 import reactor.core.publisher.Mono;
 
 /**
@@ -19,4 +21,7 @@ public interface TppConnector {
      *         specified entity ID.
      */
     Mono<TppDTO> getTppByEntityId(String entityId);
+
+    /** Looks up multiple TPP records in one request. */
+    Mono<TppBatchResponseDTO> getTppsByIds(TppBatchRequestDTO request);
 }

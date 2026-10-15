@@ -15,6 +15,8 @@ import lombok.NoArgsConstructor;
 public class PaymentSearchItemDTO {
     private String iun;
     private String tppId;
+    private String businessName;
+    private String entityId;
     private long attemptsCount;
 }
 

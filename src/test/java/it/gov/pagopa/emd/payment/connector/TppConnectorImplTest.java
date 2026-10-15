@@ -1,8 +1,11 @@
 package it.gov.pagopa.emd.payment.connector;
 
 import it.gov.pagopa.emd.payment.dto.TppDTO;
+import it.gov.pagopa.emd.payment.dto.TppBatchRequestDTO;
+import it.gov.pagopa.emd.payment.dto.TppBatchResponseDTO;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -71,6 +74,26 @@ class TppConnectorImplTest {
         assertThat(tppDTO.getContact().getNumber()).isEqualTo("+1234567890");
         assertThat(tppDTO.getContact().getEmail()).isEqualTo("contact@example.com");
         assertThat(tppDTO.getState()).isTrue();
+    }
+
+    @Test
+    void testGetTppsByIdsSendsVersionedBatchRequest() throws Exception {
+        mockWebServer.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setBody("{\"results\":[{\"tppId\":\"TPP_1\",\"businessName\":\"Business\",\"entityId\":\"ENTITY_1\"}],\"missingTppIds\":[\"TPP_MISSING\"]}")
+                .addHeader("Content-Type", "application/json"));
+
+        TppBatchResponseDTO response = tppConnector.getTppsByIds(
+                new TppBatchRequestDTO(java.util.List.of("TPP_1", "TPP_MISSING"))).block();
+        RecordedRequest request = mockWebServer.takeRequest();
+
+        assertThat(request.getMethod()).isEqualTo("POST");
+        assertThat(request.getPath()).isEqualTo("/emd/tpp/batch");
+        assertThat(request.getHeader("X-API-Version")).isEqualTo("1");
+        assertThat(request.getBody().readUtf8()).isEqualTo("{\"ids\":[\"TPP_1\",\"TPP_MISSING\"]}");
+        assertThat(response.getResults()).hasSize(1);
+        assertThat(response.getResults().getFirst().getBusinessName()).isEqualTo("Business");
+        assertThat(response.getMissingTppIds()).containsExactly("TPP_MISSING");
     }
 
     // ── retry tests ───────────────────────────────────────────────────────────

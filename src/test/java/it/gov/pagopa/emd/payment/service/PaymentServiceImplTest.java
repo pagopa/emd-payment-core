@@ -1,17 +1,21 @@
 package it.gov.pagopa.emd.payment.service;
 
 import it.gov.pagopa.emd.payment.configuration.ExceptionMap;
-import it.gov.pagopa.emd.payment.connector.TppConnectorImpl;
+import it.gov.pagopa.emd.payment.connector.TppConnector;
 import it.gov.pagopa.emd.payment.dto.RetrievalRequestDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
 import it.gov.pagopa.emd.payment.dto.PaymentSearchRequestDTO;
 import it.gov.pagopa.emd.payment.dto.PaymentSearchItemDTO;
+import it.gov.pagopa.emd.payment.dto.TppBatchRequestDTO;
+import it.gov.pagopa.emd.payment.dto.TppBatchResponseDTO;
+import it.gov.pagopa.emd.payment.dto.TppBatchResultDTO;
 import it.gov.pagopa.emd.payment.model.PaymentAttempt;
 import it.gov.pagopa.emd.payment.model.AttemptDetails;
 import it.gov.pagopa.emd.payment.model.Retrieval;
 import it.gov.pagopa.emd.payment.repository.PaymentAttemptRepository;
 import it.gov.pagopa.emd.payment.repository.RetrievalRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +50,13 @@ class PaymentServiceImplTest {
     private PaymentAttemptRepository paymentAttemptRepository;
 
     @MockitoBean
-    private TppConnectorImpl tppConnectorImpl;
+    private TppConnector tppConnectorImpl;
+
+    @BeforeEach
+    void setUp() {
+        when(tppConnectorImpl.getTppsByIds(any()))
+                .thenReturn(Mono.just(new TppBatchResponseDTO(List.of(), List.of())));
+    }
 
     /**
      * Method under test: {@link PaymentServiceImpl#saveRetrieval(String, RetrievalRequestDTO)}
@@ -171,6 +181,8 @@ class PaymentServiceImplTest {
                     org.junit.jupiter.api.Assertions.assertNull(response.getNextCursor());
                 })
                 .verifyComplete();
+
+        verify(tppConnectorImpl, never()).getTppsByIds(any());
     }
 
     @Test
@@ -235,7 +247,49 @@ class PaymentServiceImplTest {
     }
 
     @Test
-    void testPaymentSearchDoesNotRequireTppLookup() {
+    void testPaymentSearchEnrichesPageWithSingleDeduplicatedTppBatchLookup() {
+        PaymentAttempt first = paymentAttempt(new ObjectId("507f1f77bcf86cd799439051"), "IUN-6", "tpp-6", 1);
+        PaymentAttempt second = paymentAttempt(new ObjectId("507f1f77bcf86cd799439052"), "IUN-6", "tpp-6", 2);
+        PaymentAttempt third = paymentAttempt(new ObjectId("507f1f77bcf86cd799439053"), "IUN-7", "tpp-7", 1);
+        when(paymentAttemptRepository.searchPayments(null, null, null, 20))
+                .thenReturn(Flux.just(first, second, third));
+        when(paymentAttemptRepository.countSearchPayments(null, null)).thenReturn(Mono.just(3L));
+        when(tppConnectorImpl.getTppsByIds(any())).thenReturn(Mono.just(new TppBatchResponseDTO(
+                List.of(new TppBatchResultDTO("tpp-6", "Business 6", "ENTITY-6")),
+                List.of("tpp-7"))));
+
+        StepVerifier.create(paymentServiceImpl.searchPayments(new PaymentSearchRequestDTO()))
+                .assertNext(response -> {
+                    org.junit.jupiter.api.Assertions.assertEquals(3, response.getContent().size());
+                    org.junit.jupiter.api.Assertions.assertEquals("Business 6", response.getContent().get(0).getBusinessName());
+                    org.junit.jupiter.api.Assertions.assertEquals("ENTITY-6", response.getContent().get(1).getEntityId());
+                    org.junit.jupiter.api.Assertions.assertNull(response.getContent().get(2).getBusinessName());
+                    org.junit.jupiter.api.Assertions.assertEquals(3, response.getTotalElements());
+                })
+                .verifyComplete();
+
+        org.mockito.ArgumentCaptor<TppBatchRequestDTO> requestCaptor =
+                org.mockito.ArgumentCaptor.forClass(TppBatchRequestDTO.class);
+        verify(tppConnectorImpl).getTppsByIds(requestCaptor.capture());
+        org.junit.jupiter.api.Assertions.assertEquals(List.of("tpp-6", "tpp-7"), requestCaptor.getValue().getIds());
+    }
+
+    @Test
+    void testPaymentSearchDoesNotReturnPartialPageWhenTppBatchLookupFails() {
+        PaymentAttempt payment = paymentAttempt(new ObjectId("507f1f77bcf86cd799439061"), "IUN-8", "tpp-8", 1);
+        when(paymentAttemptRepository.searchPayments("IUN-8", null, null, 20)).thenReturn(Flux.just(payment));
+        when(paymentAttemptRepository.countSearchPayments("IUN-8", null)).thenReturn(Mono.just(1L));
+        when(tppConnectorImpl.getTppsByIds(any())).thenReturn(Mono.error(new IllegalStateException("TPP unavailable")));
+        PaymentSearchRequestDTO request = new PaymentSearchRequestDTO();
+        request.setIun("IUN-8");
+
+        StepVerifier.create(paymentServiceImpl.searchPayments(request))
+                .expectErrorMatches(error -> error instanceof it.gov.pagopa.emd.payment.exception.ClientExceptionWithBody)
+                .verify();
+    }
+
+    @Test
+    void testPaymentSearchPerformsTppLookupForReturnedPage() {
         PaymentAttempt payment = paymentAttempt(new ObjectId("507f1f77bcf86cd799439041"), "IUN-5", "tpp-5", 1);
         when(paymentAttemptRepository.searchPayments("IUN-5", null, null, 20))
                 .thenReturn(Flux.just(payment));
@@ -252,7 +306,7 @@ class PaymentServiceImplTest {
 
         verify(retrievalRepository, never())
                 .findFirstByTppIdAndOriginIdOrderByCreatedAtDesc(anyString(), anyString());
-        verify(tppConnectorImpl, never()).getTppByEntityId(anyString());
+        verify(tppConnectorImpl).getTppsByIds(any());
     }
 
     @Test
