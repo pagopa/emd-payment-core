@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.6.0](https://github.com/pagopa/emd-payment-core/compare/v1.5.4...v1.6.0) (2026-10-15)
+
+
+### Features
+
+* [MMC-1191] add tpp info to search endpoint ([#102](https://github.com/pagopa/emd-payment-core/issues/102)) ([1f820cb](https://github.com/pagopa/emd-payment-core/commit/1f820cb6ba11c8a5d78cbdcef249e54d7ef82843))
+* [MMC-1191] payment search endpoint add ([#98](https://github.com/pagopa/emd-payment-core/issues/98)) ([efab5f2](https://github.com/pagopa/emd-payment-core/commit/efab5f29f6be354cc6b4ade4555caba4adb3f6b3))
+
 ## [1.5.4](https://github.com/pagopa/emd-payment-core/compare/v1.5.3...v1.5.4) (2026-07-21)
 
 
