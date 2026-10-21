@@ -52,11 +52,18 @@ public class PaymentServiceImpl implements PaymentService {
         return tppControllerImpl.getTppByEntityId(entityId)
                 .switchIfEmpty(Mono.error(exceptionMap.throwException(PaymentConstants.ExceptionName.TPP_NOT_FOUND, PaymentConstants.ExceptionMessage.TPP_NOT_FOUND)))
                 .flatMap(tppDTO ->
-                        retrievalRepository.save(createRetrievalByTppAndRequest(tppDTO, retrievalRequestDTO))
-                                .onErrorMap(error -> exceptionMap.throwException(PaymentConstants.ExceptionName.GENERIC_ERROR, PaymentConstants.ExceptionMessage.GENERIC_ERROR))
-                                .map(this::createResponseByRetrieval))
-                .doOnSuccess(retrievalResponseDTO -> log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for entityId:{} and agent: {}, and originId: {}",
-                    inputSanify(retrievalResponseDTO.getRetrievalId()),inputSanify(entityId),retrievalRequestDTO.getAgent(), inputSanify(retrievalRequestDTO.getOriginId())));
+                retrievalRepository.save(
+                                createRetrievalByTppAndRequest(tppDTO, retrievalRequestDTO))
+                        .onErrorMap(error -> exceptionMap.throwException(
+                                PaymentConstants.ExceptionName.GENERIC_ERROR,
+                                PaymentConstants.ExceptionMessage.GENERIC_ERROR))
+                        .map(this::createResponseByRetrieval)
+                        .doOnSuccess(retrievalResponseDTO ->
+                                log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for entityId: {}, tppId: {}, agent: {}, originId: {}, isPaymentEnabled: {}",
+                                        inputSanify(retrievalResponseDTO.getRetrievalId()), inputSanify(entityId),
+                                        inputSanify(tppDTO.getTppId()), retrievalRequestDTO.getAgent(),
+                                        inputSanify(retrievalRequestDTO.getOriginId()), retrievalResponseDTO.getIsPaymentEnabled()))
+        );
     }
 
     /**
