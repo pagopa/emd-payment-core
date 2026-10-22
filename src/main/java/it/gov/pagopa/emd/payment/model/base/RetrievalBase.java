@@ -4,8 +4,6 @@ package it.gov.pagopa.emd.payment.model.base;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * Base class containing common retrieval information.

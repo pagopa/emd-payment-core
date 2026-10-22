@@ -60,10 +60,10 @@ public class PaymentServiceImpl implements PaymentService {
                                 PaymentConstants.ExceptionMessage.GENERIC_ERROR))
                         .map(this::createResponseByModel)
                         .doOnSuccess(retrievalResponseDTO ->
-                                log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for entityId: {}, tppId: {}, agent: {}, deepLink:{} originId: {}, isPaymentEnabled: {}",
-                                        inputSanify(retrievalResponseDTO.getRetrievalId()), inputSanify(entityId),
+                                log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for pspDenomination: {}, entityId: {}, tppId: {}, agent: {}, deepLink:{} originId: {}, isPaymentEnabled: {}, createdAt: {}",
+                                        inputSanify(retrievalResponseDTO.getRetrievalId()), inputSanify(tppDTO.getPspDenomination()), inputSanify(entityId),
                                         inputSanify(retrievalResponseDTO.getTppId()), retrievalRequestDTO.getAgent(), retrievalResponseDTO.getDeeplink(),
-                                        inputSanify(retrievalRequestDTO.getOriginId()), retrievalResponseDTO.getIsPaymentEnabled()))
+                                        inputSanify(retrievalRequestDTO.getOriginId()), retrievalResponseDTO.getIsPaymentEnabled(), retrievalResponseDTO.getCreatedAt()))
         );
     }
 
@@ -319,15 +319,6 @@ public class PaymentServiceImpl implements PaymentService {
     }
 
     /**
-     * Creates a minimal RetrievalResponseDTO from a Retrieval entity for save operations.
-     */
-    private RetrievalResponseDTO createResponseByRetrieval(Retrieval retrieval){
-        RetrievalResponseDTO retrievalResponseDTO = new RetrievalResponseDTO();
-        retrievalResponseDTO.setRetrievalId(retrieval.getRetrievalId());
-        return retrievalResponseDTO;
-    }
-
-    /**
      * Creates a complete RetrievalResponseDTO from a Retrieval entity.
      */
     private RetrievalResponseDTO createResponseByModel(Retrieval retrieval){
@@ -338,6 +329,7 @@ public class PaymentServiceImpl implements PaymentService {
         retrievalResponseDTO.setOriginId(retrieval.getOriginId());
         retrievalResponseDTO.setTppId(retrieval.getTppId());
         retrievalResponseDTO.setIsPaymentEnabled(retrieval.getIsPaymentEnabled());
+        retrievalResponseDTO.setCreatedAt(retrieval.getCreatedAt());
         return retrievalResponseDTO;
     }
 
