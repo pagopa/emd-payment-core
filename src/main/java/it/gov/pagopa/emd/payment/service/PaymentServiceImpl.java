@@ -57,11 +57,11 @@ public class PaymentServiceImpl implements PaymentService {
                         .onErrorMap(error -> exceptionMap.throwException(
                                 PaymentConstants.ExceptionName.GENERIC_ERROR,
                                 PaymentConstants.ExceptionMessage.GENERIC_ERROR))
-                        .map(this::createResponseByRetrieval)
+                        .map(this::createResponseByModel)
                         .doOnSuccess(retrievalResponseDTO ->
-                                log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for entityId: {}, tppId: {}, agent: {}, originId: {}, isPaymentEnabled: {}",
+                                log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for entityId: {}, tppId: {}, agent: {}, deepLink:{} originId: {}, isPaymentEnabled: {}",
                                         inputSanify(retrievalResponseDTO.getRetrievalId()), inputSanify(entityId),
-                                        inputSanify(tppDTO.getTppId()), retrievalRequestDTO.getAgent(),
+                                        inputSanify(retrievalResponseDTO.getTppId()), retrievalRequestDTO.getAgent(), retrievalResponseDTO.getDeeplink(),
                                         inputSanify(retrievalRequestDTO.getOriginId()), retrievalResponseDTO.getIsPaymentEnabled()))
         );
     }
