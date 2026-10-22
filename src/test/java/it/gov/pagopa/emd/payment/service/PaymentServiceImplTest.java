@@ -67,13 +67,11 @@ class PaymentServiceImplTest {
         when(tppConnectorImpl.getTppByEntityId("tppId")).thenReturn(Mono.just(TPP_DTO));
         when(retrievalRepository.save(any())).thenReturn(Mono.just(RETRIEVAL));
 
+        RetrievalResponseDTO retrievalResponseDTO = new RetrievalResponseDTO();
+        retrievalResponseDTO.setRetrievalId("retrievalId");
+
         StepVerifier.create(paymentServiceImpl.saveRetrieval("tppId", RETRIEVAL_REQUEST_DTO))
-                .assertNext(response -> {
-                    assertNotNull(response);
-                    assertEquals(RETRIEVAL.getRetrievalId(), response.getRetrievalId());
-                    assertEquals(RETRIEVAL.getTppId(), response.getTppId());
-                    assertEquals(RETRIEVAL.getDeeplink(), response.getDeeplink());
-                })
+                .expectNext(retrievalResponseDTO)
                 .verifyComplete();
     }
 
