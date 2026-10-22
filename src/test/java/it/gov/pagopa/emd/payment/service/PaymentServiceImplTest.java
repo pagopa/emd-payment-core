@@ -29,6 +29,7 @@ import reactor.test.StepVerifier;
 import java.util.List;
 
 import static it.gov.pagopa.emd.payment.faker.TestUtils.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -65,11 +66,14 @@ class PaymentServiceImplTest {
     void testSaveRetrieval() {
         when(tppConnectorImpl.getTppByEntityId("tppId")).thenReturn(Mono.just(TPP_DTO));
         when(retrievalRepository.save(any())).thenReturn(Mono.just(RETRIEVAL));
-        RetrievalResponseDTO retrievalResponseDTO = new RetrievalResponseDTO();
-        retrievalResponseDTO.setRetrievalId("retrievalId");
 
         StepVerifier.create(paymentServiceImpl.saveRetrieval("tppId", RETRIEVAL_REQUEST_DTO))
-                .expectNext(retrievalResponseDTO)
+                .assertNext(response -> {
+                    assertNotNull(response);
+                    assertEquals(RETRIEVAL.getRetrievalId(), response.getRetrievalId());
+                    assertEquals(RETRIEVAL.getTppId(), response.getTppId());
+                    assertEquals(RETRIEVAL.getDeeplink(), response.getDeeplink());
+                })
                 .verifyComplete();
     }
 
