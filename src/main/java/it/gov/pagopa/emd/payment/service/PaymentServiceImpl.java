@@ -51,20 +51,18 @@ public class PaymentServiceImpl implements PaymentService {
     public Mono<RetrievalResponseDTO> saveRetrieval(String entityId, RetrievalRequestDTO retrievalRequestDTO) {
         log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Save retrieval for entityId:{} and agent: {}, and linkVersion: {}", inputSanify(entityId), retrievalRequestDTO.getAgent(), retrievalRequestDTO.getLinkVersion());
         return tppConnector.getTppByEntityId(entityId)
-                .switchIfEmpty(Mono.error(exceptionMap.throwException(PaymentConstants.ExceptionName.TPP_NOT_FOUND, PaymentConstants.ExceptionMessage.TPP_NOT_FOUND)))
-                .flatMap(tppDTO ->
-                retrievalRepository.save(
-                                createRetrievalByTppAndRequest(tppDTO, retrievalRequestDTO))
-                        .onErrorMap(error -> exceptionMap.throwException(
-                                PaymentConstants.ExceptionName.GENERIC_ERROR,
-                                PaymentConstants.ExceptionMessage.GENERIC_ERROR))
-                        .map(this::createResponseByModel)
-                        .doOnSuccess(retrievalResponseDTO ->
-                                log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for pspDenomination: {}, entityId: {}, tppId: {}, agent: {}, deepLink:{} originId: {}, isPaymentEnabled: {}, createdAt: {}",
-                                        inputSanify(retrievalResponseDTO.getRetrievalId()), inputSanify(tppDTO.getPspDenomination()), inputSanify(entityId),
-                                        inputSanify(retrievalResponseDTO.getTppId()), retrievalRequestDTO.getAgent(), retrievalResponseDTO.getDeeplink(),
-                                        inputSanify(retrievalRequestDTO.getOriginId()), retrievalResponseDTO.getIsPaymentEnabled(), retrievalResponseDTO.getCreatedAt()))
-        );
+            .switchIfEmpty(Mono.error(exceptionMap.throwException(PaymentConstants.ExceptionName.TPP_NOT_FOUND, PaymentConstants.ExceptionMessage.TPP_NOT_FOUND)))
+            .flatMap(tppDTO ->
+                retrievalRepository.save(createRetrievalByTppAndRequest(tppDTO, retrievalRequestDTO))
+                    .onErrorMap(error -> exceptionMap.throwException(PaymentConstants.ExceptionName.GENERIC_ERROR,
+                            PaymentConstants.ExceptionMessage.GENERIC_ERROR))
+                    .doOnSuccess(savedRetrieval ->
+                        log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for pspDenomination: {}, entityId: {}, tppId: {}, agent: {}, deepLink:{} originId: {}, isPaymentEnabled: {}, createdAt: {}",
+                                inputSanify(savedRetrieval.getRetrievalId()), inputSanify(tppDTO.getPspDenomination()), 
+                                inputSanify(entityId), inputSanify(savedRetrieval.getTppId()), retrievalRequestDTO.getAgent(), savedRetrieval.getDeeplink(),
+                                inputSanify(retrievalRequestDTO.getOriginId()), savedRetrieval.getIsPaymentEnabled(), savedRetrieval.getCreatedAt()))
+                    .map(this::createResponseByRetrieval)
+            );
     }
 
     /**
@@ -318,6 +316,12 @@ public class PaymentServiceImpl implements PaymentService {
         return retrieval;
     }
 
+    private RetrievalResponseDTO createResponseByRetrieval(Retrieval retrieval) {
+    RetrievalResponseDTO dto = new RetrievalResponseDTO();
+    dto.setRetrievalId(retrieval.getRetrievalId());
+    return dto;
+}
+
     /**
      * Creates a complete RetrievalResponseDTO from a Retrieval entity.
      */
@@ -329,7 +333,6 @@ public class PaymentServiceImpl implements PaymentService {
         retrievalResponseDTO.setOriginId(retrieval.getOriginId());
         retrievalResponseDTO.setTppId(retrieval.getTppId());
         retrievalResponseDTO.setIsPaymentEnabled(retrieval.getIsPaymentEnabled());
-        retrievalResponseDTO.setCreatedAt(retrieval.getCreatedAt());
         return retrievalResponseDTO;
     }
 
