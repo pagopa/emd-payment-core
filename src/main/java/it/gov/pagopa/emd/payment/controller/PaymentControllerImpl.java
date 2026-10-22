@@ -2,6 +2,8 @@ package it.gov.pagopa.emd.payment.controller;
 
 
 import it.gov.pagopa.emd.payment.dto.PaymentAttemptResponseDTO;
+import it.gov.pagopa.emd.payment.dto.PaymentSearchRequestDTO;
+import it.gov.pagopa.emd.payment.dto.PaymentSearchResponseDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalRequestDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
 import it.gov.pagopa.emd.payment.service.PaymentServiceImpl;
@@ -70,6 +72,11 @@ public class PaymentControllerImpl implements PaymentController {
   public Mono<ResponseEntity<PaymentAttemptResponseDTO>> getPaymentAttemptByTppIdAndOriginId(String tppId, String originId){
     return paymentServiceImpl.getPaymentAttemptByTppIdAndOriginId(tppId, originId)
             .map(ResponseEntity::ok);
+  }
+
+  @Override
+  public Mono<ResponseEntity<PaymentSearchResponseDTO>> searchPayments(PaymentSearchRequestDTO request) {
+    return paymentServiceImpl.searchPayments(request).map(ResponseEntity::ok);
   }
 
 

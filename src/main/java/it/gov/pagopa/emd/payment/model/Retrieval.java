@@ -18,6 +18,7 @@ import java.util.Date;
 @SuperBuilder
 public class Retrieval extends RetrievalBase {
 
+
   @CreatedDate
   private Date createdAt;
 }

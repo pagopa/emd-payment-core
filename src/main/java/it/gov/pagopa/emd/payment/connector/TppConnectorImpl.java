@@ -2,6 +2,8 @@ package it.gov.pagopa.emd.payment.connector;
 
 import it.gov.pagopa.emd.payment.configuration.WebClientRetrySpecs;
 import it.gov.pagopa.emd.payment.dto.TppDTO;
+import it.gov.pagopa.emd.payment.dto.TppBatchRequestDTO;
+import it.gov.pagopa.emd.payment.dto.TppBatchResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,20 @@ public class TppConnectorImpl implements TppConnector {
                 .retryWhen(WebClientRetrySpecs.transientNetwork())
                 .doOnError(ex -> log.error(
                         "[TPP-CONNECTOR] GET /emd/tpp/entityId/{{entityId}} failed: {}",
+                        ex.getMessage()));
+    }
+
+    @Override
+    public Mono<TppBatchResponseDTO> getTppsByIds(TppBatchRequestDTO request) {
+        return webClient.post()
+                .uri("/emd/tpp/batch")
+                .header("X-API-Version", "1")
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(TppBatchResponseDTO.class)
+                .retryWhen(WebClientRetrySpecs.connectFailureOnly())
+                .doOnError(ex -> log.error(
+                        "[TPP-CONNECTOR] POST /emd/tpp/batch failed: {}",
                         ex.getMessage()));
     }
 }

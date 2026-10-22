@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.6.0](https://github.com/pagopa/emd-payment-core/compare/v1.5.4...v1.6.0) (2026-10-15)
+
+
+### Features
+
+* [MMC-1191] add tpp info to search endpoint ([#102](https://github.com/pagopa/emd-payment-core/issues/102)) ([1f820cb](https://github.com/pagopa/emd-payment-core/commit/1f820cb6ba11c8a5d78cbdcef249e54d7ef82843))
+* [MMC-1191] payment search endpoint add ([#98](https://github.com/pagopa/emd-payment-core/issues/98)) ([efab5f2](https://github.com/pagopa/emd-payment-core/commit/efab5f29f6be354cc6b4ade4555caba4adb3f6b3))
+
+## [1.5.4](https://github.com/pagopa/emd-payment-core/compare/v1.5.3...v1.5.4) (2026-07-21)
+
+
+### Bug Fixes
+
+* **deps:** bump com.azure.spring:spring-cloud-azure-dependencies from 5.16.0 to 7.3.0 ([#76](https://github.com/pagopa/emd-payment-core/issues/76)) ([30c6bcf](https://github.com/pagopa/emd-payment-core/commit/30c6bcf74b5fb00004856736510a94f3eb8671a2))
+* **deps:** bump org.springframework.cloud:spring-cloud-dependencies from 2023.0.2 to 2025.1.2 ([#77](https://github.com/pagopa/emd-payment-core/issues/77)) ([c3c58c7](https://github.com/pagopa/emd-payment-core/commit/c3c58c7fb781e7f424621cc0d27734eeeba2711f))
+* **deps:** bump org.springframework.security:spring-security-crypto from 6.3.8 to 7.1.0 ([#89](https://github.com/pagopa/emd-payment-core/issues/89)) ([b58f911](https://github.com/pagopa/emd-payment-core/commit/b58f911b7f7d57b319dce2770fe99a607b12017a))
+* **deps:** bump the non-major-updates group across 1 directory with 7 updates ([#80](https://github.com/pagopa/emd-payment-core/issues/80)) ([e8d169f](https://github.com/pagopa/emd-payment-core/commit/e8d169fb33030ece2dd733208e39c6eeefbc5162))
+
 ## [1.5.3](https://github.com/pagopa/emd-payment-core/compare/v1.5.2...v1.5.3) (2026-06-17)
 
 

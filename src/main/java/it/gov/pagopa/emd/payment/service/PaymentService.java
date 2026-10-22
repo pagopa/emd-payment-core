@@ -1,6 +1,8 @@
 package it.gov.pagopa.emd.payment.service;
 
 import it.gov.pagopa.emd.payment.dto.PaymentAttemptResponseDTO;
+import it.gov.pagopa.emd.payment.dto.PaymentSearchRequestDTO;
+import it.gov.pagopa.emd.payment.dto.PaymentSearchResponseDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalRequestDTO;
 import it.gov.pagopa.emd.payment.dto.RetrievalResponseDTO;
 import reactor.core.publisher.Mono;
@@ -56,5 +58,7 @@ public interface PaymentService {
    * @return {@link Mono} containing {@link PaymentAttemptResponseDTO} object
    */
   Mono<PaymentAttemptResponseDTO> getPaymentAttemptByTppIdAndOriginId(String tppId, String originId);
+
+  Mono<PaymentSearchResponseDTO> searchPayments(PaymentSearchRequestDTO request);
 
 }

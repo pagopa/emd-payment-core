@@ -4,6 +4,7 @@ import com.mongodb.client.result.UpdateResult;
 import it.gov.pagopa.emd.payment.model.AttemptDetails;
 import it.gov.pagopa.emd.payment.model.PaymentAttempt;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -110,5 +111,75 @@ class PaymentAttemptCustomRepositoryImplTest {
                 .verify();
 
         verify(mongoTemplate, times(1)).upsert(any(Query.class), any(Update.class), eq(PaymentAttempt.class));
+    }
+
+    @Test
+    void testSearchPaymentsBuildsCombinedKeysetQuery() {
+        ObjectId cursor = new ObjectId("507f1f77bcf86cd799439011");
+        when(mongoTemplate.find(any(Query.class), eq(PaymentAttempt.class))).thenReturn(reactor.core.publisher.Flux.empty());
+        ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
+
+        StepVerifier.create(customRepository.searchPayments("IUN-1", "tpp-1", cursor, 10))
+                .verifyComplete();
+
+        verify(mongoTemplate).find(queryCaptor.capture(), eq(PaymentAttempt.class));
+        Query query = queryCaptor.getValue();
+        Document queryObject = query.getQueryObject();
+        java.util.List<Document> clauses = queryObject.getList("$and", Document.class);
+        assertEquals("IUN-1", clauses.get(0).get("originId"));
+        assertEquals("tpp-1", clauses.get(1).get("tppId"));
+        assertEquals(cursor, ((Document) clauses.get(2).get("_id")).get("$gt"));
+        assertEquals(1, query.getSortObject().get("_id"));
+        assertEquals(11, query.getLimit());
+    }
+
+    @Test
+    void testSearchPaymentsSupportsIunOnlyWithoutCursor() {
+        when(mongoTemplate.find(any(Query.class), eq(PaymentAttempt.class))).thenReturn(reactor.core.publisher.Flux.empty());
+        ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
+
+        StepVerifier.create(customRepository.searchPayments("IUN-2", null, null, 5))
+                .verifyComplete();
+
+        verify(mongoTemplate).find(queryCaptor.capture(), eq(PaymentAttempt.class));
+        Query query = queryCaptor.getValue();
+        java.util.List<Document> clauses = query.getQueryObject().getList("$and", Document.class);
+        assertEquals(1, clauses.size());
+        assertEquals("IUN-2", clauses.getFirst().get("originId"));
+        assertEquals(6, query.getLimit());
+    }
+
+    @Test
+    void testSearchPaymentsSupportsTppIdOnlyWithCursor() {
+        ObjectId cursor = new ObjectId("507f1f77bcf86cd799439012");
+        when(mongoTemplate.find(any(Query.class), eq(PaymentAttempt.class))).thenReturn(reactor.core.publisher.Flux.empty());
+        ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
+
+        StepVerifier.create(customRepository.searchPayments(null, "tpp-2", cursor, 1))
+                .verifyComplete();
+
+        verify(mongoTemplate).find(queryCaptor.capture(), eq(PaymentAttempt.class));
+        Query query = queryCaptor.getValue();
+        java.util.List<Document> clauses = query.getQueryObject().getList("$and", Document.class);
+        assertEquals("tpp-2", clauses.get(0).get("tppId"));
+        assertEquals(cursor, ((Document) clauses.get(1).get("_id")).get("$gt"));
+        assertEquals(2, query.getLimit());
+    }
+
+    @Test
+    void testCountSearchPaymentsCountsFilteredDocumentsWithoutApplyingCursor() {
+        when(mongoTemplate.count(any(Query.class), eq(PaymentAttempt.class))).thenReturn(Mono.just(42L));
+        ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
+
+        StepVerifier.create(customRepository.countSearchPayments("IUN-3", "tpp-3"))
+                .expectNext(42L)
+                .verifyComplete();
+
+        verify(mongoTemplate).count(queryCaptor.capture(), eq(PaymentAttempt.class));
+        Document queryObject = queryCaptor.getValue().getQueryObject();
+        java.util.List<Document> clauses = queryObject.getList("$and", Document.class);
+        assertEquals("IUN-3", clauses.get(0).get("originId"));
+        assertEquals("tpp-3", clauses.get(1).get("tppId"));
+        assertTrue(clauses.stream().noneMatch(clause -> clause.containsKey("_id")));
     }
 }
