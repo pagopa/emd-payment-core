@@ -316,11 +316,14 @@ public class PaymentServiceImpl implements PaymentService {
         return retrieval;
     }
 
-    private RetrievalResponseDTO createResponseByRetrieval(Retrieval retrieval) {
-    RetrievalResponseDTO dto = new RetrievalResponseDTO();
-    dto.setRetrievalId(retrieval.getRetrievalId());
-    return dto;
-}
+    /**
+     * Creates a minimal RetrievalResponseDTO from a Retrieval entity for save operations.
+     */
+    private RetrievalResponseDTO createResponseByRetrieval(Retrieval retrieval){
+        RetrievalResponseDTO retrievalResponseDTO = new RetrievalResponseDTO();
+        retrievalResponseDTO.setRetrievalId(retrieval.getRetrievalId());
+        return retrievalResponseDTO;
+    }
 
     /**
      * Creates a complete RetrievalResponseDTO from a Retrieval entity.
