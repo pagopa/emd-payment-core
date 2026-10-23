@@ -11,7 +11,6 @@ import it.gov.pagopa.emd.payment.dto.TppBatchResponseDTO;
 import it.gov.pagopa.emd.payment.dto.TppBatchResultDTO;
 import it.gov.pagopa.emd.payment.model.PaymentAttempt;
 import it.gov.pagopa.emd.payment.model.AttemptDetails;
-import it.gov.pagopa.emd.payment.model.Retrieval;
 import it.gov.pagopa.emd.payment.repository.PaymentAttemptRepository;
 import it.gov.pagopa.emd.payment.repository.RetrievalRepository;
 import org.junit.jupiter.api.Test;
@@ -29,7 +28,6 @@ import reactor.test.StepVerifier;
 import java.util.List;
 
 import static it.gov.pagopa.emd.payment.faker.TestUtils.*;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -66,7 +64,6 @@ class PaymentServiceImplTest {
     void testSaveRetrieval() {
         when(tppConnectorImpl.getTppByEntityId("tppId")).thenReturn(Mono.just(TPP_DTO));
         when(retrievalRepository.save(any())).thenReturn(Mono.just(RETRIEVAL));
-
         RetrievalResponseDTO retrievalResponseDTO = new RetrievalResponseDTO();
         retrievalResponseDTO.setRetrievalId("retrievalId");
 
