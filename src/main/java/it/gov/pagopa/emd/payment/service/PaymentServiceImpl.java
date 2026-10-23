@@ -59,7 +59,7 @@ public class PaymentServiceImpl implements PaymentService {
                     .doOnSuccess(savedRetrieval ->
                         log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for pspDenomination: {}, entityId: {}, tppId: {}, agent: {}, deepLink:{} originId: {}, isPaymentEnabled: {}, createdAt: {}",
                                 inputSanify(savedRetrieval.getRetrievalId()), inputSanify(tppDTO.getPspDenomination()), 
-                                inputSanify(entityId), inputSanify(savedRetrieval.getTppId()), retrievalRequestDTO.getAgent(), savedRetrieval.getDeeplink(),
+                                inputSanify(entityId), inputSanify(savedRetrieval.getTppId()), retrievalRequestDTO.getAgent(), inputSanify(savedRetrieval.getDeeplink()),
                                 inputSanify(retrievalRequestDTO.getOriginId()), savedRetrieval.getIsPaymentEnabled(), savedRetrieval.getCreatedAt()))
                     .map(this::createResponseByRetrieval)
             );
