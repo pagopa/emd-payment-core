@@ -54,8 +54,7 @@ public class PaymentServiceImpl implements PaymentService {
             .switchIfEmpty(Mono.error(exceptionMap.throwException(PaymentConstants.ExceptionName.TPP_NOT_FOUND, PaymentConstants.ExceptionMessage.TPP_NOT_FOUND)))
             .flatMap(tppDTO ->
                 retrievalRepository.save(createRetrievalByTppAndRequest(tppDTO, retrievalRequestDTO))
-                    .onErrorMap(error -> exceptionMap.throwException(PaymentConstants.ExceptionName.GENERIC_ERROR,
-                            PaymentConstants.ExceptionMessage.GENERIC_ERROR))
+                    .onErrorMap(error -> exceptionMap.throwException(PaymentConstants.ExceptionName.GENERIC_ERROR, PaymentConstants.ExceptionMessage.GENERIC_ERROR))
                     .doOnSuccess(savedRetrieval ->
                         log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for pspDenomination: {}, entityId: {}, tppId: {}, agent: {}, deepLink:{} originId: {}, isPaymentEnabled: {}, createdAt: {}",
                                 inputSanify(savedRetrieval.getRetrievalId()), inputSanify(tppDTO.getPspDenomination()), 
