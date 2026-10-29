@@ -51,13 +51,17 @@ public class PaymentServiceImpl implements PaymentService {
     public Mono<RetrievalResponseDTO> saveRetrieval(String entityId, RetrievalRequestDTO retrievalRequestDTO) {
         log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Save retrieval for entityId:{} and agent: {}, and linkVersion: {}", inputSanify(entityId), retrievalRequestDTO.getAgent(), retrievalRequestDTO.getLinkVersion());
         return tppConnector.getTppByEntityId(entityId)
-                .switchIfEmpty(Mono.error(exceptionMap.throwException(PaymentConstants.ExceptionName.TPP_NOT_FOUND, PaymentConstants.ExceptionMessage.TPP_NOT_FOUND)))
-                .flatMap(tppDTO ->
-                        retrievalRepository.save(createRetrievalByTppAndRequest(tppDTO, retrievalRequestDTO))
-                                .onErrorMap(error -> exceptionMap.throwException(PaymentConstants.ExceptionName.GENERIC_ERROR, PaymentConstants.ExceptionMessage.GENERIC_ERROR))
-                                .map(this::createResponseByRetrieval))
-                .doOnSuccess(retrievalResponseDTO -> log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for entityId:{} and agent: {}, and originId: {}",
-                    inputSanify(retrievalResponseDTO.getRetrievalId()),inputSanify(entityId),retrievalRequestDTO.getAgent(), inputSanify(retrievalRequestDTO.getOriginId())));
+            .switchIfEmpty(Mono.error(exceptionMap.throwException(PaymentConstants.ExceptionName.TPP_NOT_FOUND, PaymentConstants.ExceptionMessage.TPP_NOT_FOUND)))
+            .flatMap(tppDTO ->
+                retrievalRepository.save(createRetrievalByTppAndRequest(tppDTO, retrievalRequestDTO))
+                    .onErrorMap(error -> exceptionMap.throwException(PaymentConstants.ExceptionName.GENERIC_ERROR, PaymentConstants.ExceptionMessage.GENERIC_ERROR))
+                    .doOnSuccess(savedRetrieval ->
+                        log.info("[EMD][PAYMENT][SAVE-RETRIEVAL] Saved retrieval: {} for pspDenomination: {}, entityId: {}, tppId: {}, agent: {}, deepLink:{} originId: {}, isPaymentEnabled: {}, createdAt: {}",
+                                inputSanify(savedRetrieval.getRetrievalId()), inputSanify(tppDTO.getPspDenomination()), 
+                                inputSanify(entityId), inputSanify(savedRetrieval.getTppId()), retrievalRequestDTO.getAgent(), inputSanify(savedRetrieval.getDeeplink()),
+                                inputSanify(retrievalRequestDTO.getOriginId()), savedRetrieval.getIsPaymentEnabled(), savedRetrieval.getCreatedAt()))
+                    .map(this::createResponseByRetrieval)
+            );
     }
 
     /**
