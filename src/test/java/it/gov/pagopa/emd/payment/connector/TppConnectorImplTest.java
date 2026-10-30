@@ -25,8 +25,7 @@ class TppConnectorImplTest {
     private static final String TPP_JSON =
             "{\"tppId\":\"TPP_OK_1\",\"entityId\":\"ENTITY_OK_1\",\"businessName\":\"Test Business\"," +
             "\"messageUrl\":\"https://example.com/message\",\"authenticationUrl\":\"https://example.com/auth\"," +
-            "\"authenticationType\":\"OAUTH2\",\"contact\":{\"name\":\"John Doe\",\"number\":\"+1234567890\"," +
-            "\"email\":\"contact@example.com\"},\"state\":true}";
+            "\"authenticationType\":\"OAUTH2\",\"state\":true}";
 
     private static MockResponse okTppResponse() {
         return new MockResponse()
@@ -57,7 +56,7 @@ class TppConnectorImplTest {
     void testGetTppInfoOk() {
         mockWebServer.enqueue(new MockResponse()
                 .setResponseCode(200)
-                .setBody("{\"tppId\":\"TPP_OK_1\",\"entityId\":\"ENTITY_OK_1\",\"businessName\":\"Test Business\",\"messageUrl\":\"https://example.com/message\",\"authenticationUrl\":\"https://example.com/auth\",\"authenticationType\":\"OAUTH2\",\"contact\":{\"name\":\"John Doe\",\"number\":\"+1234567890\",\"email\":\"contact@example.com\"},\"state\":true}")
+                .setBody("{\"tppId\":\"TPP_OK_1\",\"entityId\":\"ENTITY_OK_1\",\"businessName\":\"Test Business\",\"messageUrl\":\"https://example.com/message\",\"authenticationUrl\":\"https://example.com/auth\",\"authenticationType\":\"OAUTH2\",\"state\":true}")
                 .addHeader("Content-Type", "application/json"));
 
         Mono<TppDTO> resultMono = tppConnector.getTppByEntityId("TPP_OK_1");
@@ -70,9 +69,6 @@ class TppConnectorImplTest {
         assertThat(tppDTO.getMessageUrl()).isEqualTo("https://example.com/message");
         assertThat(tppDTO.getAuthenticationUrl()).isEqualTo("https://example.com/auth");
         assertThat(tppDTO.getAuthenticationType()).isEqualTo(OAUTH2);
-        assertThat(tppDTO.getContact().getName()).isEqualTo("John Doe");
-        assertThat(tppDTO.getContact().getNumber()).isEqualTo("+1234567890");
-        assertThat(tppDTO.getContact().getEmail()).isEqualTo("contact@example.com");
         assertThat(tppDTO.getState()).isTrue();
     }
 

@@ -43,7 +43,6 @@ public class PaymentService {
         <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
           <soapenv:Body>
             <nfp:verifyPaymentNoticeReq xmlns:nfp="http://pagopa-api.pagopa.gov.it/node/nodeForPsp.xsd">
-              <idPSP>AGID_01</idPSP>
               <idBrokerPSP>97735020584</idBrokerPSP>
               <idChannel>97735020584_03</idChannel>
               <password>pwd_AgID</password>
