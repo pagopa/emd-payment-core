@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.1](https://github.com/pagopa/emd-payment-core/compare/v1.6.0...v1.6.1) (2026-11-05)
+
+
+### Bug Fixes
+
+* [MMC-1003] add information to save retrieval log ([#105](https://github.com/pagopa/emd-payment-core/issues/105)) ([b8a40e3](https://github.com/pagopa/emd-payment-core/commit/b8a40e3d8e511f02185352052f704299433d97df))
+
 ## [1.6.0](https://github.com/pagopa/emd-payment-core/compare/v1.5.4...v1.6.0) (2026-10-15)
 
 
