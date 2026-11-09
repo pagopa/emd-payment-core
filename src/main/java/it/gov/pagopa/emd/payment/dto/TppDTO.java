@@ -27,14 +27,8 @@ public class TppDTO {
     @Pattern(regexp = "^(\\d{11}|[A-Za-z0-9]{16})$", message = "Entity ID must be 11 digits or up to 16 alphanumeric characters")
     private String entityId;
 
-    @NotBlank(message = "ID PSP must not be blank")
-    private String idPsp;
-
     @NotBlank(message = "Business name must not be blank")
     private String businessName;
-
-    @NotBlank(message = "Legal address must not be blank")
-    private String legalAddress;
 
     @Pattern(regexp = "^(https?|ftp)://[^ /$.?#].[^ ]*$", message = "Message URL must be a valid URL")
     private String messageUrl;
@@ -45,8 +39,6 @@ public class TppDTO {
     @NotNull(message = "Authentication type must not be null")
     private AuthenticationType authenticationType;
 
-    @NotNull(message = "Contact must not be null")
-    private Contact contact;
     private Boolean state;
     private LocalDateTime creationDate;
     private LocalDateTime lastUpdateDate;
