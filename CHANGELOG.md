@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.2](https://github.com/pagopa/emd-payment-core/compare/v1.6.1...v1.6.2) (2026-11-09)
+
+
+### Bug Fixes
+
+* [MMC-1317] Tpp refactor ([#106](https://github.com/pagopa/emd-payment-core/issues/106)) ([ba9060d](https://github.com/pagopa/emd-payment-core/commit/ba9060db479e4aced19b8a9050a66013189510f2))
+
 ## [1.6.1](https://github.com/pagopa/emd-payment-core/compare/v1.6.0...v1.6.1) (2026-11-05)
 
 
