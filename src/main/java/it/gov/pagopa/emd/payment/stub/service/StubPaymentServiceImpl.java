@@ -22,7 +22,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -132,7 +132,7 @@ public class StubPaymentServiceImpl implements StubPaymentService {
         PaymentAttempt paymentAttempt = new PaymentAttempt();
         paymentAttempt.setTppId(retrievalResponseDTO.getTppId());
         paymentAttempt.setOriginId(retrievalResponseDTO.getOriginId());
-        paymentAttempt.setCreatedAt(new Date());
+        paymentAttempt.setCreatedAt(Instant.now());
         paymentAttempt.setAttemptDetails(new ArrayList<>());
         addNewAttemptDetails(paymentAttempt, noticeNumber, fiscalCode, amount);
         return paymentAttempt;

@@ -11,8 +11,8 @@ import org.springframework.data.mongodb.core.query.Update;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -39,7 +39,7 @@ public class PaymentAttemptCustomRepositoryImpl implements PaymentAttemptCustomR
         Update update = new Update()
                 .setOnInsert("tppId", tppId)
                 .setOnInsert("originId", originId)
-                .setOnInsert("createdAt", new Date())
+                .setOnInsert("createdAt", Instant.now())
                 .setOnInsert("_class", PaymentAttempt.class.getName())
                 .push("attemptDetails", attemptDetails);
 
