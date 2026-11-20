@@ -12,6 +12,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -38,6 +39,7 @@ public class PaymentAttemptCustomRepositoryImpl implements PaymentAttemptCustomR
         Update update = new Update()
                 .setOnInsert("tppId", tppId)
                 .setOnInsert("originId", originId)
+                .setOnInsert("createdAt", new Date())
                 .setOnInsert("_class", PaymentAttempt.class.getName())
                 .push("attemptDetails", attemptDetails);
 
