@@ -22,6 +22,16 @@ public interface PaymentAttemptCustomRepository {
      */
     Mono<Void> upsertAttemptDetails(String tppId, String originId, AttemptDetails attemptDetails);
 
+    /**
+     * Searches payment attempts ordered by creation date descending, most recent first.
+     * The cursor is the {@code _id} of the last document of the previous page.
+     *
+     * @param iun    the notification identifier to filter by, or {@code null}
+     * @param tppId  the TPP identifier to filter by, or {@code null}
+     * @param cursor the {@code _id} of the last document of the previous page, or {@code null} for the first page
+     * @param limit  the page size; one more document is read to detect whether a next page exists
+     * @return the matching documents, at most {@code limit + 1}
+     */
     Flux<PaymentAttempt> searchPayments(String iun, String tppId, ObjectId cursor, int limit);
 
     /** Counts matching payment_attempt documents, independently of the page cursor. */
