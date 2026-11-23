@@ -136,14 +136,48 @@ class PaymentAttemptCustomRepositoryImplTest {
 
         // most recent first: createdAt < cursor.createdAt OR (createdAt = cursor.createdAt AND _id < cursor)
         java.util.List<Document> orClauses = clauses.get(2).getList("$or", Document.class);
-        assertEquals(2, orClauses.size());
+        assertEquals(3, orClauses.size());
         assertEquals(cursorCreatedAt, ((Document) orClauses.get(0).get("createdAt")).get("$lt"));
         assertEquals(cursorCreatedAt, orClauses.get(1).get("createdAt"));
         assertEquals(cursor, ((Document) orClauses.get(1).get("_id")).get("$lt"));
+        // documents without createdAt (null or missing) are the last group of the ordering
+        assertMissingCreatedAtCriteria(orClauses.get(2));
 
         assertEquals(-1, query.getSortObject().get("createdAt"));
         assertEquals(-1, query.getSortObject().get("_id"));
         assertEquals(11, query.getLimit());
+    }
+
+    @Test
+    void testSearchPaymentsContinuesAmongDocumentsWithoutCreatedAtWhenCursorHasNoCreatedAt() {
+        ObjectId cursor = new ObjectId("507f1f77bcf86cd799439014");
+        when(mongoTemplate.findById(cursor, PaymentAttempt.class))
+                .thenReturn(Mono.just(PaymentAttempt.builder().id(cursor).build()));
+        when(mongoTemplate.find(any(Query.class), eq(PaymentAttempt.class))).thenReturn(reactor.core.publisher.Flux.empty());
+        ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
+
+        StepVerifier.create(customRepository.searchPayments("IUN-1", null, cursor, 10))
+                .verifyComplete();
+
+        verify(mongoTemplate).find(queryCaptor.capture(), eq(PaymentAttempt.class));
+        Query query = queryCaptor.getValue();
+        java.util.List<Document> clauses = query.getQueryObject().getList("$and", Document.class);
+        assertEquals("IUN-1", clauses.get(0).get("originId"));
+
+        // legacy cursor: only legacy documents with a lower _id, never the dated ones
+        java.util.List<Document> andClauses = clauses.get(1).getList("$and", Document.class);
+        assertEquals(2, andClauses.size());
+        assertMissingCreatedAtCriteria(andClauses.get(0));
+        assertEquals(cursor, ((Document) andClauses.get(1).get("_id")).get("$lt"));
+        assertEquals(-1, query.getSortObject().get("createdAt"));
+        assertEquals(-1, query.getSortObject().get("_id"));
+    }
+
+    private void assertMissingCreatedAtCriteria(Document criteria) {
+        java.util.List<Document> missingClauses = criteria.getList("$or", Document.class);
+        assertEquals(2, missingClauses.size());
+        assertTrue(missingClauses.get(0).containsKey("createdAt") && missingClauses.get(0).get("createdAt") == null);
+        assertEquals(false, ((Document) missingClauses.get(1).get("createdAt")).get("$exists"));
     }
 
     @Test
