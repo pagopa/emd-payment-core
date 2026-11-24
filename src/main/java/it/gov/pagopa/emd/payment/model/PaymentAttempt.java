@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -31,5 +32,10 @@ public class PaymentAttempt {
    */
   private String originId;
   private List<AttemptDetails> attemptDetails;
+  /**
+   * Document creation date, written once on insert. It is null for documents created
+   * before this field was introduced.
+   */
+  private Instant createdAt;
 
 }

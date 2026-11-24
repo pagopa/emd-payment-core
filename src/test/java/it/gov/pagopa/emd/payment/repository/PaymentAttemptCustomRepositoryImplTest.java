@@ -17,6 +17,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.time.Instant;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -83,6 +84,7 @@ class PaymentAttemptCustomRepositoryImplTest {
         assertEquals(tppId, setOnInsertObj.get("tppId"));
         assertEquals(originId, setOnInsertObj.get("originId"));
         assertEquals(PaymentAttempt.class.getName(), setOnInsertObj.get("_class"));
+        assertTrue(setOnInsertObj.get("createdAt") instanceof Instant);
 
         // Assert atomic $push operator appending details to the nested array field
         assertTrue(updateObj.containsKey("$push"));
@@ -116,6 +118,9 @@ class PaymentAttemptCustomRepositoryImplTest {
     @Test
     void testSearchPaymentsBuildsCombinedKeysetQuery() {
         ObjectId cursor = new ObjectId("507f1f77bcf86cd799439011");
+        Instant cursorCreatedAt = Instant.parse("2026-07-10T12:45:56.792Z");
+        when(mongoTemplate.findById(cursor, PaymentAttempt.class))
+                .thenReturn(Mono.just(PaymentAttempt.builder().id(cursor).createdAt(cursorCreatedAt).build()));
         when(mongoTemplate.find(any(Query.class), eq(PaymentAttempt.class))).thenReturn(reactor.core.publisher.Flux.empty());
         ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
 
@@ -128,9 +133,62 @@ class PaymentAttemptCustomRepositoryImplTest {
         java.util.List<Document> clauses = queryObject.getList("$and", Document.class);
         assertEquals("IUN-1", clauses.get(0).get("originId"));
         assertEquals("tpp-1", clauses.get(1).get("tppId"));
-        assertEquals(cursor, ((Document) clauses.get(2).get("_id")).get("$gt"));
-        assertEquals(1, query.getSortObject().get("_id"));
+
+        // most recent first: createdAt < cursor.createdAt OR (createdAt = cursor.createdAt AND _id < cursor)
+        java.util.List<Document> orClauses = clauses.get(2).getList("$or", Document.class);
+        assertEquals(3, orClauses.size());
+        assertEquals(cursorCreatedAt, ((Document) orClauses.get(0).get("createdAt")).get("$lt"));
+        assertEquals(cursorCreatedAt, orClauses.get(1).get("createdAt"));
+        assertEquals(cursor, ((Document) orClauses.get(1).get("_id")).get("$lt"));
+        // documents without createdAt (null or missing) are the last group of the ordering
+        assertMissingCreatedAtCriteria(orClauses.get(2));
+
+        assertEquals(-1, query.getSortObject().get("createdAt"));
+        assertEquals(-1, query.getSortObject().get("_id"));
         assertEquals(11, query.getLimit());
+    }
+
+    @Test
+    void testSearchPaymentsContinuesAmongDocumentsWithoutCreatedAtWhenCursorHasNoCreatedAt() {
+        ObjectId cursor = new ObjectId("507f1f77bcf86cd799439014");
+        when(mongoTemplate.findById(cursor, PaymentAttempt.class))
+                .thenReturn(Mono.just(PaymentAttempt.builder().id(cursor).build()));
+        when(mongoTemplate.find(any(Query.class), eq(PaymentAttempt.class))).thenReturn(reactor.core.publisher.Flux.empty());
+        ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
+
+        StepVerifier.create(customRepository.searchPayments("IUN-1", null, cursor, 10))
+                .verifyComplete();
+
+        verify(mongoTemplate).find(queryCaptor.capture(), eq(PaymentAttempt.class));
+        Query query = queryCaptor.getValue();
+        java.util.List<Document> clauses = query.getQueryObject().getList("$and", Document.class);
+        assertEquals("IUN-1", clauses.get(0).get("originId"));
+
+        // legacy cursor: only legacy documents with a lower _id, never the dated ones
+        java.util.List<Document> andClauses = clauses.get(1).getList("$and", Document.class);
+        assertEquals(2, andClauses.size());
+        assertMissingCreatedAtCriteria(andClauses.get(0));
+        assertEquals(cursor, ((Document) andClauses.get(1).get("_id")).get("$lt"));
+        assertEquals(-1, query.getSortObject().get("createdAt"));
+        assertEquals(-1, query.getSortObject().get("_id"));
+    }
+
+    private void assertMissingCreatedAtCriteria(Document criteria) {
+        java.util.List<Document> missingClauses = criteria.getList("$or", Document.class);
+        assertEquals(2, missingClauses.size());
+        assertTrue(missingClauses.get(0).containsKey("createdAt") && missingClauses.get(0).get("createdAt") == null);
+        assertEquals(false, ((Document) missingClauses.get(1).get("createdAt")).get("$exists"));
+    }
+
+    @Test
+    void testSearchPaymentsReturnsEmptyWhenCursorDocumentDoesNotExist() {
+        ObjectId cursor = new ObjectId("507f1f77bcf86cd799439013");
+        when(mongoTemplate.findById(cursor, PaymentAttempt.class)).thenReturn(Mono.empty());
+
+        StepVerifier.create(customRepository.searchPayments("IUN-1", null, cursor, 10))
+                .verifyComplete();
+
+        verify(mongoTemplate, never()).find(any(Query.class), eq(PaymentAttempt.class));
     }
 
     @Test
@@ -147,11 +205,17 @@ class PaymentAttemptCustomRepositoryImplTest {
         assertEquals(1, clauses.size());
         assertEquals("IUN-2", clauses.getFirst().get("originId"));
         assertEquals(6, query.getLimit());
+        assertEquals(-1, query.getSortObject().get("createdAt"));
+        assertEquals(-1, query.getSortObject().get("_id"));
+        verify(mongoTemplate, never()).findById(any(Object.class), eq(PaymentAttempt.class));
     }
 
     @Test
     void testSearchPaymentsSupportsTppIdOnlyWithCursor() {
         ObjectId cursor = new ObjectId("507f1f77bcf86cd799439012");
+        Instant cursorCreatedAt = Instant.parse("2026-07-11T08:00:00.000Z");
+        when(mongoTemplate.findById(cursor, PaymentAttempt.class))
+                .thenReturn(Mono.just(PaymentAttempt.builder().id(cursor).createdAt(cursorCreatedAt).build()));
         when(mongoTemplate.find(any(Query.class), eq(PaymentAttempt.class))).thenReturn(reactor.core.publisher.Flux.empty());
         ArgumentCaptor<Query> queryCaptor = ArgumentCaptor.forClass(Query.class);
 
@@ -162,7 +226,9 @@ class PaymentAttemptCustomRepositoryImplTest {
         Query query = queryCaptor.getValue();
         java.util.List<Document> clauses = query.getQueryObject().getList("$and", Document.class);
         assertEquals("tpp-2", clauses.get(0).get("tppId"));
-        assertEquals(cursor, ((Document) clauses.get(1).get("_id")).get("$gt"));
+        java.util.List<Document> orClauses = clauses.get(1).getList("$or", Document.class);
+        assertEquals(cursorCreatedAt, ((Document) orClauses.get(0).get("createdAt")).get("$lt"));
+        assertEquals(cursor, ((Document) orClauses.get(1).get("_id")).get("$lt"));
         assertEquals(2, query.getLimit());
     }
 
